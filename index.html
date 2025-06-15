@@ -77,7 +77,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             color: var(--dark-color);
             position: relative;
         }
+        /* WhatsApp Button */
+        .whatsapp-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #25D366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
         
+        .whatsapp-btn:hover {
+            background-color: #128C7E;
+            color: white;
+            transform: scale(1.1);
+         }
         .section-title:after {
             content: '';
             position: absolute;
@@ -204,7 +228,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXX"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
         <div class="container">
@@ -233,6 +256,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
         </div>
     </nav>
+     <!-- WhatsApp Button -->
+    <a href="https://wa.me/34637161141" class="whatsapp-btn" aria-label="Contactar por WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
     
     <!-- Hero Section -->
     <section class="hero-section">
