@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Secreto Mejor Guardado</title>
+    <title>Chatbot IA: Reduce Costes y Aumenta Ventas 24/7</title>
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -17,37 +17,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4a6bff;
-            --secondary-color: #f8f9fa;
-            --accent-color: #ff6b6b;
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
         }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.7;
-            color: #333;
+            color: #334155;
         }
         
         .hero-section {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             padding: 5rem 0;
-            border-radius: 0 0 20px 20px;
-            margin-bottom: 3rem;
+            border-bottom: 1px solid #bae6fd;
         }
         
         .hero-title {
             font-weight: 800;
-            font-size: 3rem;
+            font-size: 2.8rem;
             margin-bottom: 1.5rem;
-            background: linear-gradient(90deg, #4a6bff, #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--dark-color);
         }
         
         .hero-subtitle {
-            font-size: 1.25rem;
-            color: #666;
-            max-width: 700px;
+            font-size: 1.35rem;
+            color: #475569;
+            max-width: 800px;
             margin: 0 auto 2rem;
         }
         
@@ -55,119 +54,129 @@
             background-color: var(--primary-color);
             border: none;
             padding: 0.8rem 2rem;
-            border-radius: 50px;
+            border-radius: 8px;
             font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
         }
         
         .btn-primary-custom:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(74, 107, 255, 0.2);
+            box-shadow: 0 10px 15px rgba(37, 99, 235, 0.3);
+            background-color: var(--secondary-color);
         }
         
         .section-title {
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #222;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: var(--dark-color);
             position: relative;
-            display: inline-block;
         }
         
         .section-title:after {
             content: '';
             position: absolute;
-            width: 50%;
+            width: 60px;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-            bottom: -10px;
+            background: var(--primary-color);
+            bottom: -12px;
             left: 0;
             border-radius: 2px;
         }
         
-        .feature-card {
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            margin-bottom: 2rem;
+        .chapter-card {
             background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 3rem;
+            border-left: 4px solid var(--primary-color);
         }
         
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
         }
         
-        .feature-icon {
+        .benefit-icon {
+            background-color: #dbeafe;
+            color: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            margin-bottom: 2rem;
+            border-top: 4px solid var(--primary-color);
+        }
+        
+        .stat-number {
             font-size: 2.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
         }
         
         .testimonial-card {
             background: white;
-            border-radius: 15px;
+            border-radius: 12px;
             padding: 2rem;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
-            margin: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin: 1rem 0;
+            border: 1px solid #e2e8f0;
         }
         
         .testimonial-text {
             font-style: italic;
             position: relative;
+            padding-left: 1.5rem;
+            border-left: 3px solid var(--primary-color);
         }
         
-        .testimonial-text:before {
-            content: '"';
-            font-size: 4rem;
-            position: absolute;
-            top: -20px;
-            left: -15px;
-            color: rgba(74, 107, 255, 0.1);
-            font-family: serif;
+        .step-number {
+            background-color: var(--primary-color);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            margin-right: 1rem;
+            flex-shrink: 0;
         }
         
-        .faq-item {
-            margin-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 1rem;
+        .step-item {
+            display: flex;
+            margin-bottom: 1.5rem;
+            align-items: flex-start;
         }
         
-        .faq-question {
-            font-weight: 600;
-            cursor: pointer;
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 4rem 0;
+            color: white;
+            border-radius: 12px;
+            margin: 3rem 0;
         }
         
         .footer {
-            background: linear-gradient(135deg, #2c3e50 0%, #1a1a2e 100%);
+            background-color: var(--dark-color);
             color: white;
             padding: 4rem 0 2rem;
-            margin-top: 4rem;
-        }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .footer-links a:hover {
-            color: white;
-        }
-        
-        .social-icon {
-            font-size: 1.5rem;
-            margin-right: 1rem;
-            color: rgba(255, 255, 255, 0.7);
-            transition: all 0.3s ease;
-        }
-        
-        .social-icon:hover {
-            color: white;
-            transform: translateY(-3px);
         }
         
         @media (max-width: 768px) {
@@ -177,6 +186,10 @@
             
             .hero-subtitle {
                 font-size: 1.1rem;
+            }
+            
+            .chapter-card {
+                padding: 1.5rem;
             }
         }
     </style>
@@ -190,172 +203,173 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#" style="color: var(--primary-color);">El Secreto</a>
+            <a class="navbar-brand fw-bold" href="#" style="color: var(--primary-color);">
+                <i class="fas fa-robot me-2"></i>ChatbotIA
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#que-es">¿Qué es?</a>
+                        <a class="nav-link" href="#problema">El Problema</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#beneficios">Beneficios</a>
+                        <a class="nav-link" href="#solucion">La Solución</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#testimonios">Testimonios</a>
+                        <a class="nav-link" href="#casos">Casos Reales</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#faq">FAQ</a>
+                        <a class="nav-link" href="#implementacion">Implementación</a>
                     </li>
                 </ul>
-                <a href="#cta" class="btn btn-primary-custom ms-lg-3 text-white">Descubrir Ahora</a>
+                <a href="#cta" class="btn btn-primary-custom ms-lg-3 text-white">Agendar Llamada</a>
             </div>
         </div>
     </nav>
     
     <!-- Hero Section -->
-    <section class="hero-section text-center">
+    <section class="hero-section">
         <div class="container">
-            <h1 class="hero-title">El Secreto Mejor Guardado</h1>
-            <p class="hero-subtitle">Descubre el conocimiento que ha transformado vidas y que solo unos pocos privilegiados conocen</p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="#que-es" class="btn btn-primary-custom text-white">Aprender Más</a>
-                <a href="#cta" class="btn btn-outline-primary border-2">Acceso Inmediato</a>
-            </div>
-            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Persona descubriendo" class="img-fluid rounded-4 mt-5 shadow" style="max-height: 400px;">
-        </div>
-    </section>
-    
-    <!-- Qué es Section -->
-    <section id="que-es" class="py-5">
-        <div class="container">
-            <h2 class="section-title text-center">¿Qué es este secreto?</h2>
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <p class="lead">Durante generaciones, este conocimiento ha sido transmitido en círculos selectos, cambiando radicalmente la vida de quienes lo aplican correctamente.</p>
-                    <p>No es magia, no es suerte. Es un principio fundamental que, una vez comprendido, abre puertas que creías cerradas para siempre. Se trata de entender cómo funcionan realmente ciertos mecanismos del mundo que nos rodea.</p>
-                    <p>Lo que aprenderás no es teoría sin fundamento, sino principios prácticos que puedes aplicar inmediatamente en diferentes áreas de tu vida.</p>
+                    <h1 class="hero-title">El Secreto Mejor Guardado para Reducir los Costes de Atención al Cliente y Aumentar las Ventas Automáticamente</h1>
+                    <p class="hero-subtitle"> Descubre cómo un chatbot con inteligencia artificial puede revolucionar tu negocio, trabajando 24/7 sin pausas, sin errores y sin descanso.</p>
+                    <div class="d-flex gap-3">
+                       </div>
                 </div>
                 <div class="col-lg-6">
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Secreto revelado" class="img-fluid rounded-4 shadow">
+                    <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Chatbot IA" class="img-fluid rounded-4 shadow mt-4 mt-lg-0">
                 </div>
             </div>
         </div>
     </section>
     
-    <!-- Por qué Section -->
-    <section class="py-5 bg-light">
+    <!-- Introducción -->
+    <section class="py-5">
         <div class="container">
-            <h2 class="section-title text-center">¿Por qué nadie habla de esto?</h2>
-            <div class="row">
-                <div class="col-lg-6 order-lg-2">
-                    <p class="lead">Existen varias razones por las que este conocimiento no es ampliamente difundido:</p>
-                    <ul class="list-unstyled">
-                        <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Algunos quieren mantener su ventaja competitiva</li>
-                        <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Otros no saben cómo comunicarlo efectivamente</li>
-                        <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> La información se ha distorsionado con el tiempo</li>
-                        <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Requiere un cambio de mentalidad que no todos están dispuestos a hacer</li>
+            <div class="chapter-card">
+                <h2 class="section-title">Introducción</h2>
+                <p class="lead fw-bold">¿Y si te dijera que existe una herramienta que nunca duerme, nunca se enferma y puede atender a tus clientes día y noche mientras tú descansas?</p>
+                <p>Esa herramienta ya existe, y se llama chatbot con inteligencia artificial.</p>
+                <p>Este ebook te revelará cómo empresarios como tú están reduciendo drásticamente los costes operativos en atención al cliente y aumentando sus ventas gracias a esta tecnología. No es ciencia ficción. Es una ventaja competitiva que ya está cambiando las reglas del juego.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Capítulo 1 -->
+    <section id="problema" class="py-5 bg-light">
+        <div class="container">
+            <div class="chapter-card">
+                <h2 class="section-title">El Problema Silencioso que Está Drenando tus Recursos</h2>
+                <p class="fw-bold">¿Cuánto cuesta realmente tu equipo de atención al cliente?</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-euro-sign"></i>
+                            </div>
+                            <div>
+                                <h5>Salarios y costes fijos</h5>
+                                <p class="text-muted">Salarios, formación, rotación, ausencias, descansos, tiempo improductivo.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-number">70%</div>
+                            <p class="mb-0">de las consultas son repetitivas y fácilmente automatizables</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 bg-danger bg-opacity-10 p-4 rounded-3">
+                    <h5 class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>El riesgo oculto: el cliente que no espera</h5>
+                    <ul class="mt-3">
+                        <li>Respuestas lentas = pérdida de ventas</li>
+                        <li>Clientes insatisfechos = reputación en peligro</li>
+                        <li>Errores humanos = costes adicionales</li>
                     </ul>
                 </div>
-                <div class="col-lg-6 order-lg-1">
-                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Silencio" class="img-fluid rounded-4 shadow">
-                </div>
             </div>
         </div>
     </section>
     
-    <!-- Beneficios Section -->
-    <section id="beneficios" class="py-5">
+    <!-- Capítulo 2 -->
+    <section id="solucion" class="py-5">
         <div class="container">
-            <h2 class="section-title text-center">Transforma tu realidad</h2>
-            <p class="text-center lead mb-5">Al aplicar este secreto correctamente, comenzarás a notar cambios radicales en:</p>
-            
-            <div class="row">
-                <div class="col-md-6 col-lg-3 mb-4">
-                    <div class="feature-card p-4 h-100 text-center">
-                        <div class="feature-icon">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <h4>Relaciones</h4>
-                        <p>Mejora tus relaciones personales y profesionales de manera significativa.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-4">
-                    <div class="feature-card p-4 h-100 text-center">
-                        <div class="feature-icon">
-                            <i class="fas fa-briefcase"></i>
-                        </div>
-                        <h4>Carrera</h4>
-                        <p>Acelera tu crecimiento profesional y alcanza posiciones que creías inalcanzables.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-4">
-                    <div class="feature-card p-4 h-100 text-center">
-                        <div class="feature-icon">
-                            <i class="fas fa-brain"></i>
-                        </div>
-                        <h4>Mentalidad</h4>
-                        <p>Desarrolla una mentalidad ganadora que te permita superar cualquier obstáculo.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-4">
-                    <div class="feature-card p-4 h-100 text-center">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h4>Resultados</h4>
-                        <p>Logra objetivos que antes considerabas imposibles en menos tiempo del que imaginas.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Testimonios Section -->
-    <section id="testimonios" class="py-5 bg-light">
-        <div class="container">
-            <h2 class="section-title text-center">Lo que dicen quienes lo aplicaron</h2>
-            
-            <div class="row">
-                <div class="col-lg-4 mb-4">
-                    <div class="testimonial-card h-100">
-                        <div class="testimonial-text mb-3">
-                            "Desde que descubrí este secreto, mi vida dio un giro de 180 grados. En 6 meses logré lo que no pude en 5 años."
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Testimonio 1" class="rounded-circle me-3" width="50">
+            <div class="chapter-card">
+                <h2 class="section-title">El Chatbot que Nunca Duerme</h2>
+                <p class="fw-bold">¿Qué es un chatbot con IA?</p>
+                <p>Un chatbot con inteligencia artificial es un asistente virtual que:</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
                             <div>
-                                <h6 class="mb-0">María G.</h6>
-                                <small class="text-muted">Emprendedora</small>
+                                <h5>Atención automática</h5>
+                                <p class="text-muted">Atiende de forma automática a los clientes en tu web, redes sociales o WhatsApp.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div>
+                                <h5>Aprendizaje continuo</h5>
+                                <p class="text-muted">Aprende de las interacciones y se adapta a tu negocio.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <div>
+                                <h5>Precisión y escalabilidad</h5>
+                                <p class="text-muted">Responde con precisión y puede escalar sin límites.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div>
+                                <h5>Personalización</h5>
+                                <p class="text-muted">Se adapta al tono y estilo de tu marca.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="testimonial-card h-100">
-                        <div class="testimonial-text mb-3">
-                            "Al principio era escéptico, pero los resultados hablan por sí solos. Mi negocio creció un 300% aplicando estos principios."
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Testimonio 2" class="rounded-circle me-3" width="50">
-                            <div>
-                                <h6 class="mb-0">Carlos R.</h6>
-                                <small class="text-muted">Empresario</small>
+                
+                <div class="mt-5">
+                    <h5 class="fw-bold">¿Por qué es tan poderoso?</h5>
+                    <div class="row mt-4 g-4">
+                        <div class="col-md-4">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 h-100">
+                                <i class="fas fa-clock text-primary mb-2"></i>
+                                <h6>Trabaja 24/7</h6>
+                                <p class="small text-muted mb-0">Atiende a cualquier hora del día o noche.</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="testimonial-card h-100">
-                        <div class="testimonial-text mb-3">
-                            "Lo que más valoro es el cambio en mi mentalidad. Ahora enfrento los desafíos con una confianza que nunca antes tuve."
+                        <div class="col-md-4">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 h-100">
+                                <i class="fas fa-users text-primary mb-2"></i>
+                                <h6>Escalabilidad</h6>
+                                <p class="small text-muted mb-0">Atiende cientos de clientes simultáneamente.</p>
+                            </div>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Testimonio 3" class="rounded-circle me-3" width="50">
-                            <div>
-                                <h6 class="mb-0">Ana L.</h6>
-                                <small class="text-muted">Profesional</small>
+                        <div class="col-md-4">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 h-100">
+                                <i class="fas fa-calendar-minus text-primary mb-2"></i>
+                                <h6>Sin descansos</h6>
+                                <p class="small text-muted mb-0">No necesita vacaciones ni pausas.</p>
                             </div>
                         </div>
                     </div>
@@ -364,48 +378,275 @@
         </div>
     </section>
     
-    <!-- CTA Section -->
-    <section id="cta" class="py-5 text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--accent-color));">
-        <div class="container text-center">
-            <h2 class="mb-4">¿Estás listo para transformar tu vida?</h2>
-            <p class="lead mb-5">Este conocimiento está ahora a tu alcance. Solo necesitas dar el primer paso.</p>
-            <a href="#" class="btn btn-light btn-lg px-5 py-3 fw-bold" style="color: var(--primary-color);">ACCEDER AHORA</a>
-            <p class="mt-3"><small>Garantía de satisfacción de 30 días</small></p>
-        </div>
-    </section>
-    
-    <!-- FAQ Section -->
-    <section id="faq" class="py-5">
+    <!-- Capítulo 3 -->
+    <section id="casos" class="py-5 bg-light">
         <div class="container">
-            <h2 class="section-title text-center">Preguntas Frecuentes</h2>
-            
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="faq-item">
-                        <h4 class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq1">¿Es esto realmente efectivo?</h4>
-                        <div id="faq1" class="collapse show">
-                            <p>Absolutamente. Los principios que aprenderás han sido probados por miles de personas en diferentes contextos y culturas. Los resultados dependen de la correcta aplicación y consistencia.</p>
+            <div class="chapter-card">
+                <h2 class="section-title">Casos Reales y Resultados Tangibles</h2>
+                
+                <div class="row mt-5">
+                    <div class="col-lg-6">
+                        <div class="testimonial-card">
+                            <h5 class="fw-bold">Caso 1: E-commerce de ropa</h5>
+                            <p class="text-muted">Antes: Equipo de 5 personas en atención al cliente, alto volumen de consultas sobre envíos, tallas y devoluciones.</p>
+                            <div class="testimonial-text mt-3">
+                                <p>Después del chatbot: Reducción del 80% en tickets humanos. Aumento del 25% en conversión de ventas nocturnas. Clientes más satisfechos.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="faq-item">
-                        <h4 class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq2">¿Cuánto tiempo toma ver resultados?</h4>
-                        <div id="faq2" class="collapse">
-                            <p>Muchas personas reportan cambios perceptibles en las primeras semanas. Sin embargo, los resultados más significativos suelen manifestarse después de 3 a 6 meses de aplicación consistente.</p>
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <h4 class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq3">¿Necesito conocimientos previos?</h4>
-                        <div id="faq3" class="collapse">
-                            <p>No se requieren conocimientos previos. El sistema está diseñado para ser comprendido y aplicado por cualquier persona, independientemente de su formación o experiencia.</p>
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <h4 class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq4">¿Qué pasa si no obtengo resultados?</h4>
-                        <div id="faq4" class="collapse">
-                            <p>Ofrecemos una garantía de satisfacción de 30 días. Si aplicas los principios y no ves ningún beneficio, te devolvemos tu inversión sin preguntas.</p>
+                    <div class="col-lg-6">
+                        <div class="testimonial-card">
+                            <h5 class="fw-bold">Caso 2: Clínica de estética</h5>
+                            <p class="text-muted">Antes: Consultas por WhatsApp saturaban a la recepcionista.</p>
+                            <div class="testimonial-text mt-3">
+                                <p>Después del chatbot: Agenda automatizada 24/7. Citas duplicadas sin contratar más personal. Reducción del 90% en errores de coordinación.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-number">80%</div>
+                            <p class="mb-0">Reducción en tickets humanos</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-number">25%</div>
+                            <p class="mb-0">Aumento en ventas nocturnas</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-number">90%</div>
+                            <p class="mb-0">Menos errores en coordinación</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Capítulo 4 -->
+    <section class="py-5">
+        <div class="container">
+            <div class="chapter-card">
+                <h2 class="section-title">¿Cómo te Ayuda a Reducir Costes?</h2>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div>
+                                <h5>Ahorro en personal</h5>
+                                <p class="text-muted">Reduce drásticamente la necesidad de contratar nuevos agentes.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div>
+                                <h5>Menos errores</h5>
+                                <p class="text-muted">Respuestas coherentes y automáticas sin equivocaciones humanas.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <h5>Más eficiencia</h5>
+                                <p class="text-muted">Cada consulta automatizada es tiempo ganado para tareas de alto valor.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-expand"></i>
+                            </div>
+                            <div>
+                                <h5>Escalabilidad</h5>
+                                <p class="text-muted">Puedes atender más clientes sin aumentar tu equipo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Capítulo 5 -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="chapter-card">
+                <h2 class="section-title">El Verdadero Valor: Automatización + Conversión</h2>
+                <p class="lead">Un chatbot bien diseñado no solo responde preguntas. También vende.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Chatbot vendiendo" class="img-fluid rounded-4">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mt-3 mt-md-0">
+                            <div class="benefit-item">
+                                <div class="benefit-icon">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                                <div>
+                                    <h5>Sugerencia de productos</h5>
+                                    <p class="text-muted">Recomienda productos basados en las necesidades del cliente.</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">
+                                    <i class="fas fa-handshake"></i>
+                                </div>
+                                <div>
+                                    <h5>Cierre de ventas</h5>
+                                    <p class="text-muted">Guía al cliente hacia la compra como un vendedor experto.</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div>
+                                    <h5>Agendamiento</h5>
+                                    <p class="text-muted">Programa citas y reuniones automáticamente.</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div>
+                                    <h5>Links de pago</h5>
+                                    <p class="text-muted">Envía enlaces directos para completar la compra.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 bg-primary bg-opacity-10 p-4 rounded-3">
+                    <h5 class="text-primary"><i class="fas fa-lightbulb me-2"></i>Cada interacción es una oportunidad de conversión</h5>
+                    <p class="mb-0">Mientras un agente humano puede estar limitado por horarios y capacidad, tu chatbot trabaja como tu mejor vendedor 24 horas al día.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Capítulo 6 -->
+    <section id="implementacion" class="py-5">
+        <div class="container">
+            <div class="chapter-card">
+                <h2 class="section-title">¿Cómo Se Implementa un Chatbot en Tu Negocio?</h2>
+                
+                <div class="row mt-4">
+                    <div class="col-lg-6">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div>
+                                <h5>Diagnóstico personalizado</h5>
+                                <p class="text-muted">Analizamos tu negocio y flujos de atención actuales.</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div>
+                                <h5>Diseño del chatbot</h5>
+                                <p class="text-muted">Creamos la estructura según tus necesidades y tono de marca.</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div>
+                                <h5>Entrenamiento con IA</h5>
+                                <p class="text-muted">Alimentamos el sistema con tus contenidos y datos reales.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="step-item">
+                            <div class="step-number">4</div>
+                            <div>
+                                <h5>Integración</h5>
+                                <p class="text-muted">Implementamos en tus canales (web, WhatsApp, redes).</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">5</div>
+                            <div>
+                                <h5>Optimización continua</h5>
+                                <p class="text-muted">Mejoramos respuestas y conversión basado en datos.</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number"><i class="fas fa-rocket"></i></div>
+                            <div>
+                                <h5>Implementación rápida</h5>
+                                <p class="text-muted">En solo 2-4 semanas tendrás tu chatbot operativo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Conclusión -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="chapter-card">
+                <h2 class="section-title">El Futuro Ya Está Aquí</h2>
+                <p class="lead fw-bold">Cada día que tu negocio no tiene un chatbot activo es dinero que estás dejando sobre la mesa.</p>
+                <p>Mientras tú duermes, un chatbot con IA puede estar vendiendo por ti, atendiendo clientes y cerrando ventas.</p>
+                <p>La tecnología ya está lista. ¿Lo estás tú?</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Final -->
+    <section id="cta" class="py-5">
+        <div class="container">
+            <div class="cta-section text-center">
+                <h2 class="mb-4">Implementa Hoy Tu Chatbot y Empieza a Vender sin Pausas</h2>
+                <p class="lead mb-5">🚀 Yo me encargo de todo. Diseño, configuro e implemento chatbots con inteligencia artificial totalmente personalizados para tu negocio.</p>
+                
+                <div class="row justify-content-center g-4">
+                    <div class="col-md-4">
+                        <div class="bg-white bg-opacity-10 p-3 rounded-3 h-100">
+                            <i class="fas fa-bolt text-white mb-2"></i>
+                            <h5>Implementación rápida</h5>
+                            <p class="small opacity-75 mb-0">2-4 semanas para tenerlo operativo</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-white bg-opacity-10 p-3 rounded-3 h-100">
+                            <i class="fas fa-chart-bar text-white mb-2"></i>
+                            <h5>Resultados medibles</h5>
+                            <p class="small opacity-75 mb-0">Métricas claras de rendimiento</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-white bg-opacity-10 p-3 rounded-3 h-100">
+                            <i class="fas fa-hands-helping text-white mb-2"></i>
+                            <h5>Acompañamiento completo</h5>
+                            <p class="small opacity-75 mb-0">Soporte continuo post-implementación</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="#" class="btn btn-light btn-lg px-5 py-3 fw-bold mt-5" style="color: var(--primary-color);">
+                    📞 Agenda una llamada gratuita de diagnóstico
+                </a>
+                <p class="mt-3 opacity-75"><small>Descubre cómo ahorrar miles de euros al año y vender 24/7</small></p>
             </div>
         </div>
     </section>
@@ -415,50 +656,48 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h5 class="mb-4">El Secreto Mejor Guardado</h5>
-                    <p>Transformando vidas a través de conocimiento poderoso y práctico.</p>
+                    <h5 class="mb-4"><i class="fas fa-robot me-2"></i>ChatbotIA Solutions</h5>
+                    <p>Transformamos tu atención al cliente con inteligencia artificial.</p>
                     <div class="mt-4">
-                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5 class="mb-4">Enlaces</h5>
-                    <ul class="list-unstyled footer-links">
-                        <li class="mb-2"><a href="#">Inicio</a></li>
-                        <li class="mb-2"><a href="#que-es">¿Qué es?</a></li>
-                        <li class="mb-2"><a href="#beneficios">Beneficios</a></li>
-                        <li class="mb-2"><a href="#testimonios">Testimonios</a></li>
-                        <li class="mb-2"><a href="#faq">FAQ</a></li>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none opacity-75">Inicio</a></li>
+                        <li class="mb-2"><a href="#problema" class="text-white text-decoration-none opacity-75">El Problema</a></li>
+                        <li class="mb-2"><a href="#solucion" class="text-white text-decoration-none opacity-75">La Solución</a></li>
+                        <li class="mb-2"><a href="#casos" class="text-white text-decoration-none opacity-75">Casos Reales</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <h5 class="mb-4">Legal</h5>
-                    <ul class="list-unstyled footer-links">
-                        <li class="mb-2"><a href="#">Términos y condiciones</a></li>
-                        <li class="mb-2"><a href="#">Política de privacidad</a></li>
-                        <li class="mb-2"><a href="#">Aviso legal</a></li>
-                        <li class="mb-2"><a href="#">Política de cookies</a></li>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none opacity-75">Términos y condiciones</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none opacity-75">Política de privacidad</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none opacity-75">Aviso legal</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 mb-4">
                     <h5 class="mb-4">Contacto</h5>
-                    <ul class="list-unstyled footer-links">
-                        <li class="mb-2"><i class="fas fa-envelope me-2"></i> contacto@elsecreto.com</li>
-                        <li class="mb-2"><i class="fas fa-phone me-2"></i> +34 123 456 789</li>
-                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Madrid, España</li>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-envelope me-2"></i> tecnogirona@gmail.com</li>
+                        <li class="mb-2"><i class="fas fa-phone me-2"></i> +34 637 161 141</li>
+                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Girona, España</li>
                     </ul>
                 </div>
             </div>
             <hr class="mt-4 mb-4" style="border-color: rgba(255,255,255,0.1);">
             <div class="row">
                 <div class="col-md-6 text-center text-md-start">
-                    <p class="mb-0">© 2023 El Secreto Mejor Guardado. Todos los derechos reservados.</p>
+                    <p class="mb-0 small opacity-75">© 2025 ChatbotIA Solutions. Todos los derechos reservados.</p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <p class="mb-0">Diseñado con <i class="fas fa-heart text-danger"></i> para transformar vidas</p>
+                    <p class="mb-0 small opacity-75">Diseñado para transformar tu negocio</p>
                 </div>
             </div>
         </div>
@@ -467,12 +706,6 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Activar los tooltips de Bootstrap
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-        
         // Smooth scrolling para los enlaces
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -481,6 +714,39 @@
                     behavior: 'smooth'
                 });
             });
+        });
+        
+        // Animación para los números de estadísticas
+        function animateStats() {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(stat => {
+                const target = +stat.getAttribute('data-target') || parseInt(stat.textContent);
+                const increment = target / 50;
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        clearInterval(timer);
+                        current = target;
+                    }
+                    stat.textContent = Math.floor(current) + (stat.textContent.includes('%') ? '%' : '');
+                }, 20);
+            });
+        }
+        
+        // Ejecutar cuando la sección sea visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateStats();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {threshold: 0.5});
+        
+        document.querySelectorAll('.stat-card').forEach(card => {
+            observer.observe(card);
         });
     </script>
 </body>
