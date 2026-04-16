@@ -3,807 +3,652 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot IA: Reduce Costes y Aumenta Ventas 24/7</title>
-  <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-TPJTLJ9');</script>
-<!-- End Google Tag Manager -->
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>S.A.T. Dashboard - Gestión Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #3b82f6;
-            --dark-color: #1e293b;
-            --light-color: #f8fafc;
-        }
-        
-        body 
-        <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TPJTLJ9"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-        {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.7;
-            color: #334155;
-        }
-        
-        .hero-section {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            padding: 5rem 0;
-            border-bottom: 1px solid #bae6fd;
-        }
-        
-        .hero-title {
-            font-weight: 800;
-            font-size: 2.8rem;
-            margin-bottom: 1.5rem;
-            color: var(--dark-color);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.35rem;
-            color: #475569;
-            max-width: 800px;
-            margin: 0 auto 2rem;
-        }
-        
-        .btn-primary-custom {
-            background-color: var(--primary-color);
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-        }
-        
-        .btn-primary-custom:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px rgba(37, 99, 235, 0.3);
-            background-color: var(--secondary-color);
-        }
-        
-        .section-title {
-            font-weight: 800;
-            margin-bottom: 2rem;
-            color: var(--dark-color);
-            position: relative;
-        }
-          /* WhatsApp Button */
-        .whatsapp-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background-color: #25D366;
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            text-align: center;
-            font-size: 30px;
-            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .whatsapp-btn:hover {
-            background-color: #128C7E;
-            color: white;
-            transform: scale(1.1);
-        }
-        .whatsapp-btn {
-    text-decoration: none !important;
-    border-bottom: none !important;
-}
-
-.whatsapp-btn i {
-    display: inline-block; /* Evita problemas de alineación */
-
-         }
-        .section-title:after {
-            content: '';
-            position: absolute;
-            width: 60px;
-            height: 4px;
-            background: var(--primary-color);
-            bottom: -12px;
-            left: 0;
-            border-radius: 2px;
-        }
-        
-        .chapter-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            margin-bottom: 3rem;
-            border-left: 4px solid var(--primary-color);
-        }
-        
-        .benefit-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-        
-        .benefit-icon {
-            background-color: #dbeafe;
-            color: var(--primary-color);
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1rem;
-            flex-shrink: 0;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            margin-bottom: 2rem;
-            border-top: 4px solid var(--primary-color);
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-        }
-        
-        .testimonial-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            margin: 1rem 0;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .testimonial-text {
-            font-style: italic;
-            position: relative;
-            padding-left: 1.5rem;
-            border-left: 3px solid var(--primary-color);
-        }
-        
-        .step-number {
-            background-color: var(--primary-color);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            margin-right: 1rem;
-            flex-shrink: 0;
-        }
-        
-        .step-item {
-            display: flex;
-            margin-bottom: 1.5rem;
-            align-items: flex-start;
-        }
-        
-        .cta-section {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            padding: 4rem 0;
-            color: white;
-            border-radius: 12px;
-            margin: 3rem 0;
-        }
-        
-        .footer {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 4rem 0 2rem;
-        }
-        
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.2rem;
-            }
-            
-            .hero-subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .chapter-card {
-                padding: 1.5rem;
-            }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .btn-small { padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; transition: all 0.2s; }
+        .sidebar-link { display: flex; align-items: center; padding: 10px 16px; color: #64748b; border-radius: 6px; margin-bottom: 4px; transition: all 0.2s; }
+        .sidebar-link.active { background-color: #f1f5f9; color: #0f172a; font-weight: 500; }
+        .sidebar-link:hover:not(.active) { background-color: #f8fafc; color: #334155; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .detail-row { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { font-weight: 600; color: #64748b; font-size: 0.875rem; text-transform: uppercase; }
+        .detail-value { color: #1e293b; font-size: 0.875rem; }
+        .badge-guarantee { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-in-warranty { background-color: #dcfce7; color: #166534; }
+        .badge-expired { background-color: #fee2e2; color: #991b1b; }
+        .badge-days-left { background-color: #fef3c7; color: #92400e; }
+        .metric-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .metric-box h3 { font-size: 2.5rem; font-weight: 700; margin: 10px 0; }
+        .metric-box p { font-size: 0.875rem; opacity: 0.9; }
+        .chart-container { position: relative; height: 300px; margin-bottom: 20px; }
+        .user-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .user-badge.daniel { background-color: #dbeafe; color: #1e40af; }
+        .user-badge.jose { background-color: #fce7f3; color: #be185d; }
     </style>
 </head>
-<body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXX"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#" style="color: var(--primary-color);">
-                <i class="fas fa-robot me-2"></i>ChatbotIA
+<body class="h-screen flex overflow-hidden">
+    <aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col">
+        <div class="p-6 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 p-1.5 rounded-lg text-white">
+                    <i data-lucide="wrench" class="w-5 h-5"></i>
+                </div>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight">S.A.T. Pro</h1>
+            </div>
+        </div>
+        <nav class="flex-1 p-4 overflow-y-auto">
+            <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3"></i> Resumen
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#problema">El Problema</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#solucion">La Solución</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#casos">Casos Reales</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#implementacion">Implementación</a>
-                    </li>
-                </ul>
-                <a href="tel:+34637161141" class="btn btn-primary-custom ms-lg-3 text-white">Agendar Llamada</a>
+            <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link">
+                <i data-lucide="package" class="w-4 h-4 mr-3"></i> Pedido de Piezas
+            </a>
+            <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link">
+                <i data-lucide="shopping-cart" class="w-4 h-4 mr-3"></i> Pedidos Clientes
+            </a>
+            <a href="#" onclick="showSection('tareas')" id="link-tareas" class="sidebar-link">
+                <i data-lucide="check-square" class="w-4 h-4 mr-3"></i> Tareas Asignadas
+            </a>
+            <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3"></i> Reportes
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-100 text-xs text-slate-400">v4.0.0 &copy; 2024 Gestión S.A.T.</div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
+            <h2 id="section-title" class="text-lg font-semibold text-slate-700">Resumen General</h2>
+            <div class="flex items-center gap-4">
+                <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md font-medium flex items-center gap-2 transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Registro
+                </button>
             </div>
-        </div>
-    </nav>
-  <!-- WhatsApp Button -->
-    <a href="https://wa.me/34637161141" class="whatsapp-btn" aria-label="Contactar por WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-    </a>
-</a>
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="hero-title">Reduce los Costes de Atención al Cliente y Aumenta las Ventas Automáticamente</h1>
-                    <p class="hero-subtitle"> Descubre cómo un chatbot con inteligencia artificial puede revolucionar tu negocio, trabajando 24/7 sin pausas, sin errores y sin descanso.</p>
-                    <div class="d-flex gap-3">
-                       </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8" id="main-view">
+            <div id="view-dashboard" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flat-card p-6 flex items-center gap-4">
+                        <div class="bg-blue-50 text-blue-600 p-3 rounded-full"><i data-lucide="package" class="w-6 h-6"></i></div>
+                        <div><p class="text-sm text-slate-500 font-medium">Piezas Pendientes</p><h3 id="stat-piezas" class="text-2xl font-bold text-slate-800">0</h3></div>
+                    </div>
+                    <div class="flat-card p-6 flex items-center gap-4">
+                        <div class="bg-green-50 text-green-600 p-3 rounded-full"><i data-lucide="shopping-cart" class="w-6 h-6"></i></div>
+                        <div><p class="text-sm text-slate-500 font-medium">Pedidos Activos</p><h3 id="stat-pedidos" class="text-2xl font-bold text-slate-800">0</h3></div>
+                    </div>
+                    <div class="flat-card p-6 flex items-center gap-4">
+                        <div class="bg-amber-50 text-amber-600 p-3 rounded-full"><i data-lucide="clock" class="w-6 h-6"></i></div>
+                        <div><p class="text-sm text-slate-500 font-medium">Tareas Urgentes</p><h3 id="stat-tareas" class="text-2xl font-bold text-slate-800">0</h3></div>
+                    </div>
                 </div>
-                <div class="col-lg-6">
-                    <img src="https://bing.com/th/id/BCO.5c11c2a4-6ccd-4866-ac16-16cec16f7e86.png" alt="Chatbot IA" class="img-fluid rounded-4 shadow mt-4 mt-lg-0">
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Introducción -->
-    <section class="py-5">
-        <div class="container">
-            <div class="chapter-card">
-                <h2 class="section-title">Introducción</h2>
-                <p class="lead fw-bold">¿Y si te dijera que existe una herramienta que nunca duerme, nunca se enferma y puede atender a tus clientes día y noche mientras tú descansas?</p>
-                <p>Esa herramienta ya existe, y se llama chatbot con inteligencia artificial.</p>
-                <p>Te revelamos cómo empresarios como tú están reduciendo drásticamente los costes operativos en atención al cliente y aumentando sus ventas gracias a esta tecnología. No es ciencia ficción. Es una ventaja competitiva que ya está cambiando las reglas del juego.</p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Capítulo 1 -->
-    <section id="problema" class="py-5 bg-light">
-        <div class="container">
-            <div class="chapter-card">
-                <h2 class="section-title">El Problema Silencioso que Está Drenando tus Recursos</h2>
-                <p class="fw-bold">¿Cuánto cuesta realmente tu equipo de atención al cliente?</p>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-euro-sign"></i>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4"></i> Actividad Reciente</h4>
+                        <div id="recent-activity" class="space-y-4"><p class="text-slate-400 text-sm italic">Cargando datos...</p></div>
+                    </div>
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4"></i> Recordatorios</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <i data-lucide="info" class="w-4 h-4 text-blue-500 mt-0.5"></i>
+                                <p class="text-sm text-slate-600">Revisar stock de pantallas LED el viernes.</p>
                             </div>
-                            <div>
-                                <h5>Salarios y costes fijos</h5>
-                                <p class="text-muted">Salarios, formación, rotación, ausencias, descansos, tiempo improductivo.</p>
+                            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <i data-lucide="info" class="w-4 h-4 text-blue-500 mt-0.5"></i>
+                                <p class="text-sm text-slate-600">Actualizar estado de pedidos de garantía.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="stat-card">
-                            <div class="stat-number">70%</div>
-                            <p class="mb-0">de las consultas son repetitivas y fácilmente automatizables</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-4 bg-danger bg-opacity-10 p-4 rounded-3">
-                    <h5 class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>El riesgo oculto: el cliente que no espera</h5>
-                    <ul class="mt-3">
-                        <li>Respuestas lentas = pérdida de ventas</li>
-                        <li>Clientes insatisfechos = reputación en peligro</li>
-                        <li>Errores humanos = costes adicionales</li>
-                    </ul>
                 </div>
             </div>
-        </div>
-    </section>
-    
-    <!-- Capítulo 2 -->
-    <section id="solucion" class="py-5">
-        <div class="container">
-            <div class="chapter-card">
-                <h2 class="section-title">El Chatbot que Nunca Duerme</h2>
-                <p class="fw-bold">¿Qué es un chatbot con IA?</p>
-                <p>Un chatbot con inteligencia artificial es un asistente virtual que:</p>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-comments"></i>
-                            </div>
-                            <div>
-                                <h5>Atención automática</h5>
-                                <p class="text-muted">Atiende de forma automática a los clientes en tu web, redes sociales o WhatsApp.</p>
-                            </div>
-                        </div>
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-brain"></i>
-                            </div>
-                            <div>
-                                <h5>Aprendizaje continuo</h5>
-                                <p class="text-muted">Aprende de las interacciones y se adapta a tu negocio.</p>
-                            </div>
-                        </div>
+
+            <div id="view-reportes" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="metric-box blue"><p>Total Pedidos</p><h3 id="kpi-total-pedidos">0</h3></div>
+                    <div class="metric-box green"><p>Pedidos Entregados</p><h3 id="kpi-pedidos-entregados">0</h3></div>
+                    <div class="metric-box amber"><p>Tareas Completadas</p><h3 id="kpi-tareas-completadas">0</h3></div>
+                    <div class="metric-box red"><p>Piezas Pendientes</p><h3 id="kpi-piezas-pendientes">0</h3></div>
+                    <div class="metric-box cyan"><p>Tasa Entrega</p><h3 id="kpi-tasa-entrega">0%</h3></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4"></i> Estado de Pedidos</h4>
+                        <div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-sliders-h"></i>
-                            </div>
-                            <div>
-                                <h5>Precisión y escalabilidad</h5>
-                                <p class="text-muted">Responde con precisión y puede escalar sin límites.</p>
-                            </div>
-                        </div>
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
-                            <div>
-                                <h5>Personalización</h5>
-                                <p class="text-muted">Se adapta al tono y estilo de tu marca.</p>
-                            </div>
-                        </div>
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4"></i> Estado de Tareas</h4>
+                        <div class="chart-container"><canvas id="chart-tareas-estado"></canvas></div>
                     </div>
                 </div>
-                
-                <div class="mt-5">
-                    <h5 class="fw-bold">¿Por qué es tan poderoso?</h5>
-                    <div class="row mt-4 g-4">
-                        <div class="col-md-4">
-                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 h-100">
-                                <i class="fas fa-clock text-primary mb-2"></i>
-                                <h6>Trabaja 24/7</h6>
-                                <p class="small text-muted mb-0">Atiende a cualquier hora del día o noche.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 h-100">
-                                <i class="fas fa-users text-primary mb-2"></i>
-                                <h6>Escalabilidad</h6>
-                                <p class="small text-muted mb-0">Atiende cientos de clientes simultáneamente.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 h-100">
-                                <i class="fas fa-calendar-minus text-primary mb-2"></i>
-                                <h6>Sin descansos</h6>
-                                <p class="small text-muted mb-0">No necesita vacaciones ni pausas.</p>
-                            </div>
-                        </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Operaciones por Usuario</h4>
+                        <div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div>
                     </div>
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Piezas por Usuario</h4>
+                        <div class="chart-container"><canvas id="chart-piezas-usuario"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> Comparativa de Gestiones</h4>
+                        <div id="stats-comparativa" class="space-y-4"></div>
+                    </div>
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Alertas Activas</h4>
+                        <div id="stats-alertas" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-list" class="hidden">
+                <div class="flat-card overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr id="table-head"></tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <!-- Capítulo 3 -->
-    <section id="casos" class="py-5 bg-light">
-        <div class="container">
-            <div class="chapter-card">
-                <h2 class="section-title">Casos Reales y Resultados Tangibles</h2>
-                
-                <div class="row mt-5">
-                    <div class="col-lg-6">
-                        <div class="testimonial-card">
-                            <h5 class="fw-bold">Caso 1: E-commerce de ropa</h5>
-                            <p class="text-muted">Antes: Equipo de 5 personas en atención al cliente, alto volumen de consultas sobre envíos, tallas y devoluciones.</p>
-                            <div class="testimonial-text mt-3">
-                                <p>Después del chatbot: Reducción del 80% en tickets humanos. Aumento del 25% en conversión de ventas nocturnas. Clientes más satisfechos.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="testimonial-card">
-                            <h5 class="fw-bold">Caso 2: Clínica de estética</h5>
-                            <p class="text-muted">Antes: Consultas por WhatsApp saturaban a la recepcionista.</p>
-                            <div class="testimonial-text mt-3">
-                                <p>Después del chatbot: Agenda automatizada 24/7. Citas duplicadas sin contratar más personal. Reducción del 90% en errores de coordinación.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row mt-4">
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <div class="stat-number">80%</div>
-                            <p class="mb-0">Reducción en tickets humanos</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <div class="stat-number">25%</div>
-                            <p class="mb-0">Aumento en ventas nocturnas</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <div class="stat-number">90%</div>
-                            <p class="mb-0">Menos errores en coordinación</p>
-                        </div>
-                    </div>
-                </div>
+    </main>
+
+    <div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 id="modal-title" class="font-bold text-slate-800">Añadir Registro</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="record-form" class="p-6 space-y-4 overflow-y-auto flex-1">
+                <input type="hidden" id="form-id">
+                <div id="form-fields" class="space-y-4"></div>
+            </form>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3">
+                <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium hover:bg-slate-50 transition-colors">Cancelar</button>
+                <button type="submit" form="record-form" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">Guardar Cambios</button>
             </div>
         </div>
-    </section>
-    
-    <!-- Capítulo 4 -->
-    <section class="py-5">
-        <div class="container">
-            <div class="chapter-card">
-                <h2 class="section-title">¿Cómo te Ayuda a Reducir Costes?</h2>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-money-bill-wave"></i>
-                            </div>
-                            <div>
-                                <h5>Ahorro en personal</h5>
-                                <p class="text-muted">Reduce drásticamente la necesidad de contratar nuevos agentes.</p>
-                            </div>
-                        </div>
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-times-circle"></i>
-                            </div>
-                            <div>
-                                <h5>Menos errores</h5>
-                                <p class="text-muted">Respuestas coherentes y automáticas sin equivocaciones humanas.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div>
-                                <h5>Más eficiencia</h5>
-                                <p class="text-muted">Cada consulta automatizada es tiempo ganado para tareas de alto valor.</p>
-                            </div>
-                        </div>
-                        <div class="benefit-item">
-                            <div class="benefit-icon">
-                                <i class="fas fa-expand"></i>
-                            </div>
-                            <div>
-                                <h5>Escalabilidad</h5>
-                                <p class="text-muted">Puedes atender más clientes sin aumentar tu equipo.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    </div>
+
+    <div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 id="detail-title" class="font-bold text-slate-800">Detalles del Registro</h3>
+                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="detail-content" class="p-6 overflow-y-auto flex-1"></div>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3">
+                <button type="button" onclick="closeDetailModal()" class="flex-1 px-4 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium hover:bg-slate-50 transition-colors">Cerrar</button>
+                <button type="button" id="detail-edit-btn" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">Editar</button>
             </div>
         </div>
-    </section>
-    
-    <!-- Capítulo 5 -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <div class="chapter-card">
-                <h2 class="section-title">El Verdadero Valor: Automatización + Conversión</h2>
-                <p class="lead">Un chatbot bien diseñado no solo responde preguntas. También vende.</p>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <img src="https://bing.com/th/id/BCO.4697e22d-9695-4bbb-baf7-472016d0e446.png" alt="Chatbot vendiendo" class="img-fluid rounded-4">
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mt-3 mt-md-0">
-                            <div class="benefit-item">
-                                <div class="benefit-icon">
-                                    <i class="fas fa-gift"></i>
-                                </div>
-                                <div>
-                                    <h5>Sugerencia de productos</h5>
-                                    <p class="text-muted">Recomienda productos basados en las necesidades del cliente.</p>
-                                </div>
-                            </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">
-                                    <i class="fas fa-handshake"></i>
-                                </div>
-                                <div>
-                                    <h5>Cierre de ventas</h5>
-                                    <p class="text-muted">Guía al cliente hacia la compra como un vendedor experto.</p>
-                                </div>
-                            </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">
-                                    <i class="fas fa-calendar-check"></i>
-                                </div>
-                                <div>
-                                    <h5>Agendamiento</h5>
-                                    <p class="text-muted">Programa citas y reuniones automáticamente.</p>
-                                </div>
-                            </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">
-                                    <i class="fas fa-link"></i>
-                                </div>
-                                <div>
-                                    <h5>Links de pago</h5>
-                                    <p class="text-muted">Envía enlaces directos para completar la compra.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-4 bg-primary bg-opacity-10 p-4 rounded-3">
-                    <h5 class="text-primary"><i class="fas fa-lightbulb me-2"></i>Cada interacción es una oportunidad de conversión</h5>
-                    <p class="mb-0">Mientras un agente humano puede estar limitado por horarios y capacidad, tu chatbot trabaja como tu mejor vendedor 24 horas al día.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Capítulo 6 -->
-    <section id="implementacion" class="py-5">
-        <div class="container">
-            <div class="chapter-card">
-                <h2 class="section-title">¿Cómo Se Implementa un Chatbot en Tu Negocio?</h2>
-                
-                <div class="row mt-4">
-                    <div class="col-lg-6">
-                        <div class="step-item">
-                            <div class="step-number">1</div>
-                            <div>
-                                <h5>Diagnóstico personalizado</h5>
-                                <p class="text-muted">Analizamos tu negocio y flujos de atención actuales.</p>
-                            </div>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-number">2</div>
-                            <div>
-                                <h5>Diseño del chatbot</h5>
-                                <p class="text-muted">Creamos la estructura según tus necesidades y tono de marca.</p>
-                            </div>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-number">3</div>
-                            <div>
-                                <h5>Entrenamiento con IA</h5>
-                                <p class="text-muted">Alimentamos el sistema con tus contenidos y datos reales.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="step-item">
-                            <div class="step-number">4</div>
-                            <div>
-                                <h5>Integración</h5>
-                                <p class="text-muted">Implementamos en tus canales (web, WhatsApp, redes).</p>
-                            </div>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-number">5</div>
-                            <div>
-                                <h5>Optimización continua</h5>
-                                <p class="text-muted">Mejoramos respuestas y conversión basado en datos.</p>
-                            </div>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-number"><i class="fas fa-rocket"></i></div>
-                            <div>
-                                <h5>Implementación rápida</h5>
-                                <p class="text-muted">En solo 2-4 semanas tendrás tu chatbot operativo.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Conclusión -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <div class="chapter-card">
-                <h2 class="section-title">El Futuro Ya Está Aquí</h2>
-                <p class="lead fw-bold">Cada día que tu negocio no tiene un chatbot activo es dinero que estás dejando sobre la mesa.</p>
-                <p>Mientras tú duermes, un chatbot con IA puede estar vendiendo por ti, atendiendo clientes y cerrando ventas.</p>
-                <p>La tecnología ya está lista. ¿Lo estás tú?</p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- CTA Final -->
-    <section id="cta" class="py-5">
-        <div class="container">
-            <div class="cta-section text-center">
-                <h2 class="mb-4">Implementa Hoy Tu Chatbot y Empieza a Vender sin Pausas</h2>
-                <p class="lead mb-5">Yo me encargo de todo. Diseño, configuro e implemento chatbots con inteligencia artificial totalmente personalizados para tu negocio.</p>
-                
-                <div class="row justify-content-center g-4">
-                    <div class="col-md-4">
-                        <div class="bg-white bg-opacity-10 p-3 rounded-3 h-100">
-                            <i class="fas fa-bolt text-white mb-2"></i>
-                            <h5>Implementación rápida</h5>
-                            <p class="small opacity-75 mb-0">2-4 semanas para tenerlo operativo</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="bg-white bg-opacity-10 p-3 rounded-3 h-100">
-                            <i class="fas fa-chart-bar text-white mb-2"></i>
-                            <h5>Resultados medibles</h5>
-                            <p class="small opacity-75 mb-0">Métricas claras de rendimiento</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="bg-white bg-opacity-10 p-3 rounded-3 h-100">
-                            <i class="fas fa-hands-helping text-white mb-2"></i>
-                            <h5>Acompañamiento completo</h5>
-                            <p class="small opacity-75 mb-0">Soporte continuo post-implementación</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="tel:+34637161141" class="btn btn-light btn-lg px-5 py-3 fw-bold mt-5" style="color: var(--primary-color);">
-                    📞 Agenda una llamada gratuita de diagnóstico
-                </a>
-                <p class="mt-3 opacity-75"><small>Descubre cómo ahorrar miles de euros al año y vender 24/7</small></p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 mb-4">
-                    <h5 class="mb-4"><i class="fas fa-robot me-2"></i>ChatbotIA Solutions</h5>
-                    <p>Transformamos tu atención al cliente con inteligencia artificial.</p>
-                    <div class="mt-4">
-                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-6 mb-4">
-                    <h5 class="mb-4">Enlaces</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none opacity-75">Inicio</a></li>
-                        <li class="mb-2"><a href="#problema" class="text-white text-decoration-none opacity-75">El Problema</a></li>
-                        <li class="mb-2"><a href="#solucion" class="text-white text-decoration-none opacity-75">La Solución</a></li>
-                        <li class="mb-2"><a href="#casos" class="text-white text-decoration-none opacity-75">Casos Reales</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5 class="mb-4">Legal</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none opacity-75">Términos y condiciones</a></li>
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none opacity-75">Política de privacidad</a></li>
-                        <li class="mb-2"><a href="#" class="text-white text-decoration-none opacity-75">Aviso legal</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3 mb-4">
-                    <h5 class="mb-4">Contacto</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-    <a href="#"
-       onclick="window.open('https://mail.google.com/mail/?view=cm&to=tecnogirona@gmail.com&su=Consulta&body=Hola,%20me%20interesa%20recibir%20información%20sobre%20vuestros%20servicios', '_blank'); return false;"
-       style="text-decoration: none; color: inherit;"
-       title="Abrir en Gmail">
-       <i class="fas fa-envelope me-2"></i> tecnogirona@gmail.com
-    </a>
-</li>
-<li class="mb-2">
-    <a href="https://wa.me/34637161141"
-       target="_blank"
-       rel="noopener noreferrer"
-       class="text-decoration-none text-reset hover-effect"
-       title="Contactar por WhatsApp (Se abrirá en una nueva ventana)">
-       <i class="fab fa-whatsapp me-2"></i> +34 637 161 141
-    </a>
-</li>
-                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Girona, España</li>
-                    </ul>
-                </div>
-            </div>
-            <hr class="mt-4 mb-4" style="border-color: rgba(255,255,255,0.1);">
-            <div class="row">
-                <div class="col-md-6 text-center text-md-start">
-                    <p class="mb-0 small opacity-75">© 2025 ChatbotIA Solutions. Todos los derechos reservados.</p>
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <p class="mb-0 small opacity-75">Diseñado para transformar tu negocio</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+
     <script>
-        // Smooth scrolling para los enlaces
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
+        const db = new Dexie("SAT_Database");
+        db.version(1).stores({
+            piezas: '++id, nombre, estado, fecha, usuario',
+            pedidos: '++id, cliente, estado, fecha, usuario',
+            tareas: '++id, titulo, estado, fecha, usuario'
         });
-        
-        // Animación para los números de estadísticas
-        function animateStats() {
-            const statNumbers = document.querySelectorAll('.stat-number');
-            statNumbers.forEach(stat => {
-                const target = +stat.getAttribute('data-target') || parseInt(stat.textContent);
-                const increment = target / 50;
-                let current = 0;
-                
-                const timer = setInterval(() => {
-                    current += increment;
-                    if (current >= target) {
-                        clearInterval(timer);
-                        current = target;
-                    }
-                    stat.textContent = Math.floor(current) + (stat.textContent.includes('%') ? '%' : '');
-                }, 20);
+
+        const USUARIOS = ['Daniel Farré', 'José Ayala'];
+        let currentSection = 'dashboard';
+        let charts = {};
+
+        function showSection(section) {
+            currentSection = section;
+            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+            document.getElementById(`link-${section}`).classList.add('active');
+            
+            const titles = {
+                'dashboard': 'Resumen General',
+                'piezas': 'Gestión de Piezas',
+                'pedidos': 'Pedidos de Clientes',
+                'tareas': 'Tareas Asignadas',
+                'reportes': 'Reportes y Métricas'
+            };
+            document.getElementById('section-title').textContent = titles[section];
+            document.getElementById('btn-new').style.display = section === 'reportes' ? 'none' : 'flex';
+
+            if (section === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                document.getElementById('view-list').classList.add('hidden');
+                document.getElementById('view-reportes').classList.add('hidden');
+                updateDashboardStats();
+            } else if (section === 'reportes') {
+                document.getElementById('view-dashboard').classList.add('hidden');
+                document.getElementById('view-list').classList.add('hidden');
+                document.getElementById('view-reportes').classList.remove('hidden');
+                updateReports();
+            } else {
+                document.getElementById('view-dashboard').classList.add('hidden');
+                document.getElementById('view-list').classList.remove('hidden');
+                document.getElementById('view-reportes').classList.add('hidden');
+                renderTable(section);
+            }
+            lucide.createIcons();
+        }
+
+        async function updateDashboardStats() {
+            try {
+                const piezas = await db.piezas.toArray();
+                const pedidos = await db.pedidos.toArray();
+                const tareas = await db.tareas.toArray();
+
+                const countPiezas = piezas.filter(p => p.estado === 'Pedido').length;
+                const countPedidos = pedidos.filter(p => p.estado && p.estado !== 'Entregado').length;
+                const countTareas = tareas.filter(t => t.prioridad === 'Alta').length;
+
+                document.getElementById('stat-piezas').textContent = countPiezas;
+                document.getElementById('stat-pedidos').textContent = countPedidos;
+                document.getElementById('stat-tareas').textContent = countTareas;
+
+                const allActivity = [];
+                piezas.slice(-2).forEach(p => {
+                    if (p.nombre) allActivity.push({
+                        text: `Pieza: ${p.nombre}`,
+                        date: p.fecha ? new Date(p.fecha) : new Date(),
+                        icon: 'package',
+                        usuario: p.usuario || 'Sin asignar'
+                    });
+                });
+                pedidos.slice(-2).forEach(p => {
+                    if (p.cliente) allActivity.push({
+                        text: `Pedido de: ${p.cliente}`,
+                        date: p.fecha ? new Date(p.fecha) : new Date(),
+                        icon: 'shopping-cart',
+                        usuario: p.usuario || 'Sin asignar'
+                    });
+                });
+
+                allActivity.sort((a, b) => b.date - a.date);
+                const container = document.getElementById('recent-activity');
+                container.innerHTML = '';
+
+                if (allActivity.length === 0) {
+                    container.innerHTML = '<p class="text-slate-400 text-sm italic">No hay actividad reciente. Crea tu primer registro.</p>';
+                } else {
+                    allActivity.slice(0, 5).forEach(act => {
+                        const userClass = act.usuario === 'Daniel Farré' ? 'daniel' : (act.usuario === 'José Ayala' ? 'jose' : '');
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center gap-3';
+                        div.innerHTML = `
+                            <div class="w-8 h-8 rounded bg-slate-50 flex items-center justify-center text-slate-400">
+                                <i data-lucide="${act.icon}" class="w-4 h-4"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-slate-700 font-medium">${act.text}</p>
+                                <p class="text-xs text-slate-400">${act.date.toLocaleString()} ${userClass ? '· <span class="user-badge ' + userClass + '">' + act.usuario + '</span>' : ''}</p>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Error en dashboard:', error);
+                document.getElementById('recent-activity').innerHTML = '<p class="text-amber-600 text-sm">⚠️ Recargando...</p>';
+            }
+        }
+
+        async function updateReports() {
+            try {
+                const piezas = await db.piezas.toArray();
+                const pedidos = await db.pedidos.toArray();
+                const tareas = await db.tareas.toArray();
+
+                const totalPedidos = pedidos.length;
+                const pedidosEntregados = pedidos.filter(p => p.estado === 'Entregado').length;
+                const tareasCompletadas = tareas.filter(t => t.estado === 'Completado').length;
+                const piezasPendientes = piezas.filter(p => p.estado === 'Pedido').length;
+                const tasaEntrega = totalPedidos > 0 ? Math.round((pedidosEntregados / totalPedidos) * 100) : 0;
+
+                document.getElementById('kpi-total-pedidos').textContent = totalPedidos;
+                document.getElementById('kpi-pedidos-entregados').textContent = pedidosEntregados;
+                document.getElementById('kpi-tareas-completadas').textContent = tareasCompletadas;
+                document.getElementById('kpi-piezas-pendientes').textContent = piezasPendientes;
+                document.getElementById('kpi-tasa-entrega').textContent = tasaEntrega + '%';
+
+                updateChartPedidosEstado(pedidos);
+                updateChartTareasEstado(tareas);
+                updateChartOperacionesUsuario(pedidos, piezas, tareas);
+                updateChartPiezasUsuario(piezas);
+                updateComparativaUsuarios(pedidos, piezas, tareas);
+                updateAlertasActivas(piezas, pedidos);
+            } catch (error) {
+                console.error('Error en reportes:', error);
+            }
+        }
+
+        function updateChartPedidosEstado(pedidos) {
+            const estados = {};
+            pedidos.forEach(p => { estados[p.estado] = (estados[p.estado] || 0) + 1; });
+            const ctx = document.getElementById('chart-pedidos-estado').getContext('2d');
+            if (charts.pedidosEstado) charts.pedidosEstado.destroy();
+            charts.pedidosEstado = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(estados),
+                    datasets: [{
+                        data: Object.values(estados),
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
         }
-        
-        // Ejecutar cuando la sección sea visible
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateStats();
-                    observer.unobserve(entry.target);
+
+        function updateChartTareasEstado(tareas) {
+            const estados = {};
+            tareas.forEach(t => { estados[t.estado] = (estados[t.estado] || 0) + 1; });
+            const ctx = document.getElementById('chart-tareas-estado').getContext('2d');
+            if (charts.tareasEstado) charts.tareasEstado.destroy();
+            charts.tareasEstado = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(estados),
+                    datasets: [{
+                        data: Object.values(estados),
+                        backgroundColor: ['#4facfe', '#00f2fe', '#43e97b'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function updateChartOperacionesUsuario(pedidos, piezas, tareas) {
+            const ctx = document.getElementById('chart-operaciones-usuario').getContext('2d');
+            if (charts.operacionesUsuario) charts.operacionesUsuario.destroy();
+            charts.operacionesUsuario = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: USUARIOS,
+                    datasets: [
+                        { label: 'Pedidos', data: USUARIOS.map(u => pedidos.filter(p => p.usuario === u).length), backgroundColor: '#667eea' },
+                        { label: 'Piezas', data: USUARIOS.map(u => piezas.filter(p => p.usuario === u).length), backgroundColor: '#764ba2' },
+                        { label: 'Tareas', data: USUARIOS.map(u => tareas.filter(t => t.usuario === u).length), backgroundColor: '#f093fb' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function updateChartPiezasUsuario(piezas) {
+            const ctx = document.getElementById('chart-piezas-usuario').getContext('2d');
+            if (charts.piezasUsuario) charts.piezasUsuario.destroy();
+            charts.piezasUsuario = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: USUARIOS,
+                    datasets: [
+                        { label: 'Recibidas', data: USUARIOS.map(u => piezas.filter(p => p.usuario === u && p.estado === 'Recibido').length), backgroundColor: '#43e97b' },
+                        { label: 'Pendientes', data: USUARIOS.map(u => piezas.filter(p => p.usuario === u && p.estado === 'Pedido').length), backgroundColor: '#fa709a' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        async function updateComparativaUsuarios(pedidos, piezas, tareas) {
+            const html = USUARIOS.map(usuario => {
+                const pedidosUser = pedidos.filter(p => p.usuario === usuario).length;
+                const piezasUser = piezas.filter(p => p.usuario === usuario).length;
+                const tareasUser = tareas.filter(t => t.usuario === usuario).length;
+                const totalOps = pedidosUser + piezasUser + tareasUser;
+                const userClass = usuario === 'Daniel Farré' ? 'daniel' : 'jose';
+                return `
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                        <div class="flex justify-between items-center mb-3">
+                            <p class="font-bold text-slate-700">${usuario}</p>
+                            <span class="user-badge ${userClass}">${totalOps} operaciones</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div><p class="text-2xl font-bold text-blue-600">${pedidosUser}</p><p class="text-xs text-slate-500">Pedidos</p></div>
+                            <div><p class="text-2xl font-bold text-purple-600">${piezasUser}</p><p class="text-xs text-slate-500">Piezas</p></div>
+                            <div><p class="text-2xl font-bold text-pink-600">${tareasUser}</p><p class="text-xs text-slate-500">Tareas</p></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('stats-comparativa').innerHTML = html;
+        }
+
+        async function updateAlertasActivas(piezas, pedidos) {
+            const alertas = [];
+            piezas.forEach(p => {
+                if (p.fechaTrami) {
+                    const daysLeft = 30 - Math.floor((new Date() - new Date(p.fechaTrami)) / (1000 * 60 * 60 * 24));
+                    if (daysLeft > 0 && daysLeft <= 5) alertas.push({ type: 'garantia', text: `Pieza "${p.nombre}" - Garantía vence en ${daysLeft}d`, severity: 'high' });
                 }
             });
-        }, {threshold: 0.5});
-        
-        document.querySelectorAll('.stat-card').forEach(card => {
-            observer.observe(card);
-        });
+            pedidos.forEach(p => {
+                if (p.fechaTrami) {
+                    const daysLeft = 15 - Math.floor((new Date() - new Date(p.fechaTrami)) / (1000 * 60 * 60 * 24));
+                    if (daysLeft > 0 && daysLeft <= 3) alertas.push({ type: 'plazo', text: `Pedido de "${p.cliente}" - Plazo vence en ${daysLeft}d`, severity: 'critical' });
+                }
+            });
+            const html = alertas.length > 0 ? alertas.map(a => {
+                const bgClass = a.severity === 'critical' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200';
+                const textClass = a.severity === 'critical' ? 'text-red-900' : 'text-amber-900';
+                const iconClass = a.severity === 'critical' ? 'text-red-600' : 'text-amber-600';
+                return `<div class="p-3 ${bgClass} rounded-lg border"><div class="flex items-start gap-2"><i data-lucide="alert-circle" class="w-4 h-4 ${iconClass} mt-0.5"></i><p class="text-sm ${textClass}">${a.text}</p></div></div>`;
+            }).join('') : '<p class="text-slate-400 text-sm">Sin alertas activas</p>';
+            document.getElementById('stats-alertas').innerHTML = html;
+            lucide.createIcons();
+        }
+
+        async function renderTable(section) {
+            const data = await db[section].toArray();
+            const head = document.getElementById('table-head');
+            const body = document.getElementById('table-body');
+
+            let headHtml = '';
+            if (section === 'piezas') {
+                headHtml = '<th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Pieza</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Proveedor</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Usuario</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Estado</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Garantía</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Fecha</th><th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
+            } else if (section === 'pedidos') {
+                headHtml = '<th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Cliente</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Producto</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Usuario</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Estado</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Plazo Dev.</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Fecha</th><th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
+            } else if (section === 'tareas') {
+                headHtml = '<th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Tarea</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Técnico</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Usuario</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Prioridad</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Estado</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Fecha</th><th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
+            }
+            head.innerHTML = headHtml;
+
+            if (data.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="p-12 text-center text-slate-400"><div class="flex flex-col items-center gap-2"><i data-lucide="database" class="w-8 h-8 opacity-20"></i><span>No hay registros</span></div></td></tr>`;
+            } else {
+                body.innerHTML = '';
+                data.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50/50 transition-colors';
+                    const userClass = item.usuario === 'Daniel Farré' ? 'daniel' : 'jose';
+                    let content = '';
+                    if (section === 'piezas') {
+                        const guarantyStatus = getGuarantyStatus(item.fechaTrami);
+                        content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.nombre}</td><td class="px-6 py-4 text-sm text-slate-500">${item.proveedor || '-'}</td><td class="px-6 py-4"><span class="user-badge ${userClass}">${item.usuario}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4"><span class="badge-guarantee ${guarantyStatus.class}">${guarantyStatus.text}</span></td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                    } else if (section === 'pedidos') {
+                        const returnStatus = getReturnStatus(item.fechaTrami);
+                        content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.cliente}</td><td class="px-6 py-4 text-sm text-slate-500">${item.producto}</td><td class="px-6 py-4"><span class="user-badge ${userClass}">${item.usuario}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4"><span class="badge-guarantee ${returnStatus.class}">${returnStatus.text}</span></td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                    } else if (section === 'tareas') {
+                        content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.titulo}</td><td class="px-6 py-4 text-sm text-slate-500">${item.tecnico}</td><td class="px-6 py-4"><span class="user-badge ${userClass}">${item.usuario}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getPriorityClass(item.prioridad)}">${item.prioridad}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                    }
+                    tr.innerHTML = `${content}<td class="px-6 py-4 text-right space-x-1"><button onclick="viewDetail('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-green-100 hover:text-green-600"><i data-lucide="eye" class="w-3 h-3"></i></button><button onclick="editRecord('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-600"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick="deleteRecord('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-red-100 hover:text-red-600"><i data-lucide="trash" class="w-3 h-3"></i></button></td>`;
+                    body.appendChild(tr);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function getStatusClass(status) {
+            const s = (status || '').toLowerCase();
+            if (s.includes('pendiente') || s.includes('pedido') || s.includes('espera')) return 'bg-amber-100 text-amber-700';
+            if (s.includes('recibido') || s.includes('entregado') || s.includes('completado')) return 'bg-green-100 text-green-700';
+            if (s.includes('proceso') || s.includes('reparando')) return 'bg-blue-100 text-blue-700';
+            return 'bg-slate-100 text-slate-700';
+        }
+
+        function getPriorityClass(p) {
+            const v = (p || '').toLowerCase();
+            if (v === 'alta') return 'bg-red-100 text-red-700';
+            if (v === 'media') return 'bg-amber-100 text-amber-700';
+            return 'bg-green-100 text-green-700';
+        }
+
+        function getGuarantyStatus(fechaTrami) {
+            if (!fechaTrami) return { text: 'Sin fecha', class: 'bg-slate-100 text-slate-700' };
+            const daysElapsed = Math.floor((new Date() - new Date(fechaTrami)) / (1000 * 60 * 60 * 24));
+            if (daysElapsed <= 30) return { text: `En garantía (${30 - daysElapsed}d)`, class: 'badge-in-warranty' };
+            return { text: `Fuera de garantía`, class: 'badge-expired' };
+        }
+
+        function getReturnStatus(fechaTrami) {
+            if (!fechaTrami) return { text: 'Sin fecha', class: 'bg-slate-100 text-slate-700' };
+            const daysRemaining = 15 - Math.floor((new Date() - new Date(fechaTrami)) / (1000 * 60 * 60 * 24));
+            if (daysRemaining > 0) return { text: `Plazo: ${daysRemaining}d`, class: 'badge-days-left' };
+            return { text: `Plazo vencido`, class: 'badge-expired' };
+        }
+
+        function openModal(editData = null) {
+            const modal = document.getElementById('modal');
+            const fields = document.getElementById('form-fields');
+            const title = document.getElementById('modal-title');
+            const idInput = document.getElementById('form-id');
+            let activeSection = currentSection === 'dashboard' ? 'tareas' : currentSection;
+            
+            title.textContent = editData ? `Editar en ${activeSection}` : `Nuevo en ${activeSection}`;
+            idInput.value = editData ? editData.id : '';
+            
+            let html = '';
+            if (activeSection === 'piezas') {
+                html = `<div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre de Pieza</label><input type="text" name="nombre" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.nombre || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Cantidad</label><input type="number" name="cantidad" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.cantidad || 1}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Proveedor</label><input type="text" name="proveedor" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.proveedor || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Referencia PT</label><input type="text" name="referencia" placeholder="Ej: PT-2024-001" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.referencia || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha de Trámite</label><input type="date" name="fechaTrami" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.fechaTrami || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Usuario</label><select name="usuario" required class="w-full border border-slate-200 rounded p-2 text-sm"><option value="">Selecciona usuario</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label><select name="estado" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.estado === 'Pedido' ? 'selected' : ''}>Pedido</option><option ${editData?.estado === 'Recibido' ? 'selected' : ''}>Recibido</option></select></div>`;
+            } else if (activeSection === 'pedidos') {
+                html = `<div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Cliente</label><input type="text" name="cliente" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.cliente || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Producto/Modelo</label><input type="text" name="producto" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.producto || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Referencia PT</label><input type="text" name="referencia" placeholder="Ej: PT-2024-001" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.referencia || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha de Trámite</label><input type="date" name="fechaTrami" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.fechaTrami || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Usuario</label><select name="usuario" required class="w-full border border-slate-200 rounded p-2 text-sm"><option value="">Selecciona usuario</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label><select name="estado" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.estado === 'En Espera' ? 'selected' : ''}>En Espera</option><option ${editData?.estado === 'Reparando' ? 'selected' : ''}>Reparando</option><option ${editData?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option></select></div>`;
+            } else if (activeSection === 'tareas') {
+                html = `<div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Título Tarea</label><input type="text" name="titulo" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.titulo || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Técnico</label><input type="text" name="tecnico" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.tecnico || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Usuario</label><select name="usuario" required class="w-full border border-slate-200 rounded p-2 text-sm"><option value="">Selecciona usuario</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
+                    <div class="grid grid-cols-2 gap-4"><div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Prioridad</label><select name="prioridad" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.prioridad === 'Baja' ? 'selected' : ''}>Baja</option><option ${editData?.prioridad === 'Media' ? 'selected' : ''}>Media</option><option ${editData?.prioridad === 'Alta' ? 'selected' : ''}>Alta</option></select></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label><select name="estado" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option ${editData?.estado === 'Completado' ? 'selected' : ''}>Completado</option></select></div></div>`;
+            }
+            fields.innerHTML = html;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').classList.remove('flex');
+            document.getElementById('record-form').reset();
+        }
+
+        async function viewDetail(section, id) {
+            const item = await db[section].get(id);
+            const userClass = item.usuario === 'Daniel Farré' ? 'daniel' : 'jose';
+            let html = '';
+            if (section === 'piezas') {
+                const guarantyStatus = getGuarantyStatus(item.fechaTrami);
+                html = `<div class="detail-row"><div class="detail-label">Pieza</div><div class="detail-value">${item.nombre}</div></div>
+                    <div class="detail-row"><div class="detail-label">Cantidad</div><div class="detail-value">${item.cantidad}</div></div>
+                    <div class="detail-row"><div class="detail-label">Proveedor</div><div class="detail-value">${item.proveedor || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Referencia PT</div><div class="detail-value">${item.referencia || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Fecha Trámite</div><div class="detail-value">${item.fechaTrami ? new Date(item.fechaTrami).toLocaleDateString() : '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Garantía</div><div class="detail-value"><span class="badge-guarantee ${guarantyStatus.class}">${guarantyStatus.text}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Registrado</div><div class="detail-value">${new Date(item.fecha).toLocaleString()}</div></div>`;
+            } else if (section === 'pedidos') {
+                const returnStatus = getReturnStatus(item.fechaTrami);
+                html = `<div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${item.cliente}</div></div>
+                    <div class="detail-row"><div class="detail-label">Producto</div><div class="detail-value">${item.producto}</div></div>
+                    <div class="detail-row"><div class="detail-label">Referencia PT</div><div class="detail-value">${item.referencia || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Fecha Trámite</div><div class="detail-value">${item.fechaTrami ? new Date(item.fechaTrami).toLocaleDateString() : '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Plazo Devolución</div><div class="detail-value"><span class="badge-guarantee ${returnStatus.class}">${returnStatus.text}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Registrado</div><div class="detail-value">${new Date(item.fecha).toLocaleString()}</div></div>`;
+            } else if (section === 'tareas') {
+                html = `<div class="detail-row"><div class="detail-label">Tarea</div><div class="detail-value">${item.titulo}</div></div>
+                    <div class="detail-row"><div class="detail-label">Técnico</div><div class="detail-value">${item.tecnico}</div></div>
+                    <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Prioridad</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getPriorityClass(item.prioridad)}">${item.prioridad}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Registrado</div><div class="detail-value">${new Date(item.fecha).toLocaleString()}</div></div>`;
+            }
+            document.getElementById('detail-content').innerHTML = html;
+            document.getElementById('detail-edit-btn').onclick = () => { closeDetailModal(); editRecord(section, id); };
+            document.getElementById('detail-modal').classList.remove('hidden');
+            document.getElementById('detail-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+            document.getElementById('detail-modal').classList.remove('flex');
+        }
+
+        document.getElementById('record-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target).entries());
+            const id = document.getElementById('form-id').value;
+            let activeSection = currentSection === 'dashboard' ? 'tareas' : currentSection;
+            data.fecha = new Date().toISOString();
+            if (id) {
+                await db[activeSection].update(parseInt(id), data);
+            } else {
+                await db[activeSection].add(data);
+            }
+            closeModal();
+            showSection(currentSection);
+        };
+
+        async function editRecord(section, id) {
+            const item = await db[section].get(id);
+            currentSection = section;
+            openModal(item);
+        }
+
+        async function deleteRecord(section, id) {
+            if (confirm('¿Estás seguro de eliminar este registro?')) {
+                await db[section].delete(id);
+                showSection(currentSection);
+            }
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            showSection('dashboard');
+        };
     </script>
 </body>
 </html>
