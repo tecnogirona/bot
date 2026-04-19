@@ -59,11 +59,14 @@
             <a href="#" onclick="showSection('tareas')" id="link-tareas" class="sidebar-link">
                 <i data-lucide="check-square" class="w-4 h-4 mr-3"></i> Tareas Asignadas
             </a>
+            <a href="#" onclick="showSection('garantias')" id="link-garantias" class="sidebar-link">
+                <i data-lucide="shield-check" class="w-4 h-4 mr-3"></i> Garantías
+            </a>
             <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link">
                 <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3"></i> Reportes
             </a>
         </nav>
-        <div class="p-4 border-t border-slate-100 text-xs text-slate-400">v4.0.0 &copy; 2024 Gestión S.A.T.</div>
+        <div class="p-4 border-t border-slate-100 text-xs text-slate-400">v5.0.0 &copy; 2024 Gestión S.A.T.</div>
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden">
@@ -206,7 +209,8 @@
         db.version(1).stores({
             piezas: '++id, nombre, estado, fecha, usuario',
             pedidos: '++id, cliente, estado, fecha, usuario',
-            tareas: '++id, titulo, estado, fecha, usuario'
+            tareas: '++id, titulo, estado, fecha, usuario',
+            garantias: '++id, equipo, estado, fecha, usuario, fechaEntrada'
         });
 
         const USUARIOS = ['Daniel Farré', 'José Ayala'];
@@ -223,6 +227,7 @@
                 'piezas': 'Gestión de Piezas',
                 'pedidos': 'Pedidos de Clientes',
                 'tareas': 'Tareas Asignadas',
+                'garantias': 'Revisiones en Garantía',
                 'reportes': 'Reportes y Métricas'
             };
             document.getElementById('section-title').textContent = titles[section];
@@ -238,6 +243,11 @@
                 document.getElementById('view-list').classList.add('hidden');
                 document.getElementById('view-reportes').classList.remove('hidden');
                 updateReports();
+            } else if (section === 'garantias') {
+                document.getElementById('view-dashboard').classList.add('hidden');
+                document.getElementById('view-list').classList.remove('hidden');
+                document.getElementById('view-reportes').classList.add('hidden');
+                renderTable('garantias');
             } else {
                 document.getElementById('view-dashboard').classList.add('hidden');
                 document.getElementById('view-list').classList.remove('hidden');
@@ -252,6 +262,7 @@
                 const piezas = await db.piezas.toArray();
                 const pedidos = await db.pedidos.toArray();
                 const tareas = await db.tareas.toArray();
+                const garantias = await db.garantias.toArray();
 
                 const countPiezas = piezas.filter(p => p.estado === 'Pedido').length;
                 const countPedidos = pedidos.filter(p => p.estado && p.estado !== 'Entregado').length;
@@ -276,6 +287,14 @@
                         date: p.fecha ? new Date(p.fecha) : new Date(),
                         icon: 'shopping-cart',
                         usuario: p.usuario || 'Sin asignar'
+                    });
+                });
+                garantias.slice(-1).forEach(g => {
+                    if (g.equipo) allActivity.push({
+                        text: `Garantía: ${g.equipo}`,
+                        date: g.fecha ? new Date(g.fecha) : new Date(),
+                        icon: 'shield-check',
+                        usuario: g.usuario || 'Sin asignar'
                     });
                 });
 
@@ -314,6 +333,7 @@
                 const piezas = await db.piezas.toArray();
                 const pedidos = await db.pedidos.toArray();
                 const tareas = await db.tareas.toArray();
+                const garantias = await db.garantias.toArray();
 
                 const totalPedidos = pedidos.length;
                 const pedidosEntregados = pedidos.filter(p => p.estado === 'Entregado').length;
@@ -326,6 +346,9 @@
                 document.getElementById('kpi-tareas-completadas').textContent = tareasCompletadas;
                 document.getElementById('kpi-piezas-pendientes').textContent = piezasPendientes;
                 document.getElementById('kpi-tasa-entrega').textContent = tasaEntrega + '%';
+                
+                // Actualizar alertas de garantías
+                updateAlertasActivas(piezas, pedidos, garantias);
 
                 updateChartPedidosEstado(pedidos);
                 updateChartTareasEstado(tareas);
@@ -435,7 +458,7 @@
             document.getElementById('stats-comparativa').innerHTML = html;
         }
 
-        async function updateAlertasActivas(piezas, pedidos) {
+        async function updateAlertasActivas(piezas, pedidos, garantias) {
             const alertas = [];
             piezas.forEach(p => {
                 if (p.fechaTrami) {
@@ -447,6 +470,12 @@
                 if (p.fechaTrami) {
                     const daysLeft = 15 - Math.floor((new Date() - new Date(p.fechaTrami)) / (1000 * 60 * 60 * 24));
                     if (daysLeft > 0 && daysLeft <= 3) alertas.push({ type: 'plazo', text: `Pedido de "${p.cliente}" - Plazo vence en ${daysLeft}d`, severity: 'critical' });
+                }
+            });
+            garantias.forEach(g => {
+                if (g.estado === 'En Revisión') {
+                    const diasTaller = Math.floor((new Date() - new Date(g.fechaEntrada)) / (1000 * 60 * 60 * 24));
+                    if (diasTaller > 7) alertas.push({ type: 'garantia_larga', text: `Equipo "${g.equipo}" - Lleva ${diasTaller}d en taller`, severity: 'high' });
                 }
             });
             const html = alertas.length > 0 ? alertas.map(a => {
@@ -471,6 +500,8 @@
                 headHtml = '<th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Cliente</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Producto</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Usuario</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Estado</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Plazo Dev.</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Fecha</th><th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
             } else if (section === 'tareas') {
                 headHtml = '<th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Tarea</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Técnico</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Usuario</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Prioridad</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Estado</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Fecha</th><th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
+            } else if (section === 'garantias') {
+                headHtml = '<th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Equipo</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Modelo</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Usuario</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Días</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Estado</th><th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Entrada</th><th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
             }
             head.innerHTML = headHtml;
 
@@ -491,6 +522,9 @@
                         content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.cliente}</td><td class="px-6 py-4 text-sm text-slate-500">${item.producto}</td><td class="px-6 py-4"><span class="user-badge ${userClass}">${item.usuario}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4"><span class="badge-guarantee ${returnStatus.class}">${returnStatus.text}</span></td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fecha).toLocaleDateString()}</td>`;
                     } else if (section === 'tareas') {
                         content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.titulo}</td><td class="px-6 py-4 text-sm text-slate-500">${item.tecnico}</td><td class="px-6 py-4"><span class="user-badge ${userClass}">${item.usuario}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getPriorityClass(item.prioridad)}">${item.prioridad}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                    } else if (section === 'garantias') {
+                        const diasTaller = Math.floor((new Date() - new Date(item.fechaEntrada)) / (1000 * 60 * 60 * 24));
+                        content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.equipo}</td><td class="px-6 py-4 text-sm text-slate-500">${item.modelo || '-'}</td><td class="px-6 py-4"><span class="user-badge ${userClass}">${item.usuario}</span></td><td class="px-6 py-4 text-sm font-bold text-slate-700">${diasTaller}d</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fechaEntrada).toLocaleDateString()}</td>`;
                     }
                     tr.innerHTML = `${content}<td class="px-6 py-4 text-right space-x-1"><button onclick="viewDetail('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-green-100 hover:text-green-600"><i data-lucide="eye" class="w-3 h-3"></i></button><button onclick="editRecord('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-600"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick="deleteRecord('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-red-100 hover:text-red-600"><i data-lucide="trash" class="w-3 h-3"></i></button></td>`;
                     body.appendChild(tr);
@@ -560,6 +594,13 @@
                     <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Usuario</label><select name="usuario" required class="w-full border border-slate-200 rounded p-2 text-sm"><option value="">Selecciona usuario</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
                     <div class="grid grid-cols-2 gap-4"><div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Prioridad</label><select name="prioridad" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.prioridad === 'Baja' ? 'selected' : ''}>Baja</option><option ${editData?.prioridad === 'Media' ? 'selected' : ''}>Media</option><option ${editData?.prioridad === 'Alta' ? 'selected' : ''}>Alta</option></select></div>
                     <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label><select name="estado" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option ${editData?.estado === 'Completado' ? 'selected' : ''}>Completado</option></select></div></div>`;
+            } else if (activeSection === 'garantias') {
+                html = `<div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Equipo</label><input type="text" name="equipo" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.equipo || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Modelo/Referencia</label><input type="text" name="modelo" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.modelo || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Descripción del Problema</label><textarea name="descripcion" class="w-full border border-slate-200 rounded p-2 text-sm" rows="3">${editData?.descripcion || ''}</textarea></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha de Entrada</label><input type="date" name="fechaEntrada" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.fechaEntrada || ''}"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Usuario</label><select name="usuario" required class="w-full border border-slate-200 rounded p-2 text-sm"><option value="">Selecciona usuario</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label><select name="estado" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.estado === 'En Revisión' ? 'selected' : ''}>En Revisión</option><option ${editData?.estado === 'Reparado' ? 'selected' : ''}>Reparado</option><option ${editData?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option></select></div>`;
             }
             fields.innerHTML = html;
             modal.classList.remove('hidden');
@@ -602,6 +643,16 @@
                     <div class="detail-row"><div class="detail-label">Técnico</div><div class="detail-value">${item.tecnico}</div></div>
                     <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
                     <div class="detail-row"><div class="detail-label">Prioridad</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getPriorityClass(item.prioridad)}">${item.prioridad}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Registrado</div><div class="detail-value">${new Date(item.fecha).toLocaleString()}</div></div>`;
+            } else if (section === 'garantias') {
+                const diasTaller = Math.floor((new Date() - new Date(item.fechaEntrada)) / (1000 * 60 * 60 * 24));
+                html = `<div class="detail-row"><div class="detail-label">Equipo</div><div class="detail-value">${item.equipo}</div></div>
+                    <div class="detail-row"><div class="detail-label">Modelo</div><div class="detail-value">${item.modelo || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Descripción</div><div class="detail-value">${item.descripcion || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Entrada</div><div class="detail-value">${new Date(item.fechaEntrada).toLocaleDateString()}</div></div>
+                    <div class="detail-row"><div class="detail-label">Días en Taller</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-700">${diasTaller}d</span></div></div>
                     <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
                     <div class="detail-row"><div class="detail-label">Registrado</div><div class="detail-value">${new Date(item.fecha).toLocaleString()}</div></div>`;
             }
