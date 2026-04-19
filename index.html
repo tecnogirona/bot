@@ -37,6 +37,26 @@
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
+    <div id="login-screen" class="fixed inset-0 bg-slate-100 flex items-center justify-center z-50">
+  <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+    <h2 class="text-xl font-bold mb-4 text-center">Iniciar sesión</h2>
+
+    <input id="login-user" type="text" placeholder="Usuario"
+      class="w-full mb-3 px-3 py-2 border rounded-md" />
+
+    <input id="login-pass" type="password" placeholder="Contraseña"
+      class="w-full mb-4 px-3 py-2 border rounded-md" />
+
+    <button onclick="login()" 
+      class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">
+      Entrar
+    </button>
+
+    <p id="login-error" class="text-red-500 text-sm mt-3 hidden">
+      Usuario o contraseña incorrectos
+    </p>
+  </div>
+</div>
     <aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col">
         <div class="p-6 border-b border-slate-100">
             <div class="flex items-center gap-2">
@@ -57,7 +77,7 @@
                 <i data-lucide="shopping-cart" class="w-4 h-4 mr-3"></i> Pedidos Clientes
             </a>
             <a href="#" onclick="showSection('tareas')" id="link-tareas" class="sidebar-link">
-                <i data-lucide="check-square" class="w-4 h-4 mr-3"></i> Tareas Asignadas
+                <i data-lucide="check-square" class="w-4 h-4 mr-3"></i> Reparaciónes
             </a>
             <a href="#" onclick="showSection('garantias')" id="link-garantias" class="sidebar-link">
                 <i data-lucide="shield-check" class="w-4 h-4 mr-3"></i> Garantías
@@ -66,7 +86,7 @@
                 <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3"></i> Reportes
             </a>
         </nav>
-        <div class="p-4 border-t border-slate-100 text-xs text-slate-400">v5.0.0 &copy; 2024 Gestión S.A.T.</div>
+        <div class="p-4 border-t border-slate-100 text-xs text-slate-400">v5.0.0 &copy; 2026 Gestión S.A.T.</div>
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden">
@@ -76,6 +96,9 @@
                 <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md font-medium flex items-center gap-2 transition-colors">
                     <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Registro
                 </button>
+                <button onclick="logout()" class="text-sm text-slate-600">
+  Cerrar sesión
+</button>
             </div>
         </header>
 
@@ -92,7 +115,7 @@
                     </div>
                     <div class="flat-card p-6 flex items-center gap-4">
                         <div class="bg-amber-50 text-amber-600 p-3 rounded-full"><i data-lucide="clock" class="w-6 h-6"></i></div>
-                        <div><p class="text-sm text-slate-500 font-medium">Tareas Urgentes</p><h3 id="stat-tareas" class="text-2xl font-bold text-slate-800">0</h3></div>
+                        <div><p class="text-sm text-slate-500 font-medium">Reparaciónes Urgentes</p><h3 id="stat-tareas" class="text-2xl font-bold text-slate-800">0</h3></div>
                     </div>
                 </div>
 
@@ -121,7 +144,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div class="metric-box blue"><p>Total Pedidos</p><h3 id="kpi-total-pedidos">0</h3></div>
                     <div class="metric-box green"><p>Pedidos Entregados</p><h3 id="kpi-pedidos-entregados">0</h3></div>
-                    <div class="metric-box amber"><p>Tareas Completadas</p><h3 id="kpi-tareas-completadas">0</h3></div>
+                    <div class="metric-box amber"><p>Reparaciónes Completadas</p><h3 id="kpi-tareas-completadas">0</h3></div>
                     <div class="metric-box red"><p>Piezas Pendientes</p><h3 id="kpi-piezas-pendientes">0</h3></div>
                     <div class="metric-box cyan"><p>Tasa Entrega</p><h3 id="kpi-tasa-entrega">0%</h3></div>
                 </div>
@@ -213,7 +236,12 @@
             garantias: '++id, equipo, estado, fecha, usuario, fechaEntrada'
         });
 
-        const USUARIOS = ['Daniel Farré', 'José Ayala'];
+       const USERS = [
+  { user: "daniel", pass: "1234", nombre: "Daniel Farré" },
+  { user: "jose", pass: "1234", nombre: "José Ayala" }
+];
+
+let currentUser = null;
         let currentSection = 'dashboard';
         let charts = {};
 
@@ -226,7 +254,7 @@
                 'dashboard': 'Resumen General',
                 'piezas': 'Gestión de Piezas',
                 'pedidos': 'Pedidos de Clientes',
-                'tareas': 'Tareas Asignadas',
+                'tareas': 'Reparaciónes Asignadas',
                 'garantias': 'Revisiones en Garantía',
                 'reportes': 'Reportes y Métricas'
             };
@@ -433,7 +461,42 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
         }
+function login() {
+  const user = document.getElementById("login-user").value;
+  const pass = document.getElementById("login-pass").value;
 
+  const found = USERS.find(u => u.user === user && u.pass === pass);
+
+  if (found) {
+    currentUser = found.nombre;
+
+    localStorage.setItem("sat_user", currentUser);
+
+    document.getElementById("login-screen").style.display = "none";
+
+    initApp();
+  } else {
+    document.getElementById("login-error").classList.remove("hidden");
+  }
+}
+        function initApp() {
+  showSection('dashboard');
+  lucide.createIcons();
+}
+
+window.onload = function () {
+  const savedUser = localStorage.getItem("sat_user");
+
+  if (savedUser) {
+    currentUser = savedUser;
+    document.getElementById("login-screen").style.display = "none";
+    initApp();
+  }
+};
+        function logout() {
+  localStorage.removeItem("sat_user");
+  location.reload();
+}
         async function updateComparativaUsuarios(pedidos, piezas, tareas) {
             const html = USUARIOS.map(usuario => {
                 const pedidosUser = pedidos.filter(p => p.usuario === usuario).length;
