@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>S.A.T. Dashboard - Gestión Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
@@ -13,34 +13,64 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; }
         .btn-small { padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; transition: all 0.2s; }
-        .sidebar-link { display: flex; align-items: center; padding: 10px 16px; color: #64748b; border-radius: 6px; margin-bottom: 4px; transition: all 0.2s; }
+        .sidebar-link { display: flex; align-items: center; padding: 10px 12px; color: #64748b; border-radius: 6px; margin-bottom: 4px; transition: all 0.2s; }
         .sidebar-link.active { background-color: #f1f5f9; color: #0f172a; font-weight: 500; }
         .sidebar-link:hover:not(.active) { background-color: #f8fafc; color: #334155; }
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .detail-row { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+        .detail-row { display: grid; grid-template-columns: 130px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
         .detail-row:last-child { border-bottom: none; }
-        .detail-label { font-weight: 600; color: #64748b; font-size: 0.875rem; text-transform: uppercase; }
-        .detail-value { color: #1e293b; font-size: 0.875rem; }
-        .badge-guarantee { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .detail-label { font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; }
+        .detail-value { color: #1e293b; font-size: 0.875rem; word-break: break-word; }
+        .badge-guarantee { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
         .badge-in-warranty { background-color: #dcfce7; color: #166534; }
         .badge-expired { background-color: #fee2e2; color: #991b1b; }
         .badge-days-left { background-color: #fef3c7; color: #92400e; }
-        .metric-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .metric-box h3 { font-size: 2.5rem; font-weight: 700; margin: 10px 0; }
-        .metric-box p { font-size: 0.875rem; opacity: 0.9; }
-        .chart-container { position: relative; height: 300px; margin-bottom: 20px; }
-        .user-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .metric-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 15px; text-align: center; }
+        .metric-box h3 { font-size: 1.5rem; font-weight: 700; margin: 8px 0; }
+        .metric-box p { font-size: 0.7rem; opacity: 0.9; }
+        .metric-box.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .metric-box.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .metric-box.blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .chart-container { position: relative; height: 250px; margin-bottom: 20px; }
+        .user-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
         .user-badge.daniel { background-color: #dbeafe; color: #1e40af; }
         .user-badge.jose { background-color: #fce7f3; color: #be185d; }
         .form-section { background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
-        .form-section-title { font-weight: 600; color: #1e293b; margin-bottom: 0.75rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem; }
+        .form-section-title { font-weight: 600; color: #1e293b; margin-bottom: 0.75rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+        .profit-positive { color: #10b981; font-weight: bold; }
+        .profit-negative { color: #ef4444; font-weight: bold; }
+        .price-preview { background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.8rem; }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar-link span { display: none; }
+            .sidebar-link i { margin-right: 0 !important; }
+            aside { width: 60px; }
+            .p-6 { padding: 1rem; }
+            .px-8 { padding-left: 1rem; padding-right: 1rem; }
+            .text-lg { font-size: 1rem; }
+            .grid { gap: 0.75rem; }
+            .flat-card.p-6 { padding: 1rem; }
+            .detail-row { grid-template-columns: 100px 1fr; }
+            table { font-size: 0.7rem; }
+            td, th { padding: 0.5rem !important; }
+        }
+        
+        @media (max-width: 480px) {
+            .metric-box h3 { font-size: 1.2rem; }
+            .btn-small { padding: 2px 4px; }
+            .form-section { padding: 0.75rem; }
+        }
+        
+        /* Tabla responsive */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
-<div id="login-screen" class="fixed inset-0 bg-slate-100 flex items-center justify-center z-50">
-  <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+<div id="login-screen" class="fixed inset-0 bg-slate-100 flex items-center justify-center z-50 p-4">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm">
     <h2 class="text-xl font-bold mb-4 text-center">Iniciar sesión</h2>
     <input id="login-user" type="text" placeholder="Usuario" class="w-full mb-3 px-3 py-2 border rounded-md" />
     <input id="login-pass" type="password" placeholder="Contraseña" class="w-full mb-4 px-3 py-2 border rounded-md" />
@@ -48,176 +78,195 @@
     <p id="login-error" class="text-red-500 text-sm mt-3 hidden">Usuario o contraseña incorrectos</p>
   </div>
 </div>    
-<aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col">
-        <div class="p-6 border-b border-slate-100">
-            <div class="flex items-center gap-2">
+<aside class="w-16 md:w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col transition-all duration-300">
+        <div class="p-4 border-b border-slate-100">
+            <div class="flex items-center justify-center md:justify-start gap-2">
                 <div class="bg-blue-600 p-1.5 rounded-lg text-white">
                     <i data-lucide="wrench" class="w-5 h-5"></i>
                 </div>
-                <h1 class="text-xl font-bold text-slate-800 tracking-tight">SAT</h1>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight hidden md:block">SAT</h1>
             </div>
         </div>
-        <nav class="flex-1 p-4 overflow-y-auto">
+        <nav class="flex-1 p-3 overflow-y-auto">
             <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active">
-                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3"></i> Resumen
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-0 md:mr-3"></i>
+                <span class="hidden md:inline">Resumen</span>
             </a>
             <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link">
-                <i data-lucide="check-square" class="w-4 h-4 mr-3"></i> Reparaciones
+                <i data-lucide="check-square" class="w-5 h-5 mr-0 md:mr-3"></i>
+                <span class="hidden md:inline">Reparaciones</span>
             </a>
             <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link">
-                <i data-lucide="package" class="w-4 h-4 mr-3"></i> Pedido de Piezas
+                <i data-lucide="package" class="w-5 h-5 mr-0 md:mr-3"></i>
+                <span class="hidden md:inline">Pedido Piezas</span>
             </a>
             <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link">
-                <i data-lucide="shopping-cart" class="w-4 h-4 mr-3"></i> Pedidos Clientes
+                <i data-lucide="shopping-cart" class="w-5 h-5 mr-0 md:mr-3"></i>
+                <span class="hidden md:inline">Pedidos Clientes</span>
             </a>
             <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link">
-                <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3"></i> Reportes
+                <i data-lucide="bar-chart-3" class="w-5 h-5 mr-0 md:mr-3"></i>
+                <span class="hidden md:inline">Reportes</span>
             </a>
         </nav>
-        <div class="p-4 border-t border-slate-100 text-xs text-slate-400">v4.0.0 &copy; 2024 Gestión S.A.T.</div>
+        <div class="p-3 border-t border-slate-100 text-[10px] text-slate-400 text-center hidden md:block">v4.0.0 © 2024</div>
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
-            <h2 id="section-title" class="text-lg font-semibold text-slate-700">Resumen General</h2>
-            <div class="flex items-center gap-4">
-                <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md font-medium flex items-center gap-2 transition-colors">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Registro
+        <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
+            <h2 id="section-title" class="text-sm md:text-lg font-semibold text-slate-700 truncate">Resumen General</h2>
+            <div class="flex items-center gap-2 md:gap-4">
+                <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-md font-medium flex items-center gap-1 md:gap-2 transition-colors">
+                    <i data-lucide="plus" class="w-3 h-3 md:w-4 md:h-4"></i>
+                    <span class="hidden sm:inline">Nuevo</span>
                 </button>
-                <button onclick="logout()" class="text-sm text-slate-600">Cerrar sesión</button>
+                <button onclick="logout()" class="text-xs md:text-sm text-slate-600">Salir</button>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-8" id="main-view">
-            <div id="view-dashboard" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="flat-card p-6 flex items-center gap-4">
-                        <div class="bg-blue-50 text-blue-600 p-3 rounded-full"><i data-lucide="package" class="w-6 h-6"></i></div>
-                        <div><p class="text-sm text-slate-500 font-medium">Piezas Pendientes</p><h3 id="stat-piezas" class="text-2xl font-bold text-slate-800">0</h3></div>
+        <div class="flex-1 overflow-y-auto p-3 md:p-8" id="main-view">
+            <div id="view-dashboard" class="space-y-4 md:space-y-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+                    <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4">
+                        <div class="bg-blue-50 text-blue-600 p-2 md:p-3 rounded-full"><i data-lucide="package" class="w-4 h-4 md:w-6 md:h-6"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Piezas Pedidas</p><h3 id="stat-piezas" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div>
                     </div>
-                    <div class="flat-card p-6 flex items-center gap-4">
-                        <div class="bg-green-50 text-green-600 p-3 rounded-full"><i data-lucide="shopping-cart" class="w-6 h-6"></i></div>
-                        <div><p class="text-sm text-slate-500 font-medium">Pedidos Activos</p><h3 id="stat-pedidos" class="text-2xl font-bold text-slate-800">0</h3></div>
+                    <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4">
+                        <div class="bg-green-50 text-green-600 p-2 md:p-3 rounded-full"><i data-lucide="shopping-cart" class="w-4 h-4 md:w-6 md:h-6"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Pedidos Activos</p><h3 id="stat-pedidos" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div>
                     </div>
-                    <div class="flat-card p-6 flex items-center gap-4">
-                        <div class="bg-amber-50 text-amber-600 p-3 rounded-full"><i data-lucide="clock" class="w-6 h-6"></i></div>
-                        <div><p class="text-sm text-slate-500 font-medium">Reparaciones Urgentes</p><h3 id="stat-reparaciones" class="text-2xl font-bold text-slate-800">0</h3></div>
+                    <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4">
+                        <div class="bg-amber-50 text-amber-600 p-2 md:p-3 rounded-full"><i data-lucide="clock" class="w-4 h-4 md:w-6 md:h-6"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Reparaciones Urgentes</p><h3 id="stat-reparaciones" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div>
+                    </div>
+                    <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4">
+                        <div class="bg-purple-50 text-purple-600 p-2 md:p-3 rounded-full"><i data-lucide="trending-up" class="w-4 h-4 md:w-6 md:h-6"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Beneficio Total</p><h3 id="stat-beneficio" class="text-sm md:text-2xl font-bold text-green-600">0€</h3></div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="flat-card p-6">
-                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4"></i> Actividad Reciente</h4>
-                        <div id="recent-activity" class="space-y-4"><p class="text-slate-400 text-sm italic">Cargando datos...</p></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <div class="flat-card p-4 md:p-6">
+                        <h4 class="font-bold text-slate-700 mb-3 flex items-center gap-2 text-sm md:text-base"><i data-lucide="activity" class="w-4 h-4"></i> Actividad Reciente</h4>
+                        <div id="recent-activity" class="space-y-3"><p class="text-slate-400 text-xs italic">Cargando datos...</p></div>
                     </div>
-                    <div class="flat-card p-6">
-                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4"></i> Recordatorios</h4>
-                        <div class="space-y-3">
-                            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                <i data-lucide="info" class="w-4 h-4 text-blue-500 mt-0.5"></i>
-                                <p class="text-sm text-slate-600">Revisar stock de pantallas LED el viernes.</p>
+                    <div class="flat-card p-4 md:p-6">
+                        <h4 class="font-bold text-slate-700 mb-3 flex items-center gap-2 text-sm md:text-base"><i data-lucide="alert-circle" class="w-4 h-4"></i> Recordatorios</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-start gap-2 p-2 md:p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <i data-lucide="info" class="w-3 h-3 md:w-4 md:h-4 text-blue-500 mt-0.5"></i>
+                                <p class="text-xs md:text-sm text-slate-600">Revisar stock de piezas esta semana.</p>
                             </div>
-                            <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                <i data-lucide="info" class="w-4 h-4 text-blue-500 mt-0.5"></i>
-                                <p class="text-sm text-slate-600">Actualizar estado de pedidos de garantía.</p>
+                            <div class="flex items-start gap-2 p-2 md:p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <i data-lucide="info" class="w-3 h-3 md:w-4 md:h-4 text-blue-500 mt-0.5"></i>
+                                <p class="text-xs md:text-sm text-slate-600">Actualizar estados de pedidos pendientes.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="view-reportes" class="hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div class="metric-box blue"><p>Total Pedidos</p><h3 id="kpi-total-pedidos">0</h3></div>
-                    <div class="metric-box green"><p>Pedidos Entregados</p><h3 id="kpi-pedidos-entregados">0</h3></div>
-                    <div class="metric-box amber"><p>Reparaciones Completadas</p><h3 id="kpi-reparaciones-completadas">0</h3></div>
-                    <div class="metric-box red"><p>Piezas Pendientes</p><h3 id="kpi-piezas-pendientes">0</h3></div>
-                    <div class="metric-box cyan"><p>Tasa Entrega</p><h3 id="kpi-tasa-entrega">0%</h3></div>
+            <div id="view-reportes" class="hidden space-y-4 md:space-y-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                    <div class="metric-box blue"><p>💰 Ingresos</p><h3 id="kpi-ingresos">0€</h3></div>
+                    <div class="metric-box"><p>📦 Coste Piezas</p><h3 id="kpi-coste-piezas">0€</h3></div>
+                    <div class="metric-box green"><p>📈 Beneficio</p><h3 id="kpi-beneficio">0€</h3></div>
+                    <div class="metric-box orange"><p>📊 Margen</p><h3 id="kpi-margen">0%</h3></div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="flat-card p-6">
-                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4"></i> Estado de Pedidos</h4>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4">
+                    <div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Total Pedidos</p><h3 id="kpi-total-pedidos" class="text-lg md:text-2xl font-bold">0</h3></div>
+                    <div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Entregados</p><h3 id="kpi-pedidos-entregados" class="text-lg md:text-2xl font-bold">0</h3></div>
+                    <div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Reparaciones OK</p><h3 id="kpi-reparaciones-completadas" class="text-lg md:text-2xl font-bold">0</h3></div>
+                    <div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Piezas Pedidas</p><h3 id="kpi-piezas-pendientes" class="text-lg md:text-2xl font-bold">0</h3></div>
+                    <div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Tasa Entrega</p><h3 id="kpi-tasa-entrega" class="text-lg md:text-2xl font-bold">0%</h3></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <div class="flat-card p-4 md:p-6">
+                        <h4 class="font-bold text-slate-700 mb-3 text-sm md:text-base"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Pedidos</h4>
                         <div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div>
                     </div>
-                    <div class="flat-card p-6">
-                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4"></i> Estado de Reparaciones</h4>
+                    <div class="flat-card p-4 md:p-6">
+                        <h4 class="font-bold text-slate-700 mb-3 text-sm md:text-base"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Reparaciones</h4>
                         <div class="chart-container"><canvas id="chart-reparaciones-estado"></canvas></div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="flat-card p-6">
-                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Operaciones por Usuario</h4>
-                        <div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div>
+                <div class="flat-card overflow-hidden">
+                    <div class="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                        <h4 class="font-bold text-slate-700 text-sm"><i data-lucide="list" class="w-4 h-4 inline mr-2"></i> Detalle de Ventas y Rentabilidad</h4>
                     </div>
-                    <div class="flat-card p-6">
-                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Piezas por Usuario</h4>
-                        <div class="chart-container"><canvas id="chart-piezas-usuario"></canvas></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="flat-card p-6">
-                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> Comparativa de Gestiones</h4>
-                        <div id="stats-comparativa" class="space-y-4"></div>
-                    </div>
-                    <div class="flat-card p-6">
-                        <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Alertas Activas</h4>
-                        <div id="stats-alertas" class="space-y-3"></div>
+                    <div class="table-responsive">
+                        <table class="w-full text-left text-xs md:text-sm">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-2 md:px-4 py-2">Producto</th>
+                                    <th class="px-2 md:px-4 py-2">Tipo</th>
+                                    <th class="px-2 md:px-4 py-2">Compra</th>
+                                    <th class="px-2 md:px-4 py-2">Venta</th>
+                                    <th class="px-2 md:px-4 py-2">Beneficio</th>
+                                    <th class="px-2 md:px-4 py-2 hidden md:table-cell">Margen</th>
+                                    <th class="px-2 md:px-4 py-2">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
             <div id="view-list" class="hidden">
                 <div class="flat-card overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50 border-b border-slate-200">
-                            <tr id="table-head"></tr>
-                        </thead>
-                        <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="w-full text-left text-xs md:text-sm">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr id="table-head"><tr>
+                            </thead>
+                            <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 id="modal-title" class="font-bold text-slate-800">Añadir Registro</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[95vh] flex flex-col">
+            <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 id="modal-title" class="font-bold text-slate-800 text-sm md:text-base">Añadir Registro</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <form id="record-form" class="p-6 space-y-4 overflow-y-auto flex-1">
+            <form id="record-form" class="p-4 space-y-3 overflow-y-auto flex-1">
                 <input type="hidden" id="form-id">
-                <div id="form-fields" class="space-y-4"></div>
+                <div id="form-fields" class="space-y-3"></div>
             </form>
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3">
-                <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium hover:bg-slate-50 transition-colors">Cancelar</button>
-                <button type="submit" form="record-form" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">Guardar Cambios</button>
+            <div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3">
+                <button type="button" onclick="closeModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cancelar</button>
+                <button type="submit" form="record-form" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Guardar</button>
             </div>
         </div>
     </div>
 
-    <div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 id="detail-title" class="font-bold text-slate-800">Detalles del Registro</h3>
-                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[95vh] flex flex-col">
+            <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 id="detail-title" class="font-bold text-slate-800 text-sm md:text-base">Detalles del Registro</h3>
+                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div id="detail-content" class="p-6 overflow-y-auto flex-1"></div>
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3">
-                <button type="button" onclick="closeDetailModal()" class="flex-1 px-4 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium hover:bg-slate-50 transition-colors">Cerrar</button>
-                <button type="button" id="detail-edit-btn" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">Editar</button>
+            <div id="detail-content" class="p-4 overflow-y-auto flex-1"></div>
+            <div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3">
+                <button type="button" onclick="closeDetailModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cerrar</button>
+                <button type="button" id="detail-edit-btn" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Editar</button>
             </div>
         </div>
     </div>
 
     <script>
-        const db = new Dexie("SAT_Database");
+        const db = new Dexie("SAT_Database_V2");
         db.version(1).stores({
-            piezas: '++id, nombre, estado, fecha, usuario',
-            pedidos: '++id, cliente, estado, fecha, usuario',
+            piezas: '++id, nombre, cantidad, proveedor, precioCompra, precioVenta, referencia, fechaTrami, estado, observaciones, fecha, usuario',
+            pedidos: '++id, cliente, producto, precioCompra, precioVenta, cantidad, referencia, fechaTrami, estado, observaciones, fecha, usuario',
             reparaciones: '++id, ot, marca, modelo, serie, cliente, telefono, email, diagnostico, precio, estado, prioridad, accesorios, password, fecha, usuario'
         });
 
@@ -227,6 +276,7 @@
         ];
 
         const USUARIOS = ["Daniel Farré", "José Ayala"];
+        const IVA = 21;
 
         let currentUser = null;
         let currentUserName = null;
@@ -284,7 +334,7 @@
             
             const titles = {
                 'dashboard': 'Resumen General',
-                'piezas': 'Gestión de Piezas',
+                'piezas': 'Pedido de Piezas',
                 'pedidos': 'Pedidos de Clientes',
                 'reparaciones': 'Órdenes de Reparación',
                 'reportes': 'Reportes y Metricas'
@@ -317,25 +367,41 @@
                 const pedidos = await db.pedidos.toArray();
                 const reparaciones = await db.reparaciones.toArray();
 
+                let beneficioTotal = 0;
+                pedidos.forEach(p => {
+                    const compra = parseFloat(p.precioCompra) || 0;
+                    const venta = parseFloat(p.precioVenta) || 0;
+                    const cantidad = parseInt(p.cantidad) || 1;
+                    beneficioTotal += (venta - compra) * cantidad;
+                });
+                piezas.forEach(p => {
+                    if (p.estado === 'Vendido' || p.estado === 'Instalado') {
+                        const compra = parseFloat(p.precioCompra) || 0;
+                        const venta = parseFloat(p.precioVenta) || 0;
+                        beneficioTotal += (venta - compra) * (parseInt(p.cantidad) || 1);
+                    }
+                });
+
                 document.getElementById('stat-piezas').textContent = piezas.filter(p => p.estado === 'Pedido').length;
                 document.getElementById('stat-pedidos').textContent = pedidos.filter(p => p.estado && p.estado !== 'Entregado').length;
                 document.getElementById('stat-reparaciones').textContent = reparaciones.filter(r => r.prioridad === 'Alta' && r.estado !== 'Completado').length;
+                document.getElementById('stat-beneficio').textContent = beneficioTotal.toFixed(2) + '€';
 
                 const allActivity = [];
                 piezas.slice(-2).forEach(p => p.nombre && allActivity.push({ text: `Pieza: ${p.nombre}`, date: p.fecha ? new Date(p.fecha) : new Date(), icon: 'package', usuario: p.usuario || 'Sin asignar' }));
-                pedidos.slice(-2).forEach(p => p.cliente && allActivity.push({ text: `Pedido de: ${p.cliente}`, date: p.fecha ? new Date(p.fecha) : new Date(), icon: 'shopping-cart', usuario: p.usuario || 'Sin asignar' }));
-                reparaciones.slice(-2).forEach(r => r.ot && allActivity.push({ text: `Reparación OT: ${r.ot} - ${r.marca} ${r.modelo}`, date: r.fecha ? new Date(r.fecha) : new Date(), icon: 'check-square', usuario: r.usuario || 'Sin asignar' }));
+                pedidos.slice(-2).forEach(p => p.cliente && allActivity.push({ text: `Pedido: ${p.producto} - ${p.cliente}`, date: p.fecha ? new Date(p.fecha) : new Date(), icon: 'shopping-cart', usuario: p.usuario || 'Sin asignar' }));
+                reparaciones.slice(-2).forEach(r => r.ot && allActivity.push({ text: `Reparación OT: ${r.ot}`, date: r.fecha ? new Date(r.fecha) : new Date(), icon: 'check-square', usuario: r.usuario || 'Sin asignar' }));
 
                 allActivity.sort((a, b) => b.date - a.date);
                 const container = document.getElementById('recent-activity');
-                container.innerHTML = allActivity.length === 0 ? '<p class="text-slate-400 text-sm italic">No hay actividad reciente. Crea tu primer registro.</p>' : '';
+                container.innerHTML = allActivity.length === 0 ? '<p class="text-slate-400 text-xs italic">No hay actividad reciente.</p>' : '';
                 allActivity.slice(0, 5).forEach(act => {
                     const userClass = act.usuario === 'Daniel Farré' ? 'daniel' : (act.usuario === 'José Ayala' ? 'jose' : '');
-                    container.innerHTML += `<div class="flex items-center gap-3"><div class="w-8 h-8 rounded bg-slate-50 flex items-center justify-center text-slate-400"><i data-lucide="${act.icon}" class="w-4 h-4"></i></div><div class="flex-1"><p class="text-sm text-slate-700 font-medium">${act.text}</p><p class="text-xs text-slate-400">${act.date.toLocaleString()} ${userClass ? '· <span class="user-badge ' + userClass + '">' + act.usuario + '</span>' : ''}</p></div></div>`;
+                    container.innerHTML += `<div class="flex items-center gap-2"><div class="w-6 h-6 rounded bg-slate-50 flex items-center justify-center"><i data-lucide="${act.icon}" class="w-3 h-3"></i></div><div class="flex-1"><p class="text-xs font-medium">${act.text}</p><p class="text-[10px] text-slate-400">${act.date.toLocaleString()} ${userClass ? '· <span class="user-badge ' + userClass + '">' + act.usuario + '</span>' : ''}</p></div></div>`;
                 });
                 lucide.createIcons();
             } catch (error) {
-                console.error('Error en dashboard:', error);
+                console.error(error);
             }
         }
 
@@ -345,26 +411,46 @@
                 const pedidos = await db.pedidos.toArray();
                 const reparaciones = await db.reparaciones.toArray();
 
-                const totalPedidos = pedidos.length;
-                const pedidosEntregados = pedidos.filter(p => p.estado === 'Entregado').length;
-                const reparacionesCompletadas = reparaciones.filter(r => r.estado === 'Completado').length;
-                const piezasPendientes = piezas.filter(p => p.estado === 'Pedido').length;
-                const tasaEntrega = totalPedidos > 0 ? Math.round((pedidosEntregados / totalPedidos) * 100) : 0;
+                let ingresosTotales = 0, costePiezasTotal = 0;
+                
+                pedidos.forEach(p => {
+                    const venta = parseFloat(p.precioVenta) || 0;
+                    const cantidad = parseInt(p.cantidad) || 1;
+                    ingresosTotales += venta * cantidad;
+                    const compra = parseFloat(p.precioCompra) || 0;
+                    costePiezasTotal += compra * cantidad;
+                });
 
-                document.getElementById('kpi-total-pedidos').textContent = totalPedidos;
-                document.getElementById('kpi-pedidos-entregados').textContent = pedidosEntregados;
-                document.getElementById('kpi-reparaciones-completadas').textContent = reparacionesCompletadas;
-                document.getElementById('kpi-piezas-pendientes').textContent = piezasPendientes;
-                document.getElementById('kpi-tasa-entrega').textContent = tasaEntrega + '%';
+                piezas.forEach(p => {
+                    if (p.estado === 'Vendido' || p.estado === 'Instalado') {
+                        const venta = parseFloat(p.precioVenta) || 0;
+                        ingresosTotales += venta;
+                        const compra = parseFloat(p.precioCompra) || 0;
+                        costePiezasTotal += compra;
+                    }
+                });
+
+                const ingresosReparaciones = reparaciones.reduce((sum, r) => sum + (parseFloat(r.precio) || 0), 0);
+                ingresosTotales += ingresosReparaciones;
+
+                const beneficioBruto = ingresosTotales - costePiezasTotal;
+                const margenBeneficio = ingresosTotales > 0 ? (beneficioBruto / ingresosTotales * 100).toFixed(1) : 0;
+
+                document.getElementById('kpi-ingresos').textContent = ingresosTotales.toFixed(2) + '€';
+                document.getElementById('kpi-coste-piezas').textContent = costePiezasTotal.toFixed(2) + '€';
+                document.getElementById('kpi-beneficio').textContent = beneficioBruto.toFixed(2) + '€';
+                document.getElementById('kpi-margen').textContent = margenBeneficio + '%';
+                document.getElementById('kpi-total-pedidos').textContent = pedidos.length;
+                document.getElementById('kpi-pedidos-entregados').textContent = pedidos.filter(p => p.estado === 'Entregado').length;
+                document.getElementById('kpi-reparaciones-completadas').textContent = reparaciones.filter(r => r.estado === 'Completado' || r.estado === 'Entregado').length;
+                document.getElementById('kpi-piezas-pendientes').textContent = piezas.filter(p => p.estado === 'Pedido').length;
+                document.getElementById('kpi-tasa-entrega').textContent = pedidos.length > 0 ? Math.round((pedidos.filter(p => p.estado === 'Entregado').length / pedidos.length) * 100) : 0 + '%';
 
                 updateChartPedidosEstado(pedidos);
                 updateChartReparacionesEstado(reparaciones);
-                updateChartOperacionesUsuario(pedidos, piezas, reparaciones);
-                updateChartPiezasUsuario(piezas);
-                updateComparativaUsuarios(pedidos, piezas, reparaciones);
-                updateAlertasActivas(piezas, pedidos);
+                updateDetalleVentas(pedidos, piezas);
             } catch (error) {
-                console.error('Error en reportes:', error);
+                console.error(error);
             }
         }
 
@@ -373,7 +459,7 @@
             pedidos.forEach(p => { estados[p.estado] = (estados[p.estado] || 0) + 1; });
             const ctx = document.getElementById('chart-pedidos-estado').getContext('2d');
             if (charts.pedidosEstado) charts.pedidosEstado.destroy();
-            charts.pedidosEstado = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c'], borderColor: '#fff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            charts.pedidosEstado = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c'], borderColor: '#fff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } } });
         }
 
         function updateChartReparacionesEstado(reparaciones) {
@@ -381,38 +467,44 @@
             reparaciones.forEach(r => { estados[r.estado] = (estados[r.estado] || 0) + 1; });
             const ctx = document.getElementById('chart-reparaciones-estado').getContext('2d');
             if (charts.reparacionesEstado) charts.reparacionesEstado.destroy();
-            charts.reparacionesEstado = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#4facfe', '#00f2fe', '#43e97b', '#fa709a'], borderColor: '#fff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            charts.reparacionesEstado = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#4facfe', '#00f2fe', '#43e97b', '#fa709a'], borderColor: '#fff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } } });
         }
 
-        function updateChartOperacionesUsuario(pedidos, piezas, reparaciones) {
-            const ctx = document.getElementById('chart-operaciones-usuario').getContext('2d');
-            if (charts.operacionesUsuario) charts.operacionesUsuario.destroy();
-            charts.operacionesUsuario = new Chart(ctx, { type: 'bar', data: { labels: USUARIOS, datasets: [{ label: 'Pedidos', data: USUARIOS.map(u => pedidos.filter(p => p.usuario === u).length), backgroundColor: '#667eea' }, { label: 'Piezas', data: USUARIOS.map(u => piezas.filter(p => p.usuario === u).length), backgroundColor: '#764ba2' }, { label: 'Reparaciones', data: USUARIOS.map(u => reparaciones.filter(r => r.usuario === u).length), backgroundColor: '#f093fb' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
-        }
-
-        function updateChartPiezasUsuario(piezas) {
-            const ctx = document.getElementById('chart-piezas-usuario').getContext('2d');
-            if (charts.piezasUsuario) charts.piezasUsuario.destroy();
-            charts.piezasUsuario = new Chart(ctx, { type: 'bar', data: { labels: USUARIOS, datasets: [{ label: 'Recibidas', data: USUARIOS.map(u => piezas.filter(p => p.usuario === u && p.estado === 'Recibido').length), backgroundColor: '#43e97b' }, { label: 'Pendientes', data: USUARIOS.map(u => piezas.filter(p => p.usuario === u && p.estado === 'Pedido').length), backgroundColor: '#fa709a' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
-        }
-
-        async function updateComparativaUsuarios(pedidos, piezas, reparaciones) {
-            document.getElementById('stats-comparativa').innerHTML = USUARIOS.map(usuario => {
-                const pedidosUser = pedidos.filter(p => p.usuario === usuario).length;
-                const piezasUser = piezas.filter(p => p.usuario === usuario).length;
-                const reparacionesUser = reparaciones.filter(r => r.usuario === usuario).length;
-                const totalOps = pedidosUser + piezasUser + reparacionesUser;
-                const userClass = usuario === 'Daniel Farré' ? 'daniel' : 'jose';
-                return `<div class="p-4 bg-slate-50 rounded-lg border border-slate-100"><div class="flex justify-between items-center mb-3"><p class="font-bold text-slate-700">${usuario}</p><span class="user-badge ${userClass}">${totalOps} operaciones</span></div><div class="grid grid-cols-3 gap-2 text-center"><div><p class="text-2xl font-bold text-blue-600">${pedidosUser}</p><p class="text-xs text-slate-500">Pedidos</p></div><div><p class="text-2xl font-bold text-purple-600">${piezasUser}</p><p class="text-xs text-slate-500">Piezas</p></div><div><p class="text-2xl font-bold text-pink-600">${reparacionesUser}</p><p class="text-xs text-slate-500">Reparaciones</p></div></div></div>`;
-            }).join('');
-        }
-
-        async function updateAlertasActivas(piezas, pedidos) {
-            const alertas = [];
-            piezas.forEach(p => { if (p.fechaTrami) { const daysLeft = 30 - Math.floor((new Date() - new Date(p.fechaTrami)) / (1000 * 60 * 60 * 24)); if (daysLeft > 0 && daysLeft <= 5) alertas.push({ text: `Pieza "${p.nombre}" - Garantía vence en ${daysLeft}d`, severity: 'high' }); } });
-            pedidos.forEach(p => { if (p.fechaTrami) { const daysLeft = 15 - Math.floor((new Date() - new Date(p.fechaTrami)) / (1000 * 60 * 60 * 24)); if (daysLeft > 0 && daysLeft <= 3) alertas.push({ text: `Pedido de "${p.cliente}" - Plazo vence en ${daysLeft}d`, severity: 'critical' }); } });
-            document.getElementById('stats-alertas').innerHTML = alertas.length > 0 ? alertas.map(a => `<div class="p-3 ${a.severity === 'critical' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'} rounded-lg border"><div class="flex items-start gap-2"><i data-lucide="alert-circle" class="w-4 h-4 ${a.severity === 'critical' ? 'text-red-600' : 'text-amber-600'} mt-0.5"></i><p class="text-sm ${a.severity === 'critical' ? 'text-red-900' : 'text-amber-900'}">${a.text}</p></div></div>`).join('') : '<p class="text-slate-400 text-sm">Sin alertas activas</p>';
-            lucide.createIcons();
+        function updateDetalleVentas(pedidos, piezas) {
+            const tbody = document.getElementById('detalle-ventas-tbody');
+            const items = [];
+            
+            pedidos.forEach(p => {
+                const compra = parseFloat(p.precioCompra) || 0;
+                const venta = parseFloat(p.precioVenta) || 0;
+                const cantidad = parseInt(p.cantidad) || 1;
+                const beneficio = (venta - compra) * cantidad;
+                const margen = venta > 0 ? ((venta - compra) / venta * 100).toFixed(1) : 0;
+                items.push({ nombre: p.producto, tipo: 'Pedido', compra: compra * cantidad, venta: venta * cantidad, beneficio: beneficio, margen: margen, estado: p.estado });
+            });
+            
+            piezas.forEach(p => {
+                if (p.precioVenta && p.precioCompra) {
+                    const compra = parseFloat(p.precioCompra) || 0;
+                    const venta = parseFloat(p.precioVenta) || 0;
+                    const beneficio = venta - compra;
+                    const margen = venta > 0 ? ((venta - compra) / venta * 100).toFixed(1) : 0;
+                    items.push({ nombre: p.nombre, tipo: 'Pieza', compra: compra, venta: venta, beneficio: beneficio, margen: margen, estado: p.estado });
+                }
+            });
+            
+            items.sort((a, b) => b.beneficio - a.beneficio);
+            tbody.innerHTML = items.slice(0, 15).map(item => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-2 md:px-4 py-2 text-xs">${item.nombre.substring(0, 20)}</td>
+                    <td class="px-2 md:px-4 py-2 text-xs">${item.tipo}</td>
+                    <td class="px-2 md:px-4 py-2 text-xs">${item.compra.toFixed(2)}€</td>
+                    <td class="px-2 md:px-4 py-2 text-xs">${item.venta.toFixed(2)}€</td>
+                    <td class="px-2 md:px-4 py-2 text-xs ${item.beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${item.beneficio.toFixed(2)}€</td>
+                    <td class="px-2 md:px-4 py-2 text-xs hidden md:table-cell ${item.margen >= 20 ? 'profit-positive' : 'profit-negative'}">${item.margen}%</td>
+                    <td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td>
+                </tr>
+            `).join('');
         }
 
         async function renderTable(section) {
@@ -421,31 +513,29 @@
             const body = document.getElementById('table-body');
 
             let headers = [];
-            if (section === 'piezas') headers = ['Pieza', 'Proveedor', 'Usuario', 'Estado', 'Garantía', 'Fecha'];
-            else if (section === 'pedidos') headers = ['Cliente', 'Producto', 'Usuario', 'Estado', 'Plazo Dev.', 'Fecha'];
-            else if (section === 'reparaciones') headers = ['OT', 'Cliente', 'Marca/Modelo', 'Estado', 'Prioridad', 'Precio', 'Fecha'];
+            if (section === 'piezas') headers = ['Pieza', 'Proveedor', 'P.Compra', 'P.Venta', 'Usuario', 'Estado', 'Fecha'];
+            else if (section === 'pedidos') headers = ['Producto', 'Cliente', 'P.Compra', 'P.Venta', 'Estado', 'Fecha'];
+            else if (section === 'reparaciones') headers = ['OT', 'Cliente', 'Equipo', 'Precio', 'Estado', 'Fecha'];
             
-            head.innerHTML = headers.map(h => `<th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">${h}</th>`).join('') + '<th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
+            head.innerHTML = headers.map(h => `<th class="px-2 md:px-4 py-2 text-[10px] md:text-xs font-semibold text-slate-500 uppercase">${h}</th>`).join('') + '<th class="px-2 md:px-4 py-2 text-right text-[10px] md:text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
 
             if (data.length === 0) {
-                body.innerHTML = `<tr><td colspan="8" class="p-12 text-center text-slate-400"><div class="flex flex-col items-center gap-2"><i data-lucide="database" class="w-8 h-8 opacity-20"></i><span>No hay registros</span></div></td></tr>`;
+                body.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400 text-xs">No hay registros</td></tr>`;
             } else {
                 body.innerHTML = '';
                 data.forEach(item => {
                     const userClass = item.usuario === 'Daniel Farré' ? 'daniel' : 'jose';
                     let content = '';
                     if (section === 'piezas') {
-                        const guarantyStatus = getGuarantyStatus(item.fechaTrami);
-                        content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.nombre}</td><td class="px-6 py-4 text-sm text-slate-500">${item.proveedor || '-'}</td><td class="px-6 py-4"><span class="user-badge ${userClass}">${item.usuario}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4"><span class="badge-guarantee ${guarantyStatus.class}">${guarantyStatus.text}</span></td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${item.nombre || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.proveedor || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioCompra || '-'}€</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta || '-'}€</td><td class="px-2 md:px-4 py-2"><span class="user-badge ${userClass} text-[9px]">${item.usuario}</span></td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
                     } else if (section === 'pedidos') {
-                        const returnStatus = getReturnStatus(item.fechaTrami);
-                        content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.cliente}</td><td class="px-6 py-4 text-sm text-slate-500">${item.producto}</td><td class="px-6 py-4"><span class="user-badge ${userClass}">${item.usuario}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4"><span class="badge-guarantee ${returnStatus.class}">${returnStatus.text}</span></td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${item.producto || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.cliente || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioCompra || '-'}€</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta || '-'}€</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
                     } else if (section === 'reparaciones') {
-                        content = `<td class="px-6 py-4 text-sm font-medium text-slate-700">${item.ot || '-'}</td><td class="px-6 py-4 text-sm text-slate-500">${item.cliente}</td><td class="px-6 py-4 text-sm text-slate-500">${item.marca} ${item.modelo}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getPriorityClass(item.prioridad)}">${item.prioridad}</span></td><td class="px-6 py-4 text-sm text-slate-500">${item.precio ? item.precio + '€' : '-'}</td><td class="px-6 py-4 text-sm text-slate-400">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${item.ot || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.cliente || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.marca} ${item.modelo}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precio ? item.precio + '€' : '-'}</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
                     }
                     const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50/50 transition-colors';
-                    tr.innerHTML = `${content}<td class="px-6 py-4 text-right space-x-1"><button onclick="viewDetail('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-green-100 hover:text-green-600"><i data-lucide="eye" class="w-3 h-3"></i></button><button onclick="editRecord('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-600"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick="deleteRecord('${section}', ${item.id})" class="btn-small bg-slate-100 text-slate-600 hover:bg-red-100 hover:text-red-600"><i data-lucide="trash" class="w-3 h-3"></i></button></td>`;
+                    tr.className = 'hover:bg-slate-50';
+                    tr.innerHTML = `${content}<td class="px-2 md:px-4 py-2 text-right space-x-1"><button onclick="viewDetail('${section}', ${item.id})" class="btn-small bg-slate-100 p-1"><i data-lucide="eye" class="w-3 h-3"></i></button><button onclick="editRecord('${section}', ${item.id})" class="btn-small bg-slate-100 p-1"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick="deleteRecord('${section}', ${item.id})" class="btn-small bg-slate-100 p-1"><i data-lucide="trash" class="w-3 h-3"></i></button></td>`;
                     body.appendChild(tr);
                 });
             }
@@ -455,8 +545,8 @@
         function getStatusClass(status) {
             const s = (status || '').toLowerCase();
             if (s.includes('pendiente') || s.includes('pedido') || s.includes('espera')) return 'bg-amber-100 text-amber-700';
-            if (s.includes('recibido') || s.includes('entregado') || s.includes('completado')) return 'bg-green-100 text-green-700';
-            if (s.includes('proceso') || s.includes('reparando') || s.includes('diagnóstico')) return 'bg-blue-100 text-blue-700';
+            if (s.includes('recibido') || s.includes('entregado') || s.includes('completado') || s.includes('vendido')) return 'bg-green-100 text-green-700';
+            if (s.includes('proceso') || s.includes('reparando')) return 'bg-blue-100 text-blue-700';
             return 'bg-slate-100 text-slate-700';
         }
 
@@ -470,15 +560,26 @@
         function getGuarantyStatus(fechaTrami) {
             if (!fechaTrami) return { text: 'Sin fecha', class: 'bg-slate-100 text-slate-700' };
             const daysElapsed = Math.floor((new Date() - new Date(fechaTrami)) / (1000 * 60 * 60 * 24));
-            if (daysElapsed <= 30) return { text: `En garantía (${30 - daysElapsed}d)`, class: 'badge-in-warranty' };
-            return { text: `Fuera de garantía`, class: 'badge-expired' };
+            if (daysElapsed <= 30) return { text: `Garantía ${30 - daysElapsed}d`, class: 'badge-in-warranty' };
+            return { text: `Fuera garantía`, class: 'badge-expired' };
         }
 
         function getReturnStatus(fechaTrami) {
             if (!fechaTrami) return { text: 'Sin fecha', class: 'bg-slate-100 text-slate-700' };
             const daysRemaining = 15 - Math.floor((new Date() - new Date(fechaTrami)) / (1000 * 60 * 60 * 24));
-            if (daysRemaining > 0) return { text: `Plazo: ${daysRemaining}d`, class: 'badge-days-left' };
+            if (daysRemaining > 0) return { text: `Plazo ${daysRemaining}d`, class: 'badge-days-left' };
             return { text: `Plazo vencido`, class: 'badge-expired' };
+        }
+
+        function calcularPreview(compra, venta, cantidad = 1) {
+            const compraNum = parseFloat(compra) || 0;
+            const ventaNum = parseFloat(venta) || 0;
+            const cantidadNum = parseInt(cantidad) || 1;
+            const beneficio = (ventaNum - compraNum) * cantidadNum;
+            const margen = ventaNum > 0 ? ((ventaNum - compraNum) / ventaNum * 100).toFixed(1) : 0;
+            const ivaVenta = ventaNum * (IVA / 100);
+            const totalConIVA = ventaNum + ivaVenta;
+            return { beneficio, margen, ivaVenta, totalConIVA };
         }
 
         function openModal(editData = null) {
@@ -488,65 +589,108 @@
             const idInput = document.getElementById('form-id');
             let activeSection = currentSection === 'dashboard' ? 'reparaciones' : currentSection;
             
-            title.textContent = editData ? `Editar en ${activeSection === 'reparaciones' ? 'Reparaciones' : activeSection}` : `Nuevo en ${activeSection === 'reparaciones' ? 'Reparaciones' : activeSection}`;
+            title.textContent = editData ? `Editar ${activeSection === 'reparaciones' ? 'Reparación' : (activeSection === 'piezas' ? 'Pieza' : 'Pedido')}` : `Nuevo ${activeSection === 'reparaciones' ? 'Reparación' : (activeSection === 'piezas' ? 'Pieza' : 'Pedido')}`;
             idInput.value = editData ? editData.id : '';
             
             let html = '';
             if (activeSection === 'piezas') {
-                html = `<div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre de Pieza</label><input type="text" name="nombre" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.nombre || ''}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Cantidad</label><input type="number" name="cantidad" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.cantidad || 1}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Proveedor</label><input type="text" name="proveedor" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.proveedor || ''}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Referencia PT</label><input type="text" name="referencia" placeholder="Ej: PT-2024-001" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.referencia || ''}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha de Trámite</label><input type="date" name="fechaTrami" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.fechaTrami || ''}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Usuario</label><select name="usuario" required class="w-full border border-slate-200 rounded p-2 text-sm"><option value="">Selecciona usuario</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label><select name="estado" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.estado === 'Pedido' ? 'selected' : ''}>Pedido</option><option ${editData?.estado === 'Recibido' ? 'selected' : ''}>Recibido</option></select></div>`;
+                html = `
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="package" class="w-4 h-4"></i> Datos de la Pieza</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded p-2 text-sm" value="${editData?.nombre || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Cantidad *</label><input type="number" name="cantidad" required class="w-full border rounded p-2 text-sm" value="${editData?.cantidad || 1}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded p-2 text-sm" value="${editData?.proveedor || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Referencia</label><input type="text" name="referencia" class="w-full border rounded p-2 text-sm" value="${editData?.referencia || ''}"></div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="euro" class="w-4 h-4"></i> Precios y Rentabilidad (IVA ${IVA}% incluido)</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Compra (sin IVA) *</label><input type="number" step="0.01" name="precioCompra" id="precioCompra" class="w-full border rounded p-2 text-sm" value="${editData?.precioCompra || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Venta (sin IVA) *</label><input type="number" step="0.01" name="precioVenta" id="precioVenta" class="w-full border rounded p-2 text-sm" value="${editData?.precioVenta || ''}"></div>
+                        </div>
+                        <div id="pricePreview" class="price-preview text-xs"></div>
+                    </div>
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="calendar" class="w-4 h-4"></i> Seguimiento</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Trámite</label><input type="date" name="fechaTrami" class="w-full border rounded p-2 text-sm" value="${editData?.fechaTrami || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario *</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado === 'Pedido' ? 'selected' : ''}>Pedido</option><option ${editData?.estado === 'Recibido' ? 'selected' : ''}>Recibido</option><option ${editData?.estado === 'Instalado' ? 'selected' : ''}>Instalado</option><option ${editData?.estado === 'Vendido' ? 'selected' : ''}>Vendido</option></select></div>
+                        </div>
+                        <div class="mt-3"><label class="block text-xs font-bold text-slate-500 mb-1">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded p-2 text-sm" placeholder="Notas adicionales...">${editData?.observaciones || ''}</textarea></div>
+                    </div>
+                `;
             } else if (activeSection === 'pedidos') {
-                html = `<div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Cliente</label><input type="text" name="cliente" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.cliente || ''}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Producto/Modelo</label><input type="text" name="producto" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.producto || ''}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Referencia PT</label><input type="text" name="referencia" placeholder="Ej: PT-2024-001" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.referencia || ''}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha de Trámite</label><input type="date" name="fechaTrami" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.fechaTrami || ''}"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Usuario</label><select name="usuario" required class="w-full border border-slate-200 rounded p-2 text-sm"><option value="">Selecciona usuario</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
-                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label><select name="estado" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.estado === 'En Espera' ? 'selected' : ''}>En Espera</option><option ${editData?.estado === 'Reparando' ? 'selected' : ''}>Reparando</option><option ${editData?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option></select></div>`;
+                html = `
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Datos del Pedido</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Producto/Modelo *</label><input type="text" name="producto" required class="w-full border rounded p-2 text-sm" value="${editData?.producto || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Cantidad *</label><input type="number" name="cantidad" id="cantidad" required class="w-full border rounded p-2 text-sm" value="${editData?.cantidad || 1}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${editData?.cliente || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Referencia</label><input type="text" name="referencia" class="w-full border rounded p-2 text-sm" value="${editData?.referencia || ''}"></div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="euro" class="w-4 h-4"></i> Precios y Rentabilidad (IVA ${IVA}% incluido)</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Compra (sin IVA) *</label><input type="number" step="0.01" name="precioCompra" id="precioCompra" class="w-full border rounded p-2 text-sm" value="${editData?.precioCompra || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Venta (sin IVA) *</label><input type="number" step="0.01" name="precioVenta" id="precioVenta" class="w-full border rounded p-2 text-sm" value="${editData?.precioVenta || ''}"></div>
+                        </div>
+                        <div id="pricePreview" class="price-preview text-xs"></div>
+                    </div>
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="calendar" class="w-4 h-4"></i> Seguimiento</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Trámite</label><input type="date" name="fechaTrami" class="w-full border rounded p-2 text-sm" value="${editData?.fechaTrami || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario *</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado === 'En Espera' ? 'selected' : ''}>En Espera</option><option ${editData?.estado === 'Preparando' ? 'selected' : ''}>Preparando</option><option ${editData?.estado === 'Enviado' ? 'selected' : ''}>Enviado</option><option ${editData?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option></select></div>
+                        </div>
+                        <div class="mt-3"><label class="block text-xs font-bold text-slate-500 mb-1">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded p-2 text-sm" placeholder="Notas adicionales, dirección, etc...">${editData?.observaciones || ''}</textarea></div>
+                    </div>
+                `;
             } else if (activeSection === 'reparaciones') {
                 html = `
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="file-text" class="w-4 h-4"></i> Datos de la Orden</div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nº Orden (OT)</label><input type="text" name="ot" required class="w-full border border-slate-200 rounded p-2 text-sm" placeholder="Ej: OT-2024-001" value="${editData?.ot || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha Entrada</label><input type="date" name="fechaEntrada" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.fechaEntrada || new Date().toISOString().split('T')[0]}"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nº Orden (OT) *</label><input type="text" name="ot" required class="w-full border rounded p-2 text-sm" value="${editData?.ot || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Entrada</label><input type="date" name="fechaEntrada" class="w-full border rounded p-2 text-sm" value="${editData?.fechaEntrada || new Date().toISOString().split('T')[0]}"></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="smartphone" class="w-4 h-4"></i> Datos del Equipo</div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Marca</label><input type="text" name="marca" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.marca || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Modelo</label><input type="text" name="modelo" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.modelo || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nº Serie</label><input type="text" name="serie" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.serie || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Password/Patrón</label><input type="text" name="password" class="w-full border border-slate-200 rounded p-2 text-sm" placeholder="PIN, patrón, contraseña" value="${editData?.password || ''}"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Marca *</label><input type="text" name="marca" required class="w-full border rounded p-2 text-sm" value="${editData?.marca || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded p-2 text-sm" value="${editData?.modelo || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nº Serie</label><input type="text" name="serie" class="w-full border rounded p-2 text-sm" value="${editData?.serie || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Password/Patrón</label><input type="text" name="password" class="w-full border rounded p-2 text-sm" value="${editData?.password || ''}"></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="user" class="w-4 h-4"></i> Datos del Cliente</div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Cliente</label><input type="text" name="cliente" required class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.cliente || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Teléfono</label><input type="tel" name="telefono" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.telefono || ''}"></div>
-                            <div class="col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label><input type="email" name="email" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.email || ''}"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${editData?.cliente || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Teléfono</label><input type="tel" name="telefono" class="w-full border rounded p-2 text-sm" value="${editData?.telefono || ''}"></div>
+                            <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-1">Email</label><input type="email" name="email" class="w-full border rounded p-2 text-sm" value="${editData?.email || ''}"></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Diagnóstico y Presupuesto</div>
-                        <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Diagnóstico / Avería</label><textarea name="diagnostico" rows="3" class="w-full border border-slate-200 rounded p-2 text-sm" placeholder="Describir la avería o diagnóstico inicial...">${editData?.diagnostico || ''}</textarea></div>
-                        <div class="grid grid-cols-2 gap-4 mt-3">
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Precio Estimado (€)</label><input type="number" step="0.01" name="precio" class="w-full border border-slate-200 rounded p-2 text-sm" value="${editData?.precio || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Prioridad</label><select name="prioridad" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.prioridad === 'Baja' ? 'selected' : ''}>Baja</option><option ${editData?.prioridad === 'Media' ? 'selected' : ''}>Media</option><option ${editData?.prioridad === 'Alta' ? 'selected' : ''}>Alta</option></select></div>
+                        <div><label class="block text-xs font-bold text-slate-500 mb-1">Diagnóstico / Avería</label><textarea name="diagnostico" rows="2" class="w-full border rounded p-2 text-sm">${editData?.diagnostico || ''}</textarea></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Estimado (€, IVA ${IVA}% incluido)</label><input type="number" step="0.01" name="precio" class="w-full border rounded p-2 text-sm" value="${editData?.precio || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Prioridad</label><select name="prioridad" class="w-full border rounded p-2 text-sm"><option ${editData?.prioridad === 'Baja' ? 'selected' : ''}>Baja</option><option ${editData?.prioridad === 'Media' ? 'selected' : ''}>Media</option><option ${editData?.prioridad === 'Alta' ? 'selected' : ''}>Alta</option></select></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="package" class="w-4 h-4"></i> Accesorios y Estado</div>
-                        <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Accesorios que deja</label><textarea name="accesorios" rows="2" class="w-full border border-slate-200 rounded p-2 text-sm" placeholder="Cargador, funda, auriculares, etc...">${editData?.accesorios || ''}</textarea></div>
-                        <div class="grid grid-cols-2 gap-4 mt-3">
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado Reparación</label><select name="estado" class="w-full border border-slate-200 rounded p-2 text-sm"><option ${editData?.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option ${editData?.estado === 'Diagnóstico' ? 'selected' : ''}>Diagnóstico</option><option ${editData?.estado === 'Reparando' ? 'selected' : ''}>Reparando</option><option ${editData?.estado === 'Espera Piezas' ? 'selected' : ''}>Espera Piezas</option><option ${editData?.estado === 'Completado' ? 'selected' : ''}>Completado</option><option ${editData?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option></select></div>
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Usuario Asignado</label><select name="usuario" required class="w-full border border-slate-200 rounded p-2 text-sm"><option value="">Selecciona usuario</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
+                        <div><label class="block text-xs font-bold text-slate-500 mb-1">Accesorios que deja</label><textarea name="accesorios" rows="2" class="w-full border rounded p-2 text-sm">${editData?.accesorios || ''}</textarea></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Estado Reparación</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option ${editData?.estado === 'Diagnóstico' ? 'selected' : ''}>Diagnóstico</option><option ${editData?.estado === 'Reparando' ? 'selected' : ''}>Reparando</option><option ${editData?.estado === 'Espera Piezas' ? 'selected' : ''}>Espera Piezas</option><option ${editData?.estado === 'Completado' ? 'selected' : ''}>Completado</option><option ${editData?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option></select></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario Asignado</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
                         </div>
                     </div>
                 `;
@@ -555,6 +699,41 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             lucide.createIcons();
+
+            // Configurar preview de precios para piezas y pedidos
+            if (activeSection === 'piezas' || activeSection === 'pedidos') {
+                const compraInput = document.querySelector('input[name="precioCompra"]');
+                const ventaInput = document.querySelector('input[name="precioVenta"]');
+                const cantidadInput = document.querySelector('input[name="cantidad"]');
+                const previewDiv = document.getElementById('pricePreview');
+                
+                const updatePreview = () => {
+                    const compra = parseFloat(compraInput?.value) || 0;
+                    const venta = parseFloat(ventaInput?.value) || 0;
+                    const cantidad = parseInt(cantidadInput?.value) || 1;
+                    const beneficio = (venta - compra) * cantidad;
+                    const margen = venta > 0 ? ((venta - compra) / venta * 100).toFixed(1) : 0;
+                    const ivaCompra = compra * (IVA / 100);
+                    const ivaVenta = venta * (IVA / 100);
+                    const totalCompraConIVA = compra + ivaCompra;
+                    const totalVentaConIVA = venta + ivaVenta;
+                    
+                    previewDiv.innerHTML = `
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><strong>Sin IVA:</strong><br>Compra: ${compra.toFixed(2)}€<br>Venta: ${venta.toFixed(2)}€</div>
+                            <div><strong>Con IVA (${IVA}%):</strong><br>Compra: ${totalCompraConIVA.toFixed(2)}€<br>Venta: ${totalVentaConIVA.toFixed(2)}€</div>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-slate-200">
+                            <strong>Beneficio por unidad:</strong> ${beneficio.toFixed(2)}€ (${margen}% margen)<br>
+                            <strong>Beneficio total (${cantidad} uds):</strong> <span class="${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${(beneficio).toFixed(2)}€</span>
+                        </div>
+                    `;
+                };
+                compraInput?.addEventListener('input', updatePreview);
+                ventaInput?.addEventListener('input', updatePreview);
+                cantidadInput?.addEventListener('input', updatePreview);
+                updatePreview();
+            }
         }
 
         function closeModal() {
@@ -569,42 +748,51 @@
             let html = '';
             if (section === 'piezas') {
                 const guarantyStatus = getGuarantyStatus(item.fechaTrami);
+                const compra = parseFloat(item.precioCompra) || 0;
+                const venta = parseFloat(item.precioVenta) || 0;
+                const cantidad = parseInt(item.cantidad) || 1;
+                const beneficio = (venta - compra) * cantidad;
+                const ivaVenta = venta * (IVA / 100);
                 html = `<div class="detail-row"><div class="detail-label">Pieza</div><div class="detail-value">${item.nombre}</div></div>
                     <div class="detail-row"><div class="detail-label">Cantidad</div><div class="detail-value">${item.cantidad}</div></div>
                     <div class="detail-row"><div class="detail-label">Proveedor</div><div class="detail-value">${item.proveedor || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Referencia PT</div><div class="detail-value">${item.referencia || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Precio Compra</div><div class="detail-value">${item.precioCompra ? item.precioCompra + '€' : '-'} (${(item.precioCompra * (1 + IVA/100)).toFixed(2)}€ con IVA)</div></div>
+                    <div class="detail-row"><div class="detail-label">Precio Venta</div><div class="detail-value">${item.precioVenta ? item.precioVenta + '€' : '-'} (${(item.precioVenta * (1 + IVA/100)).toFixed(2)}€ con IVA)</div></div>
+                    <div class="detail-row"><div class="detail-label">Beneficio</div><div class="detail-value ${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${beneficio.toFixed(2)}€</div></div>
+                    <div class="detail-row"><div class="detail-label">Observaciones</div><div class="detail-value">${item.observaciones || '-'}</div></div>
                     <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
-                    <div class="detail-row"><div class="detail-label">Fecha Trámite</div><div class="detail-value">${item.fechaTrami ? new Date(item.fechaTrami).toLocaleDateString() : '-'}</div></div>
                     <div class="detail-row"><div class="detail-label">Garantía</div><div class="detail-value"><span class="badge-guarantee ${guarantyStatus.class}">${guarantyStatus.text}</span></div></div>
-                    <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
-                    <div class="detail-row"><div class="detail-label">Registrado</div><div class="detail-value">${new Date(item.fecha).toLocaleString()}</div></div>`;
+                    <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>`;
             } else if (section === 'pedidos') {
-                const returnStatus = getReturnStatus(item.fechaTrami);
-                html = `<div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${item.cliente}</div></div>
-                    <div class="detail-row"><div class="detail-label">Producto</div><div class="detail-value">${item.producto}</div></div>
-                    <div class="detail-row"><div class="detail-label">Referencia PT</div><div class="detail-value">${item.referencia || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
-                    <div class="detail-row"><div class="detail-label">Fecha Trámite</div><div class="detail-value">${item.fechaTrami ? new Date(item.fechaTrami).toLocaleDateString() : '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Plazo Devolución</div><div class="detail-value"><span class="badge-guarantee ${returnStatus.class}">${returnStatus.text}</span></div></div>
-                    <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
-                    <div class="detail-row"><div class="detail-label">Registrado</div><div class="detail-value">${new Date(item.fecha).toLocaleString()}</div></div>`;
-            } else if (section === 'reparaciones') {
-                html = `<div class="detail-row"><div class="detail-label">Nº Orden (OT)</div><div class="detail-value">${item.ot || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Fecha Entrada</div><div class="detail-value">${item.fechaEntrada ? new Date(item.fechaEntrada).toLocaleDateString() : '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Marca</div><div class="detail-value">${item.marca}</div></div>
-                    <div class="detail-row"><div class="detail-label">Modelo</div><div class="detail-value">${item.modelo}</div></div>
-                    <div class="detail-row"><div class="detail-label">Nº Serie</div><div class="detail-value">${item.serie || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Password/Patrón</div><div class="detail-value">${item.password || '-'}</div></div>
+                const compra = parseFloat(item.precioCompra) || 0;
+                const venta = parseFloat(item.precioVenta) || 0;
+                const cantidad = parseInt(item.cantidad) || 1;
+                const beneficio = (venta - compra) * cantidad;
+                const margen = venta > 0 ? ((venta - compra) / venta * 100).toFixed(1) : 0;
+                html = `<div class="detail-row"><div class="detail-label">Producto</div><div class="detail-value">${item.producto}</div></div>
+                    <div class="detail-row"><div class="detail-label">Cantidad</div><div class="detail-value">${item.cantidad || 1}</div></div>
                     <div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${item.cliente}</div></div>
-                    <div class="detail-row"><div class="detail-label">Teléfono</div><div class="detail-value">${item.telefono || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value">${item.email || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Precio Compra</div><div class="detail-value">${item.precioCompra ? item.precioCompra + '€' : '-'} (${(item.precioCompra * (1 + IVA/100)).toFixed(2)}€ con IVA)</div></div>
+                    <div class="detail-row"><div class="detail-label">Precio Venta</div><div class="detail-value">${item.precioVenta ? item.precioVenta + '€' : '-'} (${(item.precioVenta * (1 + IVA/100)).toFixed(2)}€ con IVA)</div></div>
+                    <div class="detail-row"><div class="detail-label">Beneficio</div><div class="detail-value ${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${beneficio.toFixed(2)}€ (${margen}% margen)</div></div>
+                    <div class="detail-row"><div class="detail-label">Observaciones</div><div class="detail-value">${item.observaciones || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
+                    <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>`;
+            } else if (section === 'reparaciones') {
+                const precioConIVA = item.precio ? (parseFloat(item.precio) * (1 + IVA/100)).toFixed(2) : '-';
+                html = `<div class="detail-row"><div class="detail-label">OT</div><div class="detail-value">${item.ot || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Fecha Entrada</div><div class="detail-value">${item.fechaEntrada ? new Date(item.fechaEntrada).toLocaleDateString() : '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Marca/Modelo</div><div class="detail-value">${item.marca} ${item.modelo}</div></div>
+                    <div class="detail-row"><div class="detail-label">Nº Serie</div><div class="detail-value">${item.serie || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Password</div><div class="detail-value">${item.password || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${item.cliente}</div></div>
+                    <div class="detail-row"><div class="detail-label">Teléfono/Email</div><div class="detail-value">${item.telefono || '-'} / ${item.email || '-'}</div></div>
                     <div class="detail-row"><div class="detail-label">Diagnóstico</div><div class="detail-value">${item.diagnostico || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Precio Estimado</div><div class="detail-value">${item.precio ? item.precio + '€' : '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Precio</div><div class="detail-value">${item.precio ? item.precio + '€' : '-'} (${precioConIVA}€ con IVA)</div></div>
                     <div class="detail-row"><div class="detail-label">Accesorios</div><div class="detail-value">${item.accesorios || '-'}</div></div>
                     <div class="detail-row"><div class="detail-label">Prioridad</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getPriorityClass(item.prioridad)}">${item.prioridad}</span></div></div>
                     <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
-                    <div class="detail-row"><div class="detail-label">Técnico Asignado</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
-                    <div class="detail-row"><div class="detail-label">Registrado</div><div class="detail-value">${new Date(item.fecha).toLocaleString()}</div></div>`;
+                    <div class="detail-row"><div class="detail-label">Técnico</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>`;
             }
             document.getElementById('detail-content').innerHTML = html;
             document.getElementById('detail-edit-btn').onclick = () => { closeDetailModal(); editRecord(section, id); };
@@ -640,7 +828,7 @@
         }
 
         async function deleteRecord(section, id) {
-            if (confirm('¿Estás seguro de eliminar este registro?')) {
+            if (confirm('¿Eliminar este registro?')) {
                 await db[section].delete(id);
                 showSection(currentSection);
             }
