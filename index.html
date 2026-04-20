@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
@@ -48,6 +49,30 @@
         .alert-warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
         .alert-info { border-left: 4px solid #3b82f6; background: #eff6ff; }
         
+        /* Estilos para impresión/PDF */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                padding: 20px;
+                background: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+            button, .btn-small, .sidebar-link, header, aside {
+                display: none !important;
+            }
+        }
+        
         @media (max-width: 768px) {
             .sidebar-link span { display: none; }
             .sidebar-link i { margin-right: 0 !important; }
@@ -69,6 +94,18 @@
         }
         
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        
+        /* Estilos para el PDF */
+        .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .print-header h1 { font-size: 24px; margin: 0; }
+        .print-header p { color: #666; margin: 5px 0; }
+        .print-footer { text-align: center; margin-top: 30px; padding-top: 10px; border-top: 1px solid #ccc; font-size: 10px; color: #666; }
+        .print-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .print-table th, .print-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .print-table th { background-color: #f2f2f2; }
+        .signature-line { margin-top: 40px; display: flex; justify-content: space-between; }
+        .signature-item { text-align: center; width: 200px; }
+        .signature-line hr { margin-top: 30px; width: 100%; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -229,7 +266,7 @@
                     <div class="table-responsive">
                         <table class="w-full text-left text-xs md:text-sm">
                             <thead class="bg-slate-50 border-b border-slate-200">
-                                <tr id="table-head"></tr>
+                                <tr id="table-head"><tr>
                             </thead>
                             <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
                         </table>
@@ -268,6 +305,7 @@
             <div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3">
                 <button type="button" onclick="closeDetailModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cerrar</button>
                 <button type="button" id="detail-edit-btn" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Editar</button>
+                <button type="button" id="detail-print-btn" class="flex-1 px-3 py-2 bg-green-600 text-white rounded-md text-sm font-medium">Imprimir</button>
             </div>
         </div>
     </div>
@@ -314,8 +352,11 @@
         </div>
     </div>
 
+    <!-- Área oculta para impresión -->
+    <div id="print-area" style="position: fixed; top: -9999px; left: -9999px; width: 210mm; background: white; padding: 20px;"></div>
+
     <script>
-        const db = new Dexie("SAT_Database_V3");
+        const db = new Dexie("SAT_Database_V4");
         db.version(1).stores({
             piezas: '++id, nombre, cantidad, proveedor, precioCompra, precioVenta, referencia, fechaTrami, estado, observaciones, fecha, usuario',
             pedidos: '++id, cliente, producto, precioCompra, precioVenta, cantidad, referencia, fechaTrami, estado, observaciones, fecha, usuario',
@@ -331,6 +372,8 @@
         const USUARIOS = ["Daniel Farré", "José Ayala"];
         const IVA = 21;
         let openaiApiKey = localStorage.getItem("openai_api_key") || "";
+        let currentItemForPrint = null;
+        let currentSectionForPrint = null;
 
         let currentUser = null;
         let currentUserName = null;
@@ -384,44 +427,277 @@
             lucide.createIcons();
         };
 
-        function showSection(section) {
-            currentSection = section;
-            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
-            const link = document.getElementById(`link-${section}`);
-            if (link) link.classList.add('active');
+        // ==================== FUNCIONES DE IMPRESIÓN ====================
+        
+        async function printDocument(section, id) {
+            const item = await db[section].get(id);
+            if (!item) return;
             
-            const titles = {
-                'dashboard': 'Resumen General',
-                'piezas': 'Pedido de Piezas',
-                'pedidos': 'Pedidos de Clientes',
-                'reparaciones': 'Órdenes de Reparación',
-                'reportes': 'Reportes y Metricas'
-            };
-            document.getElementById('section-title').textContent = titles[section] + (currentUserName ? ` - ${currentUserName}` : '');
-            const btnNew = document.getElementById('btn-new');
-            if (btnNew) btnNew.style.display = section === 'reportes' ? 'none' : 'flex';
-
-            const viewDashboard = document.getElementById('view-dashboard');
-            const viewList = document.getElementById('view-list');
-            const viewReportes = document.getElementById('view-reportes');
+            currentItemForPrint = item;
+            currentSectionForPrint = section;
             
-            if (section === 'dashboard') {
-                if (viewDashboard) viewDashboard.classList.remove('hidden');
-                if (viewList) viewList.classList.add('hidden');
-                if (viewReportes) viewReportes.classList.add('hidden');
-                updateDashboardStats();
-            } else if (section === 'reportes') {
-                if (viewDashboard) viewDashboard.classList.add('hidden');
-                if (viewList) viewList.classList.add('hidden');
-                if (viewReportes) viewReportes.classList.remove('hidden');
-                updateReports();
-            } else {
-                if (viewDashboard) viewDashboard.classList.add('hidden');
-                if (viewList) viewList.classList.remove('hidden');
-                if (viewReportes) viewReportes.classList.add('hidden');
-                renderTable(section);
+            let html = '';
+            const fechaActual = new Date().toLocaleString();
+            const empresa = "S.A.T. Servicio Técnico Autorizado";
+            const telefono = "900 123 456";
+            const email = "sat@tecnico.com";
+            
+            if (section === 'reparaciones') {
+                const precioConIVA = item.precio ? (parseFloat(item.precio) * (1 + IVA/100)).toFixed(2) : '-';
+                html = `
+                    <div class="print-header">
+                        <h1>${empresa}</h1>
+                        <p>Orden de Reparación / Trabajo</p>
+                        <p>Tel: ${telefono} | Email: ${email}</p>
+                        <p>Fecha: ${fechaActual}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DATOS DE LA ORDEN</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Nº Orden (OT):</th><td>${item.ot || '-'}</td></tr>
+                            <tr><th>Fecha Entrada:</th><td>${item.fechaEntrada ? new Date(item.fechaEntrada).toLocaleDateString() : '-'}</td></tr>
+                            <tr><th>Fecha Registro:</th><td>${new Date(item.fecha).toLocaleString()}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DATOS DEL EQUIPO</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Marca:</th><td>${item.marca || '-'}</td></tr>
+                            <tr><th>Modelo:</th><td>${item.modelo || '-'}</td></tr>
+                            <tr><th>Nº Serie:</th><td>${item.serie || '-'}</td></tr>
+                            <tr><th>Password/Patrón:</th><td>${item.password || '-'}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DATOS DEL CLIENTE</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Cliente:</th><td>${item.cliente || '-'}</td></tr>
+                            <tr><th>Teléfono:</th><td>${item.telefono || '-'}</td></tr>
+                            <tr><th>Email:</th><td>${item.email || '-'}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DIAGNÓSTICO Y PRESUPUESTO</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Diagnóstico/Avería:</th><td>${item.diagnostico || '-'}</td></tr>
+                            <tr><th>Precio Estimado (sin IVA):</th><td>${item.precio ? item.precio + '€' : '-'}</td></tr>
+                            <tr><th>IVA (${IVA}%):</th><td>${item.precio ? (item.precio * IVA / 100).toFixed(2) + '€' : '-'}</td></tr>
+                            <tr><th><strong>Total con IVA:</strong></th><td><strong>${precioConIVA}€</strong></td></tr>
+                            <tr><th>Prioridad:</th><td>${item.prioridad || '-'}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">ACCESORIOS Y ESTADO</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Accesorios que deja:</th><td>${item.accesorios || 'Ninguno'}</td></tr>
+                            <tr><th>Estado Reparación:</th><td>${item.estado || '-'}</td></tr>
+                            <tr><th>Técnico Asignado:</th><td>${item.usuario || '-'}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div class="signature-line">
+                        <div class="signature-item">
+                            <hr>
+                            <p>Firma del Cliente</p>
+                        </div>
+                        <div class="signature-item">
+                            <hr>
+                            <p>Firma del Técnico</p>
+                        </div>
+                    </div>
+                    
+                    <div class="print-footer">
+                        <p>Documento generado por SAT Gestión Pro - ${fechaActual}</p>
+                        <p>Gracias por confiar en nosotros</p>
+                    </div>
+                `;
+            } else if (section === 'pedidos') {
+                const compra = parseFloat(item.precioCompra) || 0;
+                const venta = parseFloat(item.precioVenta) || 0;
+                const cantidad = parseInt(item.cantidad) || 1;
+                const beneficio = (venta - compra) * cantidad;
+                const totalSinIVA = venta * cantidad;
+                const totalConIVA = totalSinIVA * (1 + IVA/100);
+                
+                html = `
+                    <div class="print-header">
+                        <h1>${empresa}</h1>
+                        <p>Orden de Pedido / Presupuesto</p>
+                        <p>Tel: ${telefono} | Email: ${email}</p>
+                        <p>Fecha: ${fechaActual}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DATOS DEL PEDIDO</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Referencia:</th><td>${item.referencia || '-'}</td></tr>
+                            <tr><th>Fecha Pedido:</th><td>${item.fechaTrami ? new Date(item.fechaTrami).toLocaleDateString() : new Date(item.fecha).toLocaleDateString()}</td></tr>
+                            <tr><th>Estado:</th><td>${item.estado || '-'}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DATOS DEL CLIENTE</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Cliente:</th><td>${item.cliente || '-'}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DETALLE DEL PRODUCTO</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Producto/Modelo:</th><td>${item.producto || '-'}</td></tr>
+                            <tr><th>Cantidad:</th><td>${cantidad}</td></tr>
+                            <tr><th>Precio Unitario (sin IVA):</th><td>${venta.toFixed(2)}€</td></tr>
+                            <tr><th>Precio Unitario (con IVA):</th><td>${(venta * (1 + IVA/100)).toFixed(2)}€</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">RESUMEN ECONÓMICO</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Subtotal (sin IVA):</th><td>${totalSinIVA.toFixed(2)}€</td></tr>
+                            <tr><th>IVA (${IVA}%):</th><td>${(totalSinIVA * IVA / 100).toFixed(2)}€</td></tr>
+                            <tr><th><strong>TOTAL:</strong></th><td><strong>${totalConIVA.toFixed(2)}€</strong></td></tr>
+                            <tr><th>Coste para el taller:</th><td>${(compra * cantidad).toFixed(2)}€</td></tr>
+                            <tr><th>Beneficio estimado:</th><td class="${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${beneficio.toFixed(2)}€</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">OBSERVACIONES</h3>
+                        <p style="padding: 10px; border: 1px solid #ddd; min-height: 60px;">${item.observaciones || 'Sin observaciones'}</p>
+                    </div>
+                    
+                    <div class="signature-line">
+                        <div class="signature-item">
+                            <hr>
+                            <p>Firma del Cliente</p>
+                        </div>
+                        <div class="signature-item">
+                            <hr>
+                            <p>Sello del Taller</p>
+                        </div>
+                    </div>
+                    
+                    <div class="print-footer">
+                        <p>Documento generado por SAT Gestión Pro - ${fechaActual}</p>
+                        <p>Gracias por su compra</p>
+                    </div>
+                `;
+            } else if (section === 'piezas') {
+                const compra = parseFloat(item.precioCompra) || 0;
+                const venta = parseFloat(item.precioVenta) || 0;
+                const cantidad = parseInt(item.cantidad) || 1;
+                const beneficio = (venta - compra) * cantidad;
+                const totalSinIVA = venta * cantidad;
+                const totalConIVA = totalSinIVA * (1 + IVA/100);
+                
+                html = `
+                    <div class="print-header">
+                        <h1>${empresa}</h1>
+                        <p>Albarán de Pedido de Piezas</p>
+                        <p>Tel: ${telefono} | Email: ${email}</p>
+                        <p>Fecha: ${fechaActual}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DATOS DEL PEDIDO</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Referencia:</th><td>${item.referencia || '-'}</td></tr>
+                            <tr><th>Proveedor:</th><td>${item.proveedor || '-'}</td></tr>
+                            <tr><th>Fecha Pedido:</th><td>${item.fechaTrami ? new Date(item.fechaTrami).toLocaleDateString() : new Date(item.fecha).toLocaleDateString()}</td></tr>
+                            <tr><th>Estado:</th><td>${item.estado || '-'}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">DETALLE DE LA PIEZA</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Pieza:</th><td>${item.nombre || '-'}</td></tr>
+                            <tr><th>Cantidad:</th><td>${cantidad}</td></tr>
+                            <tr><th>Precio Unitario Compra (sin IVA):</th><td>${compra.toFixed(2)}€</td></tr>
+                            <tr><th>Precio Unitario Venta (sin IVA):</th><td>${venta.toFixed(2)}€</td></tr>
+                            <tr><th>Precio Venta con IVA:</th><td>${(venta * (1 + IVA/100)).toFixed(2)}€</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">RESUMEN ECONÓMICO</h3>
+                        <table class="print-table">
+                            <tr><th width="30%">Coste total para taller:</th><td>${(compra * cantidad).toFixed(2)}€</td></tr>
+                            <tr><th>Venta total (sin IVA):</th><td>${totalSinIVA.toFixed(2)}€</td></tr>
+                            <tr><th>IVA (${IVA}%):</th><td>${(totalSinIVA * IVA / 100).toFixed(2)}€</td></tr>
+                            <tr><th><strong>Total Venta con IVA:</strong></th><td><strong>${totalConIVA.toFixed(2)}€</strong></td></tr>
+                            <tr><th>Beneficio estimado:</th><td class="${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${beneficio.toFixed(2)}€</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="background: #f0f0f0; padding: 8px; margin: 0 0 10px 0;">OBSERVACIONES</h3>
+                        <p style="padding: 10px; border: 1px solid #ddd; min-height: 60px;">${item.observaciones || 'Sin observaciones'}</p>
+                    </div>
+                    
+                    <div class="signature-line">
+                        <div class="signature-item">
+                            <hr>
+                            <p>Firma del Recepcionista</p>
+                        </div>
+                        <div class="signature-item">
+                            <hr>
+                            <p>Sello del Taller</p>
+                        </div>
+                    </div>
+                    
+                    <div class="print-footer">
+                        <p>Documento generado por SAT Gestión Pro - ${fechaActual}</p>
+                        <p>Pieza original con garantía</p>
+                    </div>
+                `;
             }
-            lucide.createIcons();
+            
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = html;
+            printArea.style.position = 'fixed';
+            printArea.style.top = '0';
+            printArea.style.left = '0';
+            printArea.style.right = '0';
+            printArea.style.width = '100%';
+            printArea.style.background = 'white';
+            printArea.style.zIndex = '9999';
+            
+            // Opción: imprimir directamente
+            window.print();
+            
+            // Opcional: exportar a PDF con html2pdf
+            // Descomentar para usar PDF en lugar de impresión directa
+            /*
+            const element = printArea;
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `${section === 'reparaciones' ? 'OT' : section === 'pedidos' ? 'Pedido' : 'Pieza'}_${item.id || item.ot || item.producto || item.nombre}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+            */
+            
+            // Ocultar después de imprimir
+            setTimeout(() => {
+                printArea.style.position = 'fixed';
+                printArea.style.top = '-9999px';
+                printArea.style.left = '-9999px';
+            }, 1000);
+        }
+        
+        async function printFromList(section, id) {
+            await printDocument(section, id);
         }
 
         // ==================== SISTEMA DE ALERTAS INTELIGENTES ====================
@@ -515,7 +791,7 @@
 
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
+            return String(str).replace(/[&<>]/g, function(m) {
                 if (m === '&') return '&amp;';
                 if (m === '<') return '&lt;';
                 if (m === '>') return '&gt;';
@@ -680,8 +956,46 @@
             }
         }
 
-        // ==================== FUNCIONES PRINCIPALES ====================
-        
+        function showSection(section) {
+            currentSection = section;
+            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+            const link = document.getElementById(`link-${section}`);
+            if (link) link.classList.add('active');
+            
+            const titles = {
+                'dashboard': 'Resumen General',
+                'piezas': 'Pedido de Piezas',
+                'pedidos': 'Pedidos de Clientes',
+                'reparaciones': 'Órdenes de Reparación',
+                'reportes': 'Reportes y Metricas'
+            };
+            document.getElementById('section-title').textContent = titles[section] + (currentUserName ? ` - ${currentUserName}` : '');
+            const btnNew = document.getElementById('btn-new');
+            if (btnNew) btnNew.style.display = section === 'reportes' ? 'none' : 'flex';
+
+            const viewDashboard = document.getElementById('view-dashboard');
+            const viewList = document.getElementById('view-list');
+            const viewReportes = document.getElementById('view-reportes');
+            
+            if (section === 'dashboard') {
+                if (viewDashboard) viewDashboard.classList.remove('hidden');
+                if (viewList) viewList.classList.add('hidden');
+                if (viewReportes) viewReportes.classList.add('hidden');
+                updateDashboardStats();
+            } else if (section === 'reportes') {
+                if (viewDashboard) viewDashboard.classList.add('hidden');
+                if (viewList) viewList.classList.add('hidden');
+                if (viewReportes) viewReportes.classList.remove('hidden');
+                updateReports();
+            } else {
+                if (viewDashboard) viewDashboard.classList.add('hidden');
+                if (viewList) viewList.classList.remove('hidden');
+                if (viewReportes) viewReportes.classList.add('hidden');
+                renderTable(section);
+            }
+            lucide.createIcons();
+        }
+
         async function updateDashboardStats() {
             try {
                 const piezas = await db.piezas.toArray();
@@ -901,7 +1215,8 @@
                         <button onclick='viewDetail("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-green-100"><i data-lucide="eye" class="w-3 h-3"></i></button>
                         <button onclick='editRecord("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-blue-100"><i data-lucide="edit-2" class="w-3 h-3"></i></button>
                         <button onclick='deleteRecord("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-red-100"><i data-lucide="trash" class="w-3 h-3"></i></button>
-                    </td>`;
+                        <button onclick='printFromList("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-purple-100"><i data-lucide="printer" class="w-3 h-3"></i></button>
+                    </td></tr>`;
                     body.appendChild(tr);
                 });
             }
@@ -1160,11 +1475,13 @@
             const detailContent = document.getElementById('detail-content');
             const detailTitle = document.getElementById('detail-title');
             const detailEditBtn = document.getElementById('detail-edit-btn');
+            const detailPrintBtn = document.getElementById('detail-print-btn');
             const detailModal = document.getElementById('detail-modal');
             
             if (detailContent) detailContent.innerHTML = html;
             if (detailTitle) detailTitle.textContent = `Detalles - ${section === 'reparaciones' ? 'Reparación' : (section === 'piezas' ? 'Pieza' : 'Pedido')}`;
             if (detailEditBtn) detailEditBtn.onclick = () => { closeDetailModal(); editRecord(section, id); };
+            if (detailPrintBtn) detailPrintBtn.onclick = () => { printDocument(section, id); };
             if (detailModal) {
                 detailModal.classList.remove('hidden');
                 detailModal.classList.add('flex');
@@ -1210,7 +1527,7 @@
             }
         }
         
-        // Exponer funciones globalmente para que los onclick funcionen
+        // Exponer funciones globalmente
         window.showSection = showSection;
         window.openModal = openModal;
         window.closeModal = closeModal;
@@ -1226,6 +1543,8 @@
         window.closeAIModal = closeAIModal;
         window.configureAPIKey = configureAPIKey;
         window.handleAlertClick = handleAlertClick;
+        window.printDocument = printDocument;
+        window.printFromList = printFromList;
     </script>
 </body>
 </html>
