@@ -12,8 +12,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; }
-        .btn-small { padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; transition: all 0.2s; }
-        .sidebar-link { display: flex; align-items: center; padding: 10px 12px; color: #64748b; border-radius: 6px; margin-bottom: 4px; transition: all 0.2s; }
+        .btn-small { padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; transition: all 0.2s; cursor: pointer; }
+        .sidebar-link { display: flex; align-items: center; padding: 10px 12px; color: #64748b; border-radius: 6px; margin-bottom: 4px; transition: all 0.2s; cursor: pointer; }
         .sidebar-link.active { background-color: #f1f5f9; color: #0f172a; font-weight: 500; }
         .sidebar-link:hover:not(.active) { background-color: #f8fafc; color: #334155; }
         ::-webkit-scrollbar { width: 4px; }
@@ -42,8 +42,12 @@
         .profit-positive { color: #10b981; font-weight: bold; }
         .profit-negative { color: #ef4444; font-weight: bold; }
         .price-preview { background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.8rem; }
+        .alert-card { transition: all 0.2s; cursor: pointer; }
+        .alert-card:hover { transform: translateX(4px); }
+        .alert-critical { border-left: 4px solid #ef4444; background: #fef2f2; }
+        .alert-warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
+        .alert-info { border-left: 4px solid #3b82f6; background: #eff6ff; }
         
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             .sidebar-link span { display: none; }
             .sidebar-link i { margin-right: 0 !important; }
@@ -64,7 +68,6 @@
             .form-section { padding: 0.75rem; }
         }
         
-        /* Tabla responsive */
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
 </head>
@@ -147,20 +150,25 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                     <div class="flat-card p-4 md:p-6">
-                        <h4 class="font-bold text-slate-700 mb-3 flex items-center gap-2 text-sm md:text-base"><i data-lucide="activity" class="w-4 h-4"></i> Actividad Reciente</h4>
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"><i data-lucide="activity" class="w-4 h-4"></i> Actividad Reciente</h4>
+                        </div>
                         <div id="recent-activity" class="space-y-3"><p class="text-slate-400 text-xs italic">Cargando datos...</p></div>
                     </div>
                     <div class="flat-card p-4 md:p-6">
-                        <h4 class="font-bold text-slate-700 mb-3 flex items-center gap-2 text-sm md:text-base"><i data-lucide="alert-circle" class="w-4 h-4"></i> Recordatorios</h4>
-                        <div class="space-y-2">
-                            <div class="flex items-start gap-2 p-2 md:p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                <i data-lucide="info" class="w-3 h-3 md:w-4 md:h-4 text-blue-500 mt-0.5"></i>
-                                <p class="text-xs md:text-sm text-slate-600">Revisar stock de piezas esta semana.</p>
-                            </div>
-                            <div class="flex items-start gap-2 p-2 md:p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                <i data-lucide="info" class="w-3 h-3 md:w-4 md:h-4 text-blue-500 mt-0.5"></i>
-                                <p class="text-xs md:text-sm text-slate-600">Actualizar estados de pedidos pendientes.</p>
-                            </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"><i data-lucide="bell" class="w-4 h-4"></i> Recordatorios Inteligentes</h4>
+                            <button onclick="openReminderModal()" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-2 py-1 rounded-md flex items-center gap-1">
+                                <i data-lucide="plus" class="w-3 h-3"></i> Nuevo
+                            </button>
+                        </div>
+                        <div id="alert-container" class="space-y-2 max-h-96 overflow-y-auto">
+                            <p class="text-slate-400 text-xs italic">Analizando datos...</p>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-slate-100">
+                            <button onclick="generateAISuggestions()" id="ai-suggest-btn" class="w-full text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                                <i data-lucide="bot" class="w-3 h-3"></i> Sugerencias con IA (ChatGPT)
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -221,7 +229,7 @@
                     <div class="table-responsive">
                         <table class="w-full text-left text-xs md:text-sm">
                             <thead class="bg-slate-50 border-b border-slate-200">
-                                <tr id="table-head"><tr>
+                                <tr id="table-head"></tr>
                             </thead>
                             <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
                         </table>
@@ -231,6 +239,7 @@
         </div>
     </main>
 
+    <!-- Modal principal para formularios -->
     <div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[95vh] flex flex-col">
             <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -248,6 +257,7 @@
         </div>
     </div>
 
+    <!-- Modal para detalles -->
     <div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[95vh] flex flex-col">
             <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -262,12 +272,55 @@
         </div>
     </div>
 
+    <!-- Modal para recordatorios manuales -->
+    <div id="reminder-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-800">Nuevo Recordatorio</h3>
+                <button onclick="closeReminderModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="reminder-form" class="p-4 space-y-4">
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Título *</label><input type="text" name="title" required class="w-full border rounded p-2 text-sm"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Descripción</label><textarea name="description" rows="2" class="w-full border rounded p-2 text-sm"></textarea></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Límite</label><input type="date" name="dueDate" class="w-full border rounded p-2 text-sm"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Prioridad</label><select name="priority" class="w-full border rounded p-2 text-sm"><option value="info">Normal</option><option value="warning">Importante</option><option value="critical">Urgente</option></select></div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeReminderModal()" class="flex-1 px-3 py-2 border rounded-md text-sm">Cancelar</button>
+                    <button type="submit" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para sugerencias de IA -->
+    <div id="ai-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[80vh] flex flex-col">
+            <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bot" class="w-4 h-4"></i> Sugerencias IA</h3>
+                <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="ai-content" class="p-4 overflow-y-auto flex-1">
+                <p class="text-slate-500 text-sm">Cargando sugerencias inteligentes...</p>
+            </div>
+            <div class="px-4 py-3 border-t border-slate-100 bg-slate-50">
+                <div class="flex gap-2">
+                    <input type="text" id="api-key-input" placeholder="API Key de OpenAI (opcional)" class="flex-1 border rounded p-2 text-xs">
+                    <button onclick="configureAPIKey()" class="bg-gray-600 text-white px-3 py-2 rounded-md text-xs">Guardar</button>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-2">Sin API key, las sugerencias serán simuladas. Con API key, ChatGPT analizará tus datos reales.</p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const db = new Dexie("SAT_Database_V2");
+        const db = new Dexie("SAT_Database_V3");
         db.version(1).stores({
             piezas: '++id, nombre, cantidad, proveedor, precioCompra, precioVenta, referencia, fechaTrami, estado, observaciones, fecha, usuario',
             pedidos: '++id, cliente, producto, precioCompra, precioVenta, cantidad, referencia, fechaTrami, estado, observaciones, fecha, usuario',
-            reparaciones: '++id, ot, marca, modelo, serie, cliente, telefono, email, diagnostico, precio, estado, prioridad, accesorios, password, fecha, usuario'
+            reparaciones: '++id, ot, marca, modelo, serie, cliente, telefono, email, diagnostico, precio, estado, prioridad, accesorios, password, fecha, usuario',
+            recordatorios: '++id, title, description, dueDate, priority, completed, createdAt'
         });
 
         const USERS = [
@@ -277,6 +330,7 @@
 
         const USUARIOS = ["Daniel Farré", "José Ayala"];
         const IVA = 21;
+        let openaiApiKey = localStorage.getItem("openai_api_key") || "";
 
         let currentUser = null;
         let currentUserName = null;
@@ -313,6 +367,9 @@
         function initApp() {
             showSection('dashboard');
             lucide.createIcons();
+            setInterval(() => {
+                if (currentSection === 'dashboard') updateDashboardStats();
+            }, 60000);
         }
 
         window.onload = function () {
@@ -330,7 +387,8 @@
         function showSection(section) {
             currentSection = section;
             document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
-            document.getElementById(`link-${section}`).classList.add('active');
+            const link = document.getElementById(`link-${section}`);
+            if (link) link.classList.add('active');
             
             const titles = {
                 'dashboard': 'Resumen General',
@@ -340,27 +398,290 @@
                 'reportes': 'Reportes y Metricas'
             };
             document.getElementById('section-title').textContent = titles[section] + (currentUserName ? ` - ${currentUserName}` : '');
-            document.getElementById('btn-new').style.display = section === 'reportes' ? 'none' : 'flex';
+            const btnNew = document.getElementById('btn-new');
+            if (btnNew) btnNew.style.display = section === 'reportes' ? 'none' : 'flex';
 
+            const viewDashboard = document.getElementById('view-dashboard');
+            const viewList = document.getElementById('view-list');
+            const viewReportes = document.getElementById('view-reportes');
+            
             if (section === 'dashboard') {
-                document.getElementById('view-dashboard').classList.remove('hidden');
-                document.getElementById('view-list').classList.add('hidden');
-                document.getElementById('view-reportes').classList.add('hidden');
+                if (viewDashboard) viewDashboard.classList.remove('hidden');
+                if (viewList) viewList.classList.add('hidden');
+                if (viewReportes) viewReportes.classList.add('hidden');
                 updateDashboardStats();
             } else if (section === 'reportes') {
-                document.getElementById('view-dashboard').classList.add('hidden');
-                document.getElementById('view-list').classList.add('hidden');
-                document.getElementById('view-reportes').classList.remove('hidden');
+                if (viewDashboard) viewDashboard.classList.add('hidden');
+                if (viewList) viewList.classList.add('hidden');
+                if (viewReportes) viewReportes.classList.remove('hidden');
                 updateReports();
             } else {
-                document.getElementById('view-dashboard').classList.add('hidden');
-                document.getElementById('view-list').classList.remove('hidden');
-                document.getElementById('view-reportes').classList.add('hidden');
+                if (viewDashboard) viewDashboard.classList.add('hidden');
+                if (viewList) viewList.classList.remove('hidden');
+                if (viewReportes) viewReportes.classList.add('hidden');
                 renderTable(section);
             }
             lucide.createIcons();
         }
 
+        // ==================== SISTEMA DE ALERTAS INTELIGENTES ====================
+        
+        async function updateIntelligentAlerts() {
+            try {
+                const piezas = await db.piezas.toArray();
+                const pedidos = await db.pedidos.toArray();
+                const reparaciones = await db.reparaciones.toArray();
+                const recordatorios = await db.recordatorios.toArray();
+                const now = new Date();
+                
+                const alerts = [];
+
+                reparaciones.forEach(rep => {
+                    const lastUpdate = new Date(rep.fecha);
+                    const hoursSince = Math.floor((now - lastUpdate) / (1000 * 60 * 60));
+                    if (rep.estado !== 'Completado' && rep.estado !== 'Entregado') {
+                        if (hoursSince >= 72) {
+                            alerts.push({ id: `rep_${rep.id}`, title: `⚠️ Reparación estancada: ${rep.ot}`, description: `${rep.marca} ${rep.modelo} - ${hoursSince}h sin actualizar. Estado: ${rep.estado}`, priority: 'critical', type: 'reparacion' });
+                        } else if (hoursSince >= 48) {
+                            alerts.push({ id: `rep_${rep.id}`, title: `🕐 Reparación sin avance: ${rep.ot}`, description: `${rep.marca} ${rep.modelo} - ${hoursSince}h sin novedades`, priority: 'warning', type: 'reparacion' });
+                        } else if (hoursSince >= 24) {
+                            alerts.push({ id: `rep_${rep.id}`, title: `ℹ️ Revisar reparación: ${rep.ot}`, description: `${rep.marca} ${rep.modelo} - 24h sin actualizar`, priority: 'info', type: 'reparacion' });
+                        }
+                    }
+                });
+
+                piezas.forEach(pieza => {
+                    if (pieza.estado === 'Pedido' && pieza.fechaTrami) {
+                        const orderDate = new Date(pieza.fechaTrami);
+                        const daysWaiting = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+                        if (daysWaiting >= 15) {
+                            alerts.push({ id: `pieza_${pieza.id}`, title: `⚠️ Pieza muy retrasada: ${pieza.nombre}`, description: `${daysWaiting} días en pedido. Proveedor: ${pieza.proveedor || 'desconocido'}`, priority: 'critical', type: 'pieza' });
+                        } else if (daysWaiting >= 7) {
+                            alerts.push({ id: `pieza_${pieza.id}`, title: `🕐 Pieza retrasada: ${pieza.nombre}`, description: `${daysWaiting} días en espera`, priority: 'warning', type: 'pieza' });
+                        }
+                    }
+                });
+
+                pedidos.forEach(pedido => {
+                    if (pedido.estado !== 'Entregado' && pedido.fechaTrami) {
+                        const orderDate = new Date(pedido.fechaTrami);
+                        const daysPending = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+                        if (daysPending >= 10) {
+                            alerts.push({ id: `pedido_${pedido.id}`, title: `⚠️ Pedido muy retrasado: ${pedido.producto}`, description: `Cliente: ${pedido.cliente} - ${daysPending} días pendiente`, priority: 'critical', type: 'pedido' });
+                        } else if (daysPending >= 5) {
+                            alerts.push({ id: `pedido_${pedido.id}`, title: `🕐 Pedido pendiente: ${pedido.producto}`, description: `${daysPending} días sin entregar a ${pedido.cliente}`, priority: 'warning', type: 'pedido' });
+                        }
+                    }
+                });
+
+                recordatorios.forEach(rem => {
+                    if (!rem.completed) {
+                        let priority = rem.priority || 'info';
+                        if (rem.dueDate) {
+                            const dueDate = new Date(rem.dueDate);
+                            const daysLeft = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+                            if (daysLeft < 0) priority = 'critical';
+                            else if (daysLeft < 3) priority = 'warning';
+                        }
+                        alerts.push({ id: `rem_${rem.id}`, title: `📌 ${rem.title}`, description: rem.description || 'Sin descripción', priority: priority, dueDate: rem.dueDate, type: 'recordatorio' });
+                    }
+                });
+
+                const priorityOrder = { critical: 0, warning: 1, info: 2 };
+                alerts.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+                const container = document.getElementById('alert-container');
+                if (!container) return;
+                
+                if (alerts.length === 0) {
+                    container.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">✅ Todo al día. No hay alertas pendientes.</div>';
+                } else {
+                    container.innerHTML = alerts.map(alert => `
+                        <div class="alert-card p-3 rounded-lg ${alert.priority === 'critical' ? 'alert-critical' : alert.priority === 'warning' ? 'alert-warning' : 'alert-info'}" onclick='handleAlertClick(${JSON.stringify(alert)})'>
+                            <div class="flex justify-between items-start">
+                                <p class="text-sm font-semibold">${escapeHtml(alert.title)}</p>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded ${alert.priority === 'critical' ? 'bg-red-100 text-red-700' : alert.priority === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">${alert.priority === 'critical' ? 'URGENTE' : alert.priority === 'warning' ? 'ATENCIÓN' : 'INFO'}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-1">${escapeHtml(alert.description)}</p>
+                            ${alert.dueDate ? `<p class="text-[10px] text-slate-400 mt-1">📅 Vence: ${new Date(alert.dueDate).toLocaleDateString()}</p>` : ''}
+                        </div>
+                    `).join('');
+                }
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Error en alertas:', error);
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function handleAlertClick(alert) {
+            if (alert.type === 'reparacion') showSection('reparaciones');
+            else if (alert.type === 'pieza') showSection('piezas');
+            else if (alert.type === 'pedido') showSection('pedidos');
+            else if (alert.type === 'recordatorio') {
+                if (confirm(`¿Marcar como completado: ${alert.title}?`)) {
+                    const id = alert.id.replace('rem_', '');
+                    db.recordatorios.update(parseInt(id), { completed: true }).then(() => updateIntelligentAlerts());
+                }
+            }
+        }
+
+        function openReminderModal() {
+            const modal = document.getElementById('reminder-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                lucide.createIcons();
+            }
+        }
+
+        function closeReminderModal() {
+            const modal = document.getElementById('reminder-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        document.getElementById('reminder-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            data.createdAt = new Date().toISOString();
+            data.completed = false;
+            await db.recordatorios.add(data);
+            closeReminderModal();
+            updateIntelligentAlerts();
+        });
+
+        function configureAPIKey() {
+            const key = document.getElementById('api-key-input')?.value;
+            if (key) {
+                openaiApiKey = key;
+                localStorage.setItem("openai_api_key", key);
+                alert("API Key guardada. Ahora las sugerencias usarán ChatGPT real.");
+            } else {
+                localStorage.removeItem("openai_api_key");
+                openaiApiKey = "";
+                alert("API Key eliminada. Se usarán sugerencias simuladas.");
+            }
+        }
+
+        async function generateAISuggestions() {
+            const modal = document.getElementById('ai-modal');
+            const content = document.getElementById('ai-content');
+            if (!modal || !content) return;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            content.innerHTML = '<div class="text-center py-8"><i data-lucide="loader" class="w-8 h-8 animate-spin mx-auto text-blue-500"></i><p class="text-sm mt-2">Analizando datos...</p></div>';
+            lucide.createIcons();
+
+            try {
+                const piezas = await db.piezas.toArray();
+                const pedidos = await db.pedidos.toArray();
+                const reparaciones = await db.reparaciones.toArray();
+                
+                const stats = {
+                    totalPiezas: piezas.length,
+                    piezasPendientes: piezas.filter(p => p.estado === 'Pedido').length,
+                    totalPedidos: pedidos.length,
+                    pedidosPendientes: pedidos.filter(p => p.estado !== 'Entregado').length,
+                    totalReparaciones: reparaciones.length,
+                    reparacionesPendientes: reparaciones.filter(r => r.estado !== 'Completado' && r.estado !== 'Entregado').length,
+                    beneficioTotal: pedidos.reduce((sum, p) => sum + ((parseFloat(p.precioVenta)||0) - (parseFloat(p.precioCompra)||0)) * (parseInt(p.cantidad)||1), 0)
+                };
+
+                let suggestionText = "";
+
+                if (openaiApiKey) {
+                    try {
+                        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${openaiApiKey}`
+                            },
+                            body: JSON.stringify({
+                                model: "gpt-3.5-turbo",
+                                messages: [
+                                    { role: "system", content: "Eres un asistente de gestión de taller SAT. Analiza los datos y da recomendaciones prácticas para mejorar la eficiencia, reducir retrasos y aumentar beneficios. Responde en español, con viñetas y tono profesional pero cercano." },
+                                    { role: "user", content: `Datos del taller:\n- Piezas totales: ${stats.totalPiezas} (${stats.piezasPendientes} pendientes de recibir)\n- Pedidos: ${stats.totalPedidos} (${stats.pedidosPendientes} sin entregar)\n- Reparaciones: ${stats.totalReparaciones} (${stats.reparacionesPendientes} en curso)\n- Beneficio estimado: ${stats.beneficioTotal.toFixed(2)}€\n\nDa 5 recomendaciones concretas para mejorar la gestión.` }
+                                ],
+                                temperature: 0.7,
+                                max_tokens: 500
+                            })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            suggestionText = data.choices[0].message.content;
+                        } else {
+                            throw new Error("Error en API");
+                        }
+                    } catch (apiError) {
+                        console.error("API Error:", apiError);
+                        suggestionText = generateLocalSuggestions(stats);
+                    }
+                } else {
+                    suggestionText = generateLocalSuggestions(stats);
+                }
+
+                content.innerHTML = `
+                    <div class="prose prose-sm max-w-none text-sm">
+                        ${suggestionText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/## (.*?)(<br>|$)/g, '<h3 class="font-bold text-lg mt-2 mb-1">$1</h3>')}
+                    </div>
+                    <div class="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+                        💡 Tip: Guarda tu API Key de OpenAI arriba para obtener sugerencias personalizadas con IA real basada en tus datos históricos.
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Error IA:", error);
+                content.innerHTML = `<div class="text-red-500 text-sm">❌ Error al generar sugerencias. ${!openaiApiKey ? 'Configura una API Key de OpenAI arriba para usar IA real.' : 'Revisa tu conexión o API Key.'}</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        function generateLocalSuggestions(stats) {
+            return `## 📊 Análisis de tu taller (${new Date().toLocaleDateString()})
+
+**Resumen actual:**
+- 🧩 ${stats.piezasPendientes} piezas pendientes de recibir de ${stats.totalPiezas} totales
+- 📦 ${stats.pedidosPendientes} pedidos sin entregar de ${stats.totalPedidos}
+- 🔧 ${stats.reparacionesPendientes} reparaciones en curso de ${stats.totalReparaciones}
+- 💰 Beneficio estimado: ${stats.beneficioTotal.toFixed(2)}€
+
+**Recomendaciones personalizadas:**
+
+1. **Piezas retrasadas** ${stats.piezasPendientes > 3 ? '⚠️ Tienes varias piezas en espera. Contacta con proveedores para fechas estimadas.' : '✅ El stock de piezas está controlado. Sigue así.'}
+
+2. **Pedidos pendientes** ${stats.pedidosPendientes > 5 ? '⚠️ Hay acumulación de pedidos. Revisa los más antiguos y prioriza entregas.' : '✅ Los pedidos fluyen correctamente.'}
+
+3. **Reparaciones** ${stats.reparacionesPendientes > 3 ? '⚠️ Varias reparaciones llevan tiempo. Asigna un técnico específico para desbloquearlas.' : '✅ Las reparaciones están bajo control.'}
+
+4. **Rentabilidad** ${stats.beneficioTotal < 500 ? '⚠️ El margen es bajo. Revisa precios de venta o negocia mejores condiciones con proveedores.' : '✅ El margen de beneficio es saludable.'}
+
+5. **Acción inmediata**: Revisa las alertas en el panel de recordatorios para priorizar tareas críticas.`;
+        }
+
+        function closeAIModal() {
+            const modal = document.getElementById('ai-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        // ==================== FUNCIONES PRINCIPALES ====================
+        
         async function updateDashboardStats() {
             try {
                 const piezas = await db.piezas.toArray();
@@ -382,10 +703,15 @@
                     }
                 });
 
-                document.getElementById('stat-piezas').textContent = piezas.filter(p => p.estado === 'Pedido').length;
-                document.getElementById('stat-pedidos').textContent = pedidos.filter(p => p.estado && p.estado !== 'Entregado').length;
-                document.getElementById('stat-reparaciones').textContent = reparaciones.filter(r => r.prioridad === 'Alta' && r.estado !== 'Completado').length;
-                document.getElementById('stat-beneficio').textContent = beneficioTotal.toFixed(2) + '€';
+                const statPiezas = document.getElementById('stat-piezas');
+                const statPedidos = document.getElementById('stat-pedidos');
+                const statReparaciones = document.getElementById('stat-reparaciones');
+                const statBeneficio = document.getElementById('stat-beneficio');
+                
+                if (statPiezas) statPiezas.textContent = piezas.filter(p => p.estado === 'Pedido').length;
+                if (statPedidos) statPedidos.textContent = pedidos.filter(p => p.estado && p.estado !== 'Entregado').length;
+                if (statReparaciones) statReparaciones.textContent = reparaciones.filter(r => r.prioridad === 'Alta' && r.estado !== 'Completado').length;
+                if (statBeneficio) statBeneficio.textContent = beneficioTotal.toFixed(2) + '€';
 
                 const allActivity = [];
                 piezas.slice(-2).forEach(p => p.nombre && allActivity.push({ text: `Pieza: ${p.nombre}`, date: p.fecha ? new Date(p.fecha) : new Date(), icon: 'package', usuario: p.usuario || 'Sin asignar' }));
@@ -394,12 +720,16 @@
 
                 allActivity.sort((a, b) => b.date - a.date);
                 const container = document.getElementById('recent-activity');
-                container.innerHTML = allActivity.length === 0 ? '<p class="text-slate-400 text-xs italic">No hay actividad reciente.</p>' : '';
-                allActivity.slice(0, 5).forEach(act => {
-                    const userClass = act.usuario === 'Daniel Farré' ? 'daniel' : (act.usuario === 'José Ayala' ? 'jose' : '');
-                    container.innerHTML += `<div class="flex items-center gap-2"><div class="w-6 h-6 rounded bg-slate-50 flex items-center justify-center"><i data-lucide="${act.icon}" class="w-3 h-3"></i></div><div class="flex-1"><p class="text-xs font-medium">${act.text}</p><p class="text-[10px] text-slate-400">${act.date.toLocaleString()} ${userClass ? '· <span class="user-badge ' + userClass + '">' + act.usuario + '</span>' : ''}</p></div></div>`;
-                });
+                if (container) {
+                    container.innerHTML = allActivity.length === 0 ? '<p class="text-slate-400 text-xs italic">No hay actividad reciente.</p>' : '';
+                    allActivity.slice(0, 5).forEach(act => {
+                        const userClass = act.usuario === 'Daniel Farré' ? 'daniel' : (act.usuario === 'José Ayala' ? 'jose' : '');
+                        container.innerHTML += `<div class="flex items-center gap-2"><div class="w-6 h-6 rounded bg-slate-50 flex items-center justify-center"><i data-lucide="${act.icon}" class="w-3 h-3"></i></div><div class="flex-1"><p class="text-xs font-medium">${act.text}</p><p class="text-[10px] text-slate-400">${act.date.toLocaleString()} ${userClass ? '· <span class="user-badge ' + userClass + '">' + act.usuario + '</span>' : ''}</p></div></div>`;
+                    });
+                }
                 lucide.createIcons();
+                
+                updateIntelligentAlerts();
             } catch (error) {
                 console.error(error);
             }
@@ -436,15 +766,25 @@
                 const beneficioBruto = ingresosTotales - costePiezasTotal;
                 const margenBeneficio = ingresosTotales > 0 ? (beneficioBruto / ingresosTotales * 100).toFixed(1) : 0;
 
-                document.getElementById('kpi-ingresos').textContent = ingresosTotales.toFixed(2) + '€';
-                document.getElementById('kpi-coste-piezas').textContent = costePiezasTotal.toFixed(2) + '€';
-                document.getElementById('kpi-beneficio').textContent = beneficioBruto.toFixed(2) + '€';
-                document.getElementById('kpi-margen').textContent = margenBeneficio + '%';
-                document.getElementById('kpi-total-pedidos').textContent = pedidos.length;
-                document.getElementById('kpi-pedidos-entregados').textContent = pedidos.filter(p => p.estado === 'Entregado').length;
-                document.getElementById('kpi-reparaciones-completadas').textContent = reparaciones.filter(r => r.estado === 'Completado' || r.estado === 'Entregado').length;
-                document.getElementById('kpi-piezas-pendientes').textContent = piezas.filter(p => p.estado === 'Pedido').length;
-                document.getElementById('kpi-tasa-entrega').textContent = pedidos.length > 0 ? Math.round((pedidos.filter(p => p.estado === 'Entregado').length / pedidos.length) * 100) : 0 + '%';
+                const kpiIngresos = document.getElementById('kpi-ingresos');
+                const kpiCoste = document.getElementById('kpi-coste-piezas');
+                const kpiBeneficio = document.getElementById('kpi-beneficio');
+                const kpiMargen = document.getElementById('kpi-margen');
+                const kpiTotalPedidos = document.getElementById('kpi-total-pedidos');
+                const kpiEntregados = document.getElementById('kpi-pedidos-entregados');
+                const kpiReparaciones = document.getElementById('kpi-reparaciones-completadas');
+                const kpiPiezas = document.getElementById('kpi-piezas-pendientes');
+                const kpiTasa = document.getElementById('kpi-tasa-entrega');
+                
+                if (kpiIngresos) kpiIngresos.textContent = ingresosTotales.toFixed(2) + '€';
+                if (kpiCoste) kpiCoste.textContent = costePiezasTotal.toFixed(2) + '€';
+                if (kpiBeneficio) kpiBeneficio.textContent = beneficioBruto.toFixed(2) + '€';
+                if (kpiMargen) kpiMargen.textContent = margenBeneficio + '%';
+                if (kpiTotalPedidos) kpiTotalPedidos.textContent = pedidos.length;
+                if (kpiEntregados) kpiEntregados.textContent = pedidos.filter(p => p.estado === 'Entregado').length;
+                if (kpiReparaciones) kpiReparaciones.textContent = reparaciones.filter(r => r.estado === 'Completado' || r.estado === 'Entregado').length;
+                if (kpiPiezas) kpiPiezas.textContent = piezas.filter(p => p.estado === 'Pedido').length;
+                if (kpiTasa) kpiTasa.textContent = pedidos.length > 0 ? Math.round((pedidos.filter(p => p.estado === 'Entregado').length / pedidos.length) * 100) : 0 + '%';
 
                 updateChartPedidosEstado(pedidos);
                 updateChartReparacionesEstado(reparaciones);
@@ -457,7 +797,8 @@
         function updateChartPedidosEstado(pedidos) {
             const estados = {};
             pedidos.forEach(p => { estados[p.estado] = (estados[p.estado] || 0) + 1; });
-            const ctx = document.getElementById('chart-pedidos-estado').getContext('2d');
+            const ctx = document.getElementById('chart-pedidos-estado')?.getContext('2d');
+            if (!ctx) return;
             if (charts.pedidosEstado) charts.pedidosEstado.destroy();
             charts.pedidosEstado = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c'], borderColor: '#fff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } } });
         }
@@ -465,13 +806,16 @@
         function updateChartReparacionesEstado(reparaciones) {
             const estados = {};
             reparaciones.forEach(r => { estados[r.estado] = (estados[r.estado] || 0) + 1; });
-            const ctx = document.getElementById('chart-reparaciones-estado').getContext('2d');
+            const ctx = document.getElementById('chart-reparaciones-estado')?.getContext('2d');
+            if (!ctx) return;
             if (charts.reparacionesEstado) charts.reparacionesEstado.destroy();
             charts.reparacionesEstado = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#4facfe', '#00f2fe', '#43e97b', '#fa709a'], borderColor: '#fff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } } });
         }
 
         function updateDetalleVentas(pedidos, piezas) {
             const tbody = document.getElementById('detalle-ventas-tbody');
+            if (!tbody) return;
+            
             const items = [];
             
             pedidos.forEach(p => {
@@ -496,7 +840,7 @@
             items.sort((a, b) => b.beneficio - a.beneficio);
             tbody.innerHTML = items.slice(0, 15).map(item => `
                 <tr class="hover:bg-slate-50">
-                    <td class="px-2 md:px-4 py-2 text-xs">${item.nombre.substring(0, 20)}</td>
+                    <td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.nombre.substring(0, 20))}</td>
                     <td class="px-2 md:px-4 py-2 text-xs">${item.tipo}</td>
                     <td class="px-2 md:px-4 py-2 text-xs">${item.compra.toFixed(2)}€</td>
                     <td class="px-2 md:px-4 py-2 text-xs">${item.venta.toFixed(2)}€</td>
@@ -511,6 +855,8 @@
             const data = await db[section].toArray();
             const head = document.getElementById('table-head');
             const body = document.getElementById('table-body');
+
+            if (!head || !body) return;
 
             let headers = [];
             if (section === 'piezas') headers = ['Pieza', 'Proveedor', 'P.Compra', 'P.Venta', 'Usuario', 'Estado', 'Fecha'];
@@ -527,15 +873,35 @@
                     const userClass = item.usuario === 'Daniel Farré' ? 'daniel' : 'jose';
                     let content = '';
                     if (section === 'piezas') {
-                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${item.nombre || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.proveedor || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioCompra || '-'}€</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta || '-'}€</td><td class="px-2 md:px-4 py-2"><span class="user-badge ${userClass} text-[9px]">${item.usuario}</span></td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.nombre || '-')}</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.proveedor || '-')}</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${item.precioCompra || '-'}€</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta || '-'}€</td>
+                            <td class="px-2 md:px-4 py-2"><span class="user-badge ${userClass} text-[9px]">${item.usuario}</span></td>
+                            <td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
                     } else if (section === 'pedidos') {
-                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${item.producto || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.cliente || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioCompra || '-'}€</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta || '-'}€</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.producto || '-')}</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.cliente || '-')}</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${item.precioCompra || '-'}€</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta || '-'}€</td>
+                            <td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
                     } else if (section === 'reparaciones') {
-                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${item.ot || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.cliente || '-'}</td><td class="px-2 md:px-4 py-2 text-xs">${item.marca} ${item.modelo}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precio ? item.precio + '€' : '-'}</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
+                        content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.ot || '-')}</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.cliente || '-')}</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${item.precio ? item.precio + '€' : '-'}</td>
+                            <td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td>
+                            <td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
                     }
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-50';
-                    tr.innerHTML = `${content}<td class="px-2 md:px-4 py-2 text-right space-x-1"><button onclick="viewDetail('${section}', ${item.id})" class="btn-small bg-slate-100 p-1"><i data-lucide="eye" class="w-3 h-3"></i></button><button onclick="editRecord('${section}', ${item.id})" class="btn-small bg-slate-100 p-1"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick="deleteRecord('${section}', ${item.id})" class="btn-small bg-slate-100 p-1"><i data-lucide="trash" class="w-3 h-3"></i></button></td>`;
+                    tr.innerHTML = `${content}<td class="px-2 md:px-4 py-2 text-right space-x-1">
+                        <button onclick='viewDetail("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-green-100"><i data-lucide="eye" class="w-3 h-3"></i></button>
+                        <button onclick='editRecord("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-blue-100"><i data-lucide="edit-2" class="w-3 h-3"></i></button>
+                        <button onclick='deleteRecord("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-red-100"><i data-lucide="trash" class="w-3 h-3"></i></button>
+                    </td>`;
                     body.appendChild(tr);
                 });
             }
@@ -571,23 +937,14 @@
             return { text: `Plazo vencido`, class: 'badge-expired' };
         }
 
-        function calcularPreview(compra, venta, cantidad = 1) {
-            const compraNum = parseFloat(compra) || 0;
-            const ventaNum = parseFloat(venta) || 0;
-            const cantidadNum = parseInt(cantidad) || 1;
-            const beneficio = (ventaNum - compraNum) * cantidadNum;
-            const margen = ventaNum > 0 ? ((ventaNum - compraNum) / ventaNum * 100).toFixed(1) : 0;
-            const ivaVenta = ventaNum * (IVA / 100);
-            const totalConIVA = ventaNum + ivaVenta;
-            return { beneficio, margen, ivaVenta, totalConIVA };
-        }
-
         function openModal(editData = null) {
             const modal = document.getElementById('modal');
             const fields = document.getElementById('form-fields');
             const title = document.getElementById('modal-title');
             const idInput = document.getElementById('form-id');
             let activeSection = currentSection === 'dashboard' ? 'reparaciones' : currentSection;
+            
+            if (!modal || !fields || !title || !idInput) return;
             
             title.textContent = editData ? `Editar ${activeSection === 'reparaciones' ? 'Reparación' : (activeSection === 'piezas' ? 'Pieza' : 'Pedido')}` : `Nuevo ${activeSection === 'reparaciones' ? 'Reparación' : (activeSection === 'piezas' ? 'Pieza' : 'Pedido')}`;
             idInput.value = editData ? editData.id : '';
@@ -598,10 +955,10 @@
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="package" class="w-4 h-4"></i> Datos de la Pieza</div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded p-2 text-sm" value="${editData?.nombre || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.nombre || '')}"></div>
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Cantidad *</label><input type="number" name="cantidad" required class="w-full border rounded p-2 text-sm" value="${editData?.cantidad || 1}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded p-2 text-sm" value="${editData?.proveedor || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Referencia</label><input type="text" name="referencia" class="w-full border rounded p-2 text-sm" value="${editData?.referencia || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.proveedor || '')}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Referencia</label><input type="text" name="referencia" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.referencia || '')}"></div>
                         </div>
                     </div>
                     <div class="form-section">
@@ -619,7 +976,7 @@
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario *</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado === 'Pedido' ? 'selected' : ''}>Pedido</option><option ${editData?.estado === 'Recibido' ? 'selected' : ''}>Recibido</option><option ${editData?.estado === 'Instalado' ? 'selected' : ''}>Instalado</option><option ${editData?.estado === 'Vendido' ? 'selected' : ''}>Vendido</option></select></div>
                         </div>
-                        <div class="mt-3"><label class="block text-xs font-bold text-slate-500 mb-1">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded p-2 text-sm" placeholder="Notas adicionales...">${editData?.observaciones || ''}</textarea></div>
+                        <div class="mt-3"><label class="block text-xs font-bold text-slate-500 mb-1">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded p-2 text-sm" placeholder="Notas adicionales...">${escapeHtml(editData?.observaciones || '')}</textarea></div>
                     </div>
                 `;
             } else if (activeSection === 'pedidos') {
@@ -627,10 +984,10 @@
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Datos del Pedido</div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Producto/Modelo *</label><input type="text" name="producto" required class="w-full border rounded p-2 text-sm" value="${editData?.producto || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Producto/Modelo *</label><input type="text" name="producto" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.producto || '')}"></div>
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Cantidad *</label><input type="number" name="cantidad" id="cantidad" required class="w-full border rounded p-2 text-sm" value="${editData?.cantidad || 1}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${editData?.cliente || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Referencia</label><input type="text" name="referencia" class="w-full border rounded p-2 text-sm" value="${editData?.referencia || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.cliente || '')}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Referencia</label><input type="text" name="referencia" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.referencia || '')}"></div>
                         </div>
                     </div>
                     <div class="form-section">
@@ -648,7 +1005,7 @@
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario *</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado === 'En Espera' ? 'selected' : ''}>En Espera</option><option ${editData?.estado === 'Preparando' ? 'selected' : ''}>Preparando</option><option ${editData?.estado === 'Enviado' ? 'selected' : ''}>Enviado</option><option ${editData?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option></select></div>
                         </div>
-                        <div class="mt-3"><label class="block text-xs font-bold text-slate-500 mb-1">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded p-2 text-sm" placeholder="Notas adicionales, dirección, etc...">${editData?.observaciones || ''}</textarea></div>
+                        <div class="mt-3"><label class="block text-xs font-bold text-slate-500 mb-1">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded p-2 text-sm" placeholder="Notas adicionales, dirección, etc...">${escapeHtml(editData?.observaciones || '')}</textarea></div>
                     </div>
                 `;
             } else if (activeSection === 'reparaciones') {
@@ -656,30 +1013,30 @@
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="file-text" class="w-4 h-4"></i> Datos de la Orden</div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nº Orden (OT) *</label><input type="text" name="ot" required class="w-full border rounded p-2 text-sm" value="${editData?.ot || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nº Orden (OT) *</label><input type="text" name="ot" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.ot || '')}"></div>
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Entrada</label><input type="date" name="fechaEntrada" class="w-full border rounded p-2 text-sm" value="${editData?.fechaEntrada || new Date().toISOString().split('T')[0]}"></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="smartphone" class="w-4 h-4"></i> Datos del Equipo</div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Marca *</label><input type="text" name="marca" required class="w-full border rounded p-2 text-sm" value="${editData?.marca || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded p-2 text-sm" value="${editData?.modelo || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nº Serie</label><input type="text" name="serie" class="w-full border rounded p-2 text-sm" value="${editData?.serie || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Password/Patrón</label><input type="text" name="password" class="w-full border rounded p-2 text-sm" value="${editData?.password || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Marca *</label><input type="text" name="marca" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.marca || '')}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.modelo || '')}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Nº Serie</label><input type="text" name="serie" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.serie || '')}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Password/Patrón</label><input type="text" name="password" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.password || '')}"></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="user" class="w-4 h-4"></i> Datos del Cliente</div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${editData?.cliente || ''}"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Teléfono</label><input type="tel" name="telefono" class="w-full border rounded p-2 text-sm" value="${editData?.telefono || ''}"></div>
-                            <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-1">Email</label><input type="email" name="email" class="w-full border rounded p-2 text-sm" value="${editData?.email || ''}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.cliente || '')}"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-1">Teléfono</label><input type="tel" name="telefono" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.telefono || '')}"></div>
+                            <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-1">Email</label><input type="email" name="email" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.email || '')}"></div>
                         </div>
                     </div>
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Diagnóstico y Presupuesto</div>
-                        <div><label class="block text-xs font-bold text-slate-500 mb-1">Diagnóstico / Avería</label><textarea name="diagnostico" rows="2" class="w-full border rounded p-2 text-sm">${editData?.diagnostico || ''}</textarea></div>
+                        <div><label class="block text-xs font-bold text-slate-500 mb-1">Diagnóstico / Avería</label><textarea name="diagnostico" rows="2" class="w-full border rounded p-2 text-sm">${escapeHtml(editData?.diagnostico || '')}</textarea></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Estimado (€, IVA ${IVA}% incluido)</label><input type="number" step="0.01" name="precio" class="w-full border rounded p-2 text-sm" value="${editData?.precio || ''}"></div>
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Prioridad</label><select name="prioridad" class="w-full border rounded p-2 text-sm"><option ${editData?.prioridad === 'Baja' ? 'selected' : ''}>Baja</option><option ${editData?.prioridad === 'Media' ? 'selected' : ''}>Media</option><option ${editData?.prioridad === 'Alta' ? 'selected' : ''}>Alta</option></select></div>
@@ -687,7 +1044,7 @@
                     </div>
                     <div class="form-section">
                         <div class="form-section-title"><i data-lucide="package" class="w-4 h-4"></i> Accesorios y Estado</div>
-                        <div><label class="block text-xs font-bold text-slate-500 mb-1">Accesorios que deja</label><textarea name="accesorios" rows="2" class="w-full border rounded p-2 text-sm">${editData?.accesorios || ''}</textarea></div>
+                        <div><label class="block text-xs font-bold text-slate-500 mb-1">Accesorios que deja</label><textarea name="accesorios" rows="2" class="w-full border rounded p-2 text-sm">${escapeHtml(editData?.accesorios || '')}</textarea></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Estado Reparación</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option ${editData?.estado === 'Diagnóstico' ? 'selected' : ''}>Diagnóstico</option><option ${editData?.estado === 'Reparando' ? 'selected' : ''}>Reparando</option><option ${editData?.estado === 'Espera Piezas' ? 'selected' : ''}>Espera Piezas</option><option ${editData?.estado === 'Completado' ? 'selected' : ''}>Completado</option><option ${editData?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option></select></div>
                             <div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario Asignado</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario === 'Daniel Farré' ? 'selected' : ''}>Daniel Farré</option><option ${editData?.usuario === 'José Ayala' ? 'selected' : ''}>José Ayala</option></select></div>
@@ -700,7 +1057,6 @@
             modal.classList.add('flex');
             lucide.createIcons();
 
-            // Configurar preview de precios para piezas y pedidos
             if (activeSection === 'piezas' || activeSection === 'pedidos') {
                 const compraInput = document.querySelector('input[name="precioCompra"]');
                 const ventaInput = document.querySelector('input[name="precioVenta"]');
@@ -718,32 +1074,40 @@
                     const totalCompraConIVA = compra + ivaCompra;
                     const totalVentaConIVA = venta + ivaVenta;
                     
-                    previewDiv.innerHTML = `
-                        <div class="grid grid-cols-2 gap-2">
-                            <div><strong>Sin IVA:</strong><br>Compra: ${compra.toFixed(2)}€<br>Venta: ${venta.toFixed(2)}€</div>
-                            <div><strong>Con IVA (${IVA}%):</strong><br>Compra: ${totalCompraConIVA.toFixed(2)}€<br>Venta: ${totalVentaConIVA.toFixed(2)}€</div>
-                        </div>
-                        <div class="mt-2 pt-2 border-t border-slate-200">
-                            <strong>Beneficio por unidad:</strong> ${beneficio.toFixed(2)}€ (${margen}% margen)<br>
-                            <strong>Beneficio total (${cantidad} uds):</strong> <span class="${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${(beneficio).toFixed(2)}€</span>
-                        </div>
-                    `;
+                    if (previewDiv) {
+                        previewDiv.innerHTML = `
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><strong>Sin IVA:</strong><br>Compra: ${compra.toFixed(2)}€<br>Venta: ${venta.toFixed(2)}€</div>
+                                <div><strong>Con IVA (${IVA}%):</strong><br>Compra: ${totalCompraConIVA.toFixed(2)}€<br>Venta: ${totalVentaConIVA.toFixed(2)}€</div>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-slate-200">
+                                <strong>Beneficio por unidad:</strong> ${(venta - compra).toFixed(2)}€ (${margen}% margen)<br>
+                                <strong>Beneficio total (${cantidad} uds):</strong> <span class="${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${beneficio.toFixed(2)}€</span>
+                            </div>
+                        `;
+                    }
                 };
-                compraInput?.addEventListener('input', updatePreview);
-                ventaInput?.addEventListener('input', updatePreview);
-                cantidadInput?.addEventListener('input', updatePreview);
+                if (compraInput) compraInput.addEventListener('input', updatePreview);
+                if (ventaInput) ventaInput.addEventListener('input', updatePreview);
+                if (cantidadInput) cantidadInput.addEventListener('input', updatePreview);
                 updatePreview();
             }
         }
 
         function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-            document.getElementById('modal').classList.remove('flex');
-            document.getElementById('record-form').reset();
+            const modal = document.getElementById('modal');
+            const form = document.getElementById('record-form');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            if (form) form.reset();
         }
 
         async function viewDetail(section, id) {
             const item = await db[section].get(id);
+            if (!item) return;
+            
             const userClass = item.usuario === 'Daniel Farré' ? 'daniel' : 'jose';
             let html = '';
             if (section === 'piezas') {
@@ -752,14 +1116,13 @@
                 const venta = parseFloat(item.precioVenta) || 0;
                 const cantidad = parseInt(item.cantidad) || 1;
                 const beneficio = (venta - compra) * cantidad;
-                const ivaVenta = venta * (IVA / 100);
-                html = `<div class="detail-row"><div class="detail-label">Pieza</div><div class="detail-value">${item.nombre}</div></div>
+                html = `<div class="detail-row"><div class="detail-label">Pieza</div><div class="detail-value">${escapeHtml(item.nombre)}</div></div>
                     <div class="detail-row"><div class="detail-label">Cantidad</div><div class="detail-value">${item.cantidad}</div></div>
-                    <div class="detail-row"><div class="detail-label">Proveedor</div><div class="detail-value">${item.proveedor || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Proveedor</div><div class="detail-value">${escapeHtml(item.proveedor || '-')}</div></div>
                     <div class="detail-row"><div class="detail-label">Precio Compra</div><div class="detail-value">${item.precioCompra ? item.precioCompra + '€' : '-'} (${(item.precioCompra * (1 + IVA/100)).toFixed(2)}€ con IVA)</div></div>
                     <div class="detail-row"><div class="detail-label">Precio Venta</div><div class="detail-value">${item.precioVenta ? item.precioVenta + '€' : '-'} (${(item.precioVenta * (1 + IVA/100)).toFixed(2)}€ con IVA)</div></div>
                     <div class="detail-row"><div class="detail-label">Beneficio</div><div class="detail-value ${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${beneficio.toFixed(2)}€</div></div>
-                    <div class="detail-row"><div class="detail-label">Observaciones</div><div class="detail-value">${item.observaciones || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Observaciones</div><div class="detail-value">${escapeHtml(item.observaciones || '-')}</div></div>
                     <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
                     <div class="detail-row"><div class="detail-label">Garantía</div><div class="detail-value"><span class="badge-guarantee ${guarantyStatus.class}">${guarantyStatus.text}</span></div></div>
                     <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>`;
@@ -769,47 +1132,58 @@
                 const cantidad = parseInt(item.cantidad) || 1;
                 const beneficio = (venta - compra) * cantidad;
                 const margen = venta > 0 ? ((venta - compra) / venta * 100).toFixed(1) : 0;
-                html = `<div class="detail-row"><div class="detail-label">Producto</div><div class="detail-value">${item.producto}</div></div>
+                html = `<div class="detail-row"><div class="detail-label">Producto</div><div class="detail-value">${escapeHtml(item.producto)}</div></div>
                     <div class="detail-row"><div class="detail-label">Cantidad</div><div class="detail-value">${item.cantidad || 1}</div></div>
-                    <div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${item.cliente}</div></div>
+                    <div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${escapeHtml(item.cliente)}</div></div>
                     <div class="detail-row"><div class="detail-label">Precio Compra</div><div class="detail-value">${item.precioCompra ? item.precioCompra + '€' : '-'} (${(item.precioCompra * (1 + IVA/100)).toFixed(2)}€ con IVA)</div></div>
                     <div class="detail-row"><div class="detail-label">Precio Venta</div><div class="detail-value">${item.precioVenta ? item.precioVenta + '€' : '-'} (${(item.precioVenta * (1 + IVA/100)).toFixed(2)}€ con IVA)</div></div>
                     <div class="detail-row"><div class="detail-label">Beneficio</div><div class="detail-value ${beneficio >= 0 ? 'profit-positive' : 'profit-negative'}">${beneficio.toFixed(2)}€ (${margen}% margen)</div></div>
-                    <div class="detail-row"><div class="detail-label">Observaciones</div><div class="detail-value">${item.observaciones || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Observaciones</div><div class="detail-value">${escapeHtml(item.observaciones || '-')}</div></div>
                     <div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>
                     <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>`;
             } else if (section === 'reparaciones') {
                 const precioConIVA = item.precio ? (parseFloat(item.precio) * (1 + IVA/100)).toFixed(2) : '-';
-                html = `<div class="detail-row"><div class="detail-label">OT</div><div class="detail-value">${item.ot || '-'}</div></div>
+                html = `<div class="detail-row"><div class="detail-label">OT</div><div class="detail-value">${escapeHtml(item.ot || '-')}</div></div>
                     <div class="detail-row"><div class="detail-label">Fecha Entrada</div><div class="detail-value">${item.fechaEntrada ? new Date(item.fechaEntrada).toLocaleDateString() : '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Marca/Modelo</div><div class="detail-value">${item.marca} ${item.modelo}</div></div>
-                    <div class="detail-row"><div class="detail-label">Nº Serie</div><div class="detail-value">${item.serie || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Password</div><div class="detail-value">${item.password || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${item.cliente}</div></div>
-                    <div class="detail-row"><div class="detail-label">Teléfono/Email</div><div class="detail-value">${item.telefono || '-'} / ${item.email || '-'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Diagnóstico</div><div class="detail-value">${item.diagnostico || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Marca/Modelo</div><div class="detail-value">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</div></div>
+                    <div class="detail-row"><div class="detail-label">Nº Serie</div><div class="detail-value">${escapeHtml(item.serie || '-')}</div></div>
+                    <div class="detail-row"><div class="detail-label">Password</div><div class="detail-value">${escapeHtml(item.password || '-')}</div></div>
+                    <div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${escapeHtml(item.cliente)}</div></div>
+                    <div class="detail-row"><div class="detail-label">Teléfono/Email</div><div class="detail-value">${escapeHtml(item.telefono || '-')} / ${escapeHtml(item.email || '-')}</div></div>
+                    <div class="detail-row"><div class="detail-label">Diagnóstico</div><div class="detail-value">${escapeHtml(item.diagnostico || '-')}</div></div>
                     <div class="detail-row"><div class="detail-label">Precio</div><div class="detail-value">${item.precio ? item.precio + '€' : '-'} (${precioConIVA}€ con IVA)</div></div>
-                    <div class="detail-row"><div class="detail-label">Accesorios</div><div class="detail-value">${item.accesorios || '-'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Accesorios</div><div class="detail-value">${escapeHtml(item.accesorios || '-')}</div></div>
                     <div class="detail-row"><div class="detail-label">Prioridad</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getPriorityClass(item.prioridad)}">${item.prioridad}</span></div></div>
                     <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>
                     <div class="detail-row"><div class="detail-label">Técnico</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>`;
             }
-            document.getElementById('detail-content').innerHTML = html;
-            document.getElementById('detail-edit-btn').onclick = () => { closeDetailModal(); editRecord(section, id); };
-            document.getElementById('detail-modal').classList.remove('hidden');
-            document.getElementById('detail-modal').classList.add('flex');
+            const detailContent = document.getElementById('detail-content');
+            const detailTitle = document.getElementById('detail-title');
+            const detailEditBtn = document.getElementById('detail-edit-btn');
+            const detailModal = document.getElementById('detail-modal');
+            
+            if (detailContent) detailContent.innerHTML = html;
+            if (detailTitle) detailTitle.textContent = `Detalles - ${section === 'reparaciones' ? 'Reparación' : (section === 'piezas' ? 'Pieza' : 'Pedido')}`;
+            if (detailEditBtn) detailEditBtn.onclick = () => { closeDetailModal(); editRecord(section, id); };
+            if (detailModal) {
+                detailModal.classList.remove('hidden');
+                detailModal.classList.add('flex');
+            }
             lucide.createIcons();
         }
 
         function closeDetailModal() {
-            document.getElementById('detail-modal').classList.add('hidden');
-            document.getElementById('detail-modal').classList.remove('flex');
+            const modal = document.getElementById('detail-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
         }
 
-        document.getElementById('record-form').onsubmit = async (e) => {
+        document.getElementById('record-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target).entries());
-            const id = document.getElementById('form-id').value;
+            const data = Object.fromEntries(new FormData(e.target));
+            const id = document.getElementById('form-id')?.value;
             let activeSection = currentSection === 'dashboard' ? 'reparaciones' : currentSection;
             data.fecha = new Date().toISOString();
             if (id) {
@@ -819,12 +1193,14 @@
             }
             closeModal();
             showSection(currentSection);
-        };
+        });
 
         async function editRecord(section, id) {
             const item = await db[section].get(id);
-            currentSection = section;
-            openModal(item);
+            if (item) {
+                currentSection = section;
+                openModal(item);
+            }
         }
 
         async function deleteRecord(section, id) {
@@ -833,6 +1209,23 @@
                 showSection(currentSection);
             }
         }
+        
+        // Exponer funciones globalmente para que los onclick funcionen
+        window.showSection = showSection;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.viewDetail = viewDetail;
+        window.closeDetailModal = closeDetailModal;
+        window.editRecord = editRecord;
+        window.deleteRecord = deleteRecord;
+        window.login = login;
+        window.logout = logout;
+        window.openReminderModal = openReminderModal;
+        window.closeReminderModal = closeReminderModal;
+        window.generateAISuggestions = generateAISuggestions;
+        window.closeAIModal = closeAIModal;
+        window.configureAPIKey = configureAPIKey;
+        window.handleAlertClick = handleAlertClick;
     </script>
 </body>
 </html>
