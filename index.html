@@ -195,19 +195,14 @@
         <div id="view-reportes" class="hidden space-y-4 md:space-y-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"><div class="metric-box blue"><p>💰 Ingresos</p><h3 id="kpi-ingresos">0€</h3></div><div class="metric-box"><p>📦 Coste Piezas</p><h3 id="kpi-coste-piezas">0€</h3></div><div class="metric-box green"><p>📈 Beneficio</p><h3 id="kpi-beneficio">0€</h3></div><div class="metric-box orange"><p>📊 Margen</p><h3 id="kpi-margen">0%</h3></div></div>
             <div class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4"><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Total Pedidos</p><h3 id="kpi-total-pedidos" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Entregados</p><h3 id="kpi-pedidos-entregados" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Reparaciones OK</p><h3 id="kpi-reparaciones-completadas" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Piezas Pedidas</p><h3 id="kpi-piezas-pendientes" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Tasa Entrega</p><h3 id="kpi-tasa-entrega" class="text-lg md:text-2xl font-bold">0%</h3></div></div>
-            
             <div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4"></i> Evolución Mensual de Ingresos (Total)</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
-            
             <div class="flat-card p-4"><div class="flex flex-wrap justify-between items-center mb-3"><h4 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> Evolución Mensual por Técnico</h4><div class="range-selector" id="range-selector"><button class="range-btn" data-months="3">3 meses</button><button class="range-btn active" data-months="6">6 meses</button><button class="range-btn" data-months="12">12 meses</button></div></div><div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div><div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-center text-xs"></div></div>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4"></i> Ranking por Usuario (Inc. Garantías)</h4><div id="ranking-usuarios" class="space-y-3"></div></div><div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Gráfico de Rendimiento</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div></div>
-            
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Pedidos</h4><div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div></div>
                 <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Reparaciones</h4><div class="chart-container"><canvas id="chart-reparaciones-estado"></canvas></div></div>
                 <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="shield-check" class="w-4 h-4 inline mr-2"></i> Estado de Garantías</h4><div class="chart-container"><canvas id="chart-garantias-estado"></canvas></div></div>
             </div>
-            
             <div class="flat-card overflow-hidden"><div class="px-4 py-3 bg-slate-50 border-b border-slate-200"><h4 class="font-bold text-slate-700 text-sm"><i data-lucide="list" class="w-4 h-4 inline mr-2"></i> Detalle de Ventas y Rentabilidad</h4></div><div class="table-responsive"><table class="w-full text-left text-xs md:text-sm"><thead class="bg-slate-50"><tr><th class="px-2 md:px-4 py-2">Producto</th><th class="px-2 md:px-4 py-2">Tipo</th><th class="px-2 md:px-4 py-2">Compra</th><th class="px-2 md:px-4 py-2">Venta</th><th class="px-2 md:px-4 py-2">Beneficio</th><th class="px-2 md:px-4 py-2 hidden md:table-cell">Margen</th><th class="px-2 md:px-4 py-2">Estado</th></tr></thead><tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100"></tbody></table></div></div>
         </div>
 
@@ -285,7 +280,7 @@
 <div id="ai-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden max-h-[80vh] flex flex-col">
         <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bot" class="w-4 h-4"></i> Análisis del Taller</h3>
+            <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bot" class="w-4 h-4"></i> Análisis Detallado del Taller</h3>
             <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div id="ai-content" class="p-4 overflow-y-auto flex-1"><p class="text-slate-500 text-sm">Analizando datos...</p></div>
@@ -701,19 +696,58 @@ document.getElementById('reminder-form').onsubmit = async(e) => {
 };
 
 async function generateAISuggestions() {
-    showToast('Analizando datos...');
-    const modal = document.getElementById('ai-modal'); modal.classList.remove('hidden'); modal.classList.add('flex');
-    const r = await db.reparaciones.toArray();
-    document.getElementById('ai-content').innerHTML = `<div class="suggestion-card info"><h4 class="font-bold">Resumen de Taller</h4><p class="text-xs">Tienes ${r.filter(x=>x.estado==='Pendiente').length} reparaciones pendientes. Deberías priorizar las de Daniel ya que tiene más carga.</p></div>`;
+    const modal = document.getElementById('ai-modal'), content = document.getElementById('ai-content');
+    if(!modal||!content) return;
+    modal.classList.remove('hidden'); modal.classList.add('flex');
+    content.innerHTML = '<div class="text-center py-8"><div class="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div><p class="text-sm mt-2 text-slate-500">Analizando datos del taller...</p></div>';
+    try {
+        const piezas = await db.piezas.toArray(), pedidos = await db.pedidos.toArray(), reparaciones = await db.reparaciones.toArray();
+        const stats = {
+            totalPiezas:piezas.length, piezasPendientes:piezas.filter(p=>p.estado==='Pedido').length,
+            totalPedidos:pedidos.length, pedidosPendientes:pedidos.filter(p=>p.estado!=='Entregado').length, pedidosEntregados:pedidos.filter(p=>p.estado==='Entregado').length,
+            totalReparaciones:reparaciones.length, reparacionesPendientes:reparaciones.filter(r=>r.estado!=='Completado' && r.estado!=='Entregado').length,
+            reparacionesCompletadas:reparaciones.filter(r=>r.estado==='Completado'||r.estado==='Entregado').length,
+            beneficioTotal:pedidos.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1),0)
+        };
+        const suggestions = [];
+        if(stats.piezasPendientes>3) suggestions.push({ type:'critical', icon:'alert-triangle', title:'Piezas críticas', description:`Tienes ${stats.piezasPendientes} piezas en espera prolongada.`, action:'Contactar con proveedores urgentemente.' });
+        else if(stats.piezasPendientes>0) suggestions.push({ type:'warning', icon:'clock', title:'Piezas en espera', description:`${stats.piezasPendientes} piezas pendientes de recibir.`, action:'Hacer seguimiento de los pedidos.' });
+        else suggestions.push({ type:'success', icon:'check-circle', title:'Stock al día', description:'No hay piezas pendientes.', action:'Buen control de inventario.' });
+
+        if(stats.pedidosPendientes>5) suggestions.push({ type:'critical', icon:'shopping-cart', title:'Saturación de pedidos', description:`${stats.pedidosPendientes} pedidos sin entregar.`, action:'Priorizar entregas pendientes.' });
+        else if(stats.pedidosPendientes>0) suggestions.push({ type:'warning', icon:'package', title:'Pedidos activos', description:`${stats.pedidosPendientes} pedidos en proceso.`, action:'Revisar plazos de entrega.' });
+        else suggestions.push({ type:'success', icon:'check-circle', title:'Pedidos completados', description:'Todos los pedidos entregados.', action:'Excelente ritmo de venta.' });
+
+        if(stats.reparacionesPendientes>3) suggestions.push({ type:'critical', icon:'wrench', title:'Cuello de botella en taller', description:`${stats.reparacionesPendientes} equipos esperando reparación.`, action:'Considerar redistribución de tareas.' });
+        else if(stats.reparacionesPendientes>0) suggestions.push({ type:'warning', icon:'clock', title:'Reparaciones en curso', description:`${stats.reparacionesPendientes} equipos en taller.`, action:'Mantener informados a los clientes.' });
+        else suggestions.push({ type:'success', icon:'check-circle', title:'Taller despejado', description:'No hay reparaciones pendientes.', action:'Taller listo para nuevos ingresos.' });
+
+        if(stats.beneficioTotal<1000) suggestions.push({ type:'warning', icon:'trending-down', title:'Rentabilidad a vigilar', description:`Beneficio acumulado: ${stats.beneficioTotal.toFixed(2)}€`, action:'Revisar márgenes de beneficio.' });
+        else suggestions.push({ type:'success', icon:'trending-up', title:'Buena rentabilidad', description:`Beneficio acumulado: ${stats.beneficioTotal.toFixed(2)}€`, action:'Mantener la estrategia actual.' });
+
+        const tasa = stats.totalReparaciones>0 ? (stats.reparacionesCompletadas/stats.totalReparaciones*100).toFixed(0) : 0;
+        if(tasa<60) suggestions.push({ type:'critical', icon:'activity', title:'Baja eficiencia técnica', description:`Tasa de finalización: ${tasa}%`, action:'Identificar causas de retraso.' });
+        else suggestions.push({ type:'success', icon:'thumbs-up', title:'Alta eficiencia técnica', description:`Tasa de finalización: ${tasa}%`, action:'Excelente rendimiento del equipo.' });
+
+        content.innerHTML = `<div class="grid grid-cols-3 gap-2 mb-4">
+            <div class="bg-blue-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">📦 Piezas</p><p class="text-sm font-bold">${stats.totalPiezas}</p><p class="text-[9px] ${stats.piezasPendientes>0?'text-amber-600':'text-green-600'}">${stats.piezasPendientes} pend.</p></div>
+            <div class="bg-green-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">🛒 Pedidos</p><p class="text-sm font-bold">${stats.totalPedidos}</p><p class="text-[9px] ${stats.pedidosPendientes>0?'text-amber-600':'text-green-600'}">${stats.pedidosEntregados} OK</p></div>
+            <div class="bg-purple-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">🔧 Reparac.</p><p class="text-sm font-bold">${stats.totalReparaciones}</p><p class="text-[9px] ${stats.reparacionesPendientes>0?'text-amber-600':'text-green-600'}">${stats.reparacionesCompletadas} OK</p></div>
+        </div>
+        <h4 class="font-bold text-sm mb-2 flex items-center gap-2"><i data-lucide="lightbulb" class="w-4 h-4"></i> Recomendaciones IA</h4>
+        ${suggestions.map(s=>`<div class="suggestion-card ${s.type}"><div class="flex items-start gap-3"><i data-lucide="${s.icon}" class="w-5 h-5 mt-0.5 ${s.type==='critical'?'text-red-500':s.type==='warning'?'text-amber-500':s.type==='success'?'text-green-500':'text-blue-500'}"></i><div class="flex-1"><h4 class="font-bold text-sm">${escapeHtml(s.title)}</h4><p class="text-xs text-slate-600 mt-1">${escapeHtml(s.description)}</p><p class="text-xs font-medium mt-1 ${s.type==='critical'?'text-red-600':s.type==='warning'?'text-amber-600':'text-green-600'}">💡 ${escapeHtml(s.action)}</p></div></div></div>`).join('')}
+        <div class="mt-3 p-2 bg-slate-100 rounded-lg text-center text-[10px] text-slate-500">📊 Análisis generado el ${new Date().toLocaleString('es-ES')}</div>`;
+        lucide.createIcons();
+    } catch(e) { content.innerHTML = '<p class="text-red-500 text-sm text-center">Error al generar informe.</p>'; }
 }
 
 function showImageModal(src) { document.getElementById('modal-image').src = src; document.getElementById('image-modal').classList.remove('hidden'); document.getElementById('image-modal').classList.add('flex'); }
 function closeImageModal() { document.getElementById('image-modal').classList.add('hidden'); }
 
 async function exportData() {
-    const d = { piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), reparaciones: await db.reparaciones.toArray() };
-    const blob = new Blob([JSON.stringify(d)], {type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup.json'; a.click();
+    const d = { piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), reparaciones: await db.reparaciones.toArray(), recordatorios: await db.recordatorios.toArray() };
+    const blob = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup_sat.json'; a.click();
 }
 async function importData(e) {
     const f = e.target.files[0]; if(!f) return;
