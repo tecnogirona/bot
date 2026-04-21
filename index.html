@@ -25,6 +25,12 @@
         .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         body.dark .flat-card { background-color: #1e293b; border-color: #334155; }
         
+        /* Colores distintos para Sidebar y Header en tema oscuro */
+        aside { background: white; }
+        body.dark aside { background-color: #1a2744; }
+        header { background: white; }
+        body.dark header { background-color: #0f172a; }
+        
         .sidebar-link { display: flex; align-items: center; padding: 10px; color: #64748b; border-radius: 6px; margin-bottom: 2px; transition: all 0.2s; cursor: pointer; }
         .sidebar-link.active { background-color: #e2e8f0; color: #2563eb; font-weight: 600; }
         body.dark .sidebar-link.active { background-color: #334155; color: #3b82f6; }
@@ -87,7 +93,7 @@
 </div>
 
 <!-- Sidebar -->
-<aside class="w-16 md:w-56 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col z-30">
+<aside class="w-16 md:w-56 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col z-30">
     <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
         <div class="bg-blue-600 p-1.5 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
         <h1 class="text-lg font-black text-slate-800 dark:text-white sidebar-text tracking-tighter">SAT V8.1</h1>
@@ -98,6 +104,7 @@
         <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Piezas</span></a>
         <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Pedidos</span></a>
         <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Métricas</span></a>
+        <a href="#" onclick="showSection('recordatorios')" id="link-recordatorios" class="sidebar-link"><i data-lucide="calendar" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Agenda</span></a>
     </nav>
     <div class="p-4 border-t border-slate-100 dark:border-slate-700">
         <button onclick="logout()" class="flex items-center gap-3 text-slate-400 hover:text-red-600 transition-colors w-full p-2">
@@ -108,7 +115,7 @@
 
 <!-- Main -->
 <main class="flex-1 flex flex-col min-w-0">
-    <header class="h-14 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-6 z-20 flex-shrink-0">
+    <header class="h-14 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-6 z-20 flex-shrink-0">
         <h2 id="section-title" class="text-base font-black text-slate-700 dark:text-white uppercase tracking-tight truncate">Dashboard</h2>
         <div class="flex items-center gap-3">
             <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500"><i data-lucide="moon" id="dark-icon" class="w-4 h-4"></i></button>
@@ -167,6 +174,17 @@
             </div>
             <div class="flat-card overflow-hidden"><div class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase">Auditoría de Ventas y Rentabilidad</div><div class="horizontal-scroll"><table class="w-full text-left text-[10px] min-w-[600px]"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="px-4 py-2">Producto</th><th class="px-4 py-2">Técnico</th><th class="px-4 py-2">Venta</th><th class="px-4 py-2">Beneficio</th><th class="px-4 py-2">Margen</th><th class="px-4 py-2">Estado</th></tr></thead><tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody></table></div></div>
         </div>
+
+        <!-- Recordatorios View -->
+        <div id="view-recordatorios" class="hidden space-y-4 pb-10">
+            <div class="flat-card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-sm font-black text-slate-800 dark:text-white uppercase">Gestión de Agenda</h3>
+                    <button onclick="openReminderForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 shadow-md active:scale-95 transition-all"><i data-lucide="plus" class="w-4 h-4"></i>NUEVO</button>
+                </div>
+                <div id="recordatorios-list" class="space-y-3"></div>
+            </div>
+        </div>
     </div>
 </main>
 
@@ -217,28 +235,41 @@
 </div>
 
 <div id="reminder-modal" class="modal-overlay">
-    <div class="modal-content max-w-md">
+    <div class="modal-content max-w-2xl">
         <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-amber-500 text-white">
-            <h3 class="font-black uppercase tracking-tighter">Nuevo Recordatorio</h3>
+            <h3 class="font-black uppercase tracking-tighter">Nuevo Recordatorio / Agenda</h3>
             <button onclick="closeReminderModal()" class="p-2 text-white/70 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
         <div class="modal-body">
             <form id="reminder-form" class="space-y-4">
                 <div class="form-section">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Asunto *</label>
-                    <input type="text" name="title" required class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase mt-3 block">Detalles</label>
-                    <textarea name="description" rows="2" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none"></textarea>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Título *</label>
+                    <input type="text" name="title" required class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase mt-3 block">Descripción</label>
+                    <textarea name="description" rows="3" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Fecha</label><input type="date" name="dueDate" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none"></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Prioridad</label><select name="priority" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none"><option value="info">Normal</option><option value="warning">Importante</option><option value="critical">Urgente</option></select></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Fecha</label><input type="date" name="dueDate" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Hora</label><input type="time" name="dueTime" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Categoría</label><select name="category" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none"><option value="taller">Taller</option><option value="cliente">Cliente</option><option value="pago">Pagos</option></select></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Responsable</label><select name="usuario" id="reminder-user-select" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none"></select></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Prioridad</label><select name="priority" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"><option value="info">Normal</option><option value="warning">Importante</option><option value="critical">Urgente</option></select></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Categoría</label><select name="category" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"><option value="taller">Taller</option><option value="cliente">Cliente</option><option value="pago">Pagos</option><option value="otro">Otro</option></select></div>
                 </div>
-                <button type="submit" class="w-full bg-amber-500 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all mt-2 uppercase">Agendar</button>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Responsable</label><select name="usuario" id="reminder-user-select" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"></select></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Referencia (Opcional)</label><input type="text" name="referencia" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700" placeholder="OT, Pedido, etc."></div>
+                </div>
+                <div class="form-section">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Observaciones</label>
+                    <textarea name="observaciones" rows="2" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700" placeholder="Notas adicionales"></textarea>
+                </div>
+                <div class="form-section">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Foto/Imagen (Opcional)</label>
+                    <input type="file" name="foto" accept="image/*" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700" onchange="previewFoto(event)">
+                    <img id="foto-preview" style="display:none; margin-top:10px; max-width:100%; border-radius:8px; max-height:200px;">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all mt-2 uppercase">Guardar Recordatorio</button>
             </form>
         </div>
     </div>
@@ -325,16 +356,18 @@ function showSection(section) {
     const link = $(`link-${section}`);
     if(link) link.classList.add('active');
     
-    const titles = { dashboard:'Resumen Ejecutivo', reparaciones:'Servicio Técnico (SAT)', piezas:'Gestión de Stock', pedidos:'Ventas y Pedidos', reportes:'Auditoría y Reportes' };
+    const titles = { dashboard:'Resumen Ejecutivo', reparaciones:'Servicio Técnico (SAT)', piezas:'Gestión de Stock', pedidos:'Ventas y Pedidos', reportes:'Auditoría y Reportes', recordatorios:'Gestión de Agenda' };
     $('section-title').textContent = titles[section];
-    $('btn-new').style.display = section === 'reportes' ? 'none' : 'flex';
+    $('btn-new').style.display = section === 'reportes' || section === 'recordatorios' ? 'none' : 'flex';
 
     $('view-dashboard').classList.toggle('hidden', section !== 'dashboard');
     $('view-list').classList.toggle('hidden', !['reparaciones','piezas','pedidos'].includes(section));
     $('view-reportes').classList.toggle('hidden', section !== 'reportes');
+    $('view-recordatorios').classList.toggle('hidden', section !== 'recordatorios');
 
     if(section === 'dashboard') updateDashboard();
     else if(section === 'reportes') updateReports();
+    else if(section === 'recordatorios') renderRecordatorios();
     else renderTable(section);
     
     lucide.createIcons();
@@ -383,9 +416,50 @@ async function updateAlerts(reps) {
         }
         if(r.prioridad === 'Alta' && r.estado === 'Pendiente') alerts.push({ title: `SAT URGENTE: ${r.ot}`, desc: r.cliente, prio: 'critical', cat: 'SAT' });
     });
-    recs.forEach(r => { if(!r.completed) alerts.push({ title: r.title, desc: r.description || 'Sin detalles', prio: r.priority, cat: r.category || 'AGENDA', user: r.usuario }); });
+    recs.forEach(r => { if(!r.completed) alerts.push({ title: r.title, desc: r.description || 'Sin detalles', prio: r.priority, cat: r.category || 'AGENDA', user: r.usuario, id: r.id }); });
     const container = $('alert-container');
     container.innerHTML = alerts.length ? alerts.map(a => `<div class="suggestion-card ${a.prio} relative overflow-hidden"><div class="flex items-center justify-between mb-1"><span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-white/50 dark:bg-black/20">${a.cat}</span><span class="text-[8px] font-bold text-slate-400">${a.user||''}</span></div><p class="text-[11px] font-black text-slate-800 dark:text-white">${escapeHtml(a.title)}</p><p class="text-[9px] text-slate-500 mt-0.5">${escapeHtml(a.desc)}</p></div>`).join('') : '<p class="text-center text-slate-400 text-[10px] py-6 italic">No hay alertas activas.</p>';
+}
+
+// Recordatorios
+async function renderRecordatorios() {
+    const recs = await db.recordatorios.toArray();
+    const container = $('recordatorios-list');
+    if(!recs.length) { container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 italic">Sin recordatorios. Crea uno nuevo.</p>'; return; }
+    container.innerHTML = recs.map(r => `
+        <div class="flat-card p-4 border-l-4 ${r.priority === 'critical' ? 'border-red-500' : r.priority === 'warning' ? 'border-amber-500' : 'border-blue-500'}">
+            <div class="flex items-start justify-between mb-2">
+                <div class="flex-1">
+                    <p class="font-bold text-slate-800 dark:text-white">${escapeHtml(r.title)}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">${r.dueDate ? new Date(r.dueDate).toLocaleDateString() : 'Sin fecha'} ${r.dueTime ? '@ ' + r.dueTime : ''}</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="deleteReminder(${r.id})" class="text-red-500 hover:text-red-700 text-lg" title="Eliminar">🗑</button>
+                </div>
+            </div>
+            ${r.description ? `<p class="text-[11px] text-slate-600 dark:text-slate-400 mb-2">${escapeHtml(r.description)}</p>` : ''}
+            <div class="flex gap-2 flex-wrap">
+                <span class="text-[9px] font-bold px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">${r.category}</span>
+                <span class="text-[9px] font-bold px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">${r.usuario}</span>
+                ${r.referencia ? `<span class="text-[9px] font-bold px-2 py-1 rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">Ref: ${escapeHtml(r.referencia)}</span>` : ''}
+            </div>
+            ${r.observaciones ? `<p class="text-[10px] text-slate-600 dark:text-slate-400 mt-2 italic">📝 ${escapeHtml(r.observaciones)}</p>` : ''}
+            ${r.foto ? `<img src="${r.foto}" style="margin-top:10px; max-width:100%; border-radius:8px; max-height:200px;">` : ''}
+        </div>
+    `).join('');
+    lucide.createIcons();
+}
+
+function previewFoto(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = $('foto-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
 }
 
 // Reports
@@ -677,23 +751,114 @@ async function generateAISuggestions(silent = false) {
     const modal = $('ai-modal'), content = $('ai-content'), dashSummary = $('ai-dashboard-summary');
     if(!silent) { modal.style.display = 'flex'; content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-white border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-white/70">AUDITANDO...</p></div>'; }
     const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
-    const stats = { p: reps.filter(r=>r.estado==='Pendiente').length, u: reps.filter(r=>r.prioridad==='Crítica'||r.prioridad==='Alta').length, pi: pie.filter(p=>p.stock_actual <= p.stock_minimo).length, ben: 0 };
-    ped.forEach(p=>stats.ben+=((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1));
-    reps.forEach(r=>{if(r.precio)stats.ben+=(parseFloat(r.precio)||0)-(parseFloat(r.coste_piezas)||0)});
-    if(dashSummary) dashSummary.innerHTML = `<div class="w-full text-left"><p class="text-[10px] font-black text-purple-600 dark:text-purple-400 mb-1">INFORME IA:</p><p class="leading-tight text-[11px]">${stats.p} pendientes, ${stats.u} críticas. ${stats.pi} alertas stock. Beneficio: <strong>${stats.ben.toFixed(2)}€</strong>.</p></div>`;
+    
+    // Estadísticas expandidas 360°
+    const hoy = new Date();
+    const stats = { 
+        p: reps.filter(r=>r.estado==='Pendiente').length,
+        enProceso: reps.filter(r=>r.estado==='En Proceso').length,
+        completadas: reps.filter(r=>r.estado==='Completado'||r.estado==='Entregado').length,
+        u: reps.filter(r=>r.prioridad==='Crítica'||r.prioridad==='Alta').length, 
+        pi: pie.filter(p=>p.stock_actual <= p.stock_minimo).length,
+        sinStock: pie.filter(p=>p.stock_actual === 0).length,
+        pedidosPend: ped.filter(p=>p.estado==='Pendiente').length,
+        garantiasActivas: 0,
+        garantiasExpired: 0,
+        ben: 0,
+        ingresos: 0,
+        costos: 0
+    };
+    
+    reps.forEach(r=>{
+        if(r.precio) stats.ben+=(parseFloat(r.precio)||0)-(parseFloat(r.coste_piezas)||0);
+        stats.ingresos += parseFloat(r.precio) || 0;
+        stats.costos += parseFloat(r.coste_piezas) || 0;
+        if(r.garantia_fin) {
+            let dias = Math.ceil((new Date(r.garantia_fin) - hoy)/(1000*60*60*24));
+            if(dias >= 0) stats.garantiasActivas++;
+            else stats.garantiasExpired++;
+        }
+    });
+    
+    ped.forEach(p=>{
+        stats.ben+=((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1);
+        stats.ingresos += (parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1);
+        stats.costos += (parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1);
+    });
+    
+    const margen = stats.ingresos > 0 ? ((stats.ben / stats.ingresos) * 100).toFixed(1) : 0;
+    
+    if(dashSummary) dashSummary.innerHTML = `<div class="w-full text-left"><p class="text-[10px] font-black text-purple-600 dark:text-purple-400 mb-2">📊 AUDITORÍA IA 360°:</p><p class="leading-tight text-[11px] mb-2"><strong>SAT:</strong> ${stats.p} pend. | ${stats.enProceso} proceso | ${stats.completadas} completadas</p><p class="leading-tight text-[11px] mb-2"><strong>Garantías:</strong> ${stats.garantiasActivas} activas | ${stats.garantiasExpired} expiradas</p><p class="leading-tight text-[11px] mb-2"><strong>Stock:</strong> ${stats.pi} bajo mínimo | ${stats.sinStock} sin stock</p><p class="leading-tight text-[11px] mb-2"><strong>Pedidos:</strong> ${stats.pedidosPend} pendientes</p><p class="leading-tight text-[11px]"><strong>Financiero:</strong> Ingresos: ${stats.ingresos.toFixed(2)}€ | Costos: ${stats.costos.toFixed(2)}€ | Beneficio: ${stats.ben.toFixed(2)}€ | Margen: ${margen}%</p></div>`;
+    
     if(!silent) {
         setTimeout(() => {
             let sug = [];
             if(stats.u>0) sug.push({t:'cr', i:'zap', h:'PRIORIDAD CRÍTICA', d:`${stats.u} órdenes críticas.`, a:'Atender hoy.'});
             if(stats.pi>0) sug.push({t:'wa', i:'package-search', h:'ALERTA STOCK', d:`${stats.pi} piezas bajo mínimo.`, a:'Pedir stock.'});
-            sug.push({t:'su', i:'trending-up', h:'FINANZAS', d:`Neto: ${stats.ben.toFixed(2)}€`, a:'Buen rendimiento.'});
-            content.innerHTML = `<div class="grid grid-cols-2 gap-3 mb-6"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-blue-500"><p class="text-[8px] font-black text-slate-400 uppercase">Pendientes</p><p class="text-2xl font-black text-slate-800 dark:text-white">${stats.p}</p></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-red-500"><p class="text-[8px] font-black text-slate-400 uppercase">Alertas</p><p class="text-2xl font-black text-red-600">${stats.u + stats.pi}</p></div></div><div class="space-y-3">${sug.map(s=>`<div class="suggestion-card ${s.t==='cr'?'critical':s.t==='wa'?'warning':'success'}"><div class="flex gap-4"><i data-lucide="${s.i}" class="w-5 h-5"></i><div><p class="text-[10px] font-black">${s.h}</p><p class="text-[10px] text-slate-600 dark:text-slate-400 mt-1">${s.d}</p><p class="text-[10px] font-black mt-2 text-blue-600 uppercase italic">→ ${s.a}</p></div></div></div>`).join('')}</div>`;
+            if(stats.garantiasExpired>0) sug.push({t:'cr', i:'alert-circle', h:'GARANTÍAS EXPIRADAS', d:`${stats.garantiasExpired} garantías vencidas.`, a:'Revisar.'});
+            if(stats.pedidosPend>0) sug.push({t:'wa', i:'shopping-cart', h:'PEDIDOS PENDIENTES', d:`${stats.pedidosPend} pedidos sin entregar.`, a:'Seguimiento.'});
+            sug.push({t:'su', i:'trending-up', h:'FINANZAS', d:`Ingresos: ${stats.ingresos.toFixed(2)}€ | Beneficio: ${stats.ben.toFixed(2)}€ | Margen: ${margen}%`, a:'Rendimiento: '+margen+'%'});
+            content.innerHTML = `<div class="grid grid-cols-2 gap-3 mb-6"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-blue-500"><p class="text-[8px] font-black text-slate-400 uppercase">Pendientes</p><p class="text-2xl font-black text-slate-800 dark:text-white">${stats.p}</p></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-red-500"><p class="text-[8px] font-black text-slate-400 uppercase">Alertas</p><p class="text-2xl font-black text-red-600">${stats.u + stats.pi + stats.garantiasExpired}</p></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-emerald-500"><p class="text-[8px] font-black text-slate-400 uppercase">Beneficio</p><p class="text-2xl font-black text-emerald-600">${stats.ben.toFixed(0)}€</p></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-purple-500"><p class="text-[8px] font-black text-slate-400 uppercase">Margen</p><p class="text-2xl font-black text-purple-600">${margen}%</p></div></div><div class="space-y-3">${sug.map(s=>`<div class="suggestion-card ${s.t==='cr'?'critical':s.t==='wa'?'warning':'success'}"><div class="flex gap-4"><i data-lucide="${s.i}" class="w-5 h-5"></i><div><p class="text-[10px] font-black">${s.h}</p><p class="text-[10px] text-slate-600 dark:text-slate-400 mt-1">${s.d}</p><p class="text-[10px] font-black mt-2 text-blue-600 uppercase italic">→ ${s.a}</p></div></div></div>`).join('')}</div>`;
             lucide.createIcons();
         }, 600);
     }
 }
 
-$('reminder-form').onsubmit = async (e) => { e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); d.completed = false; await db.recordatorios.add(d); closeReminderModal(); updateDashboard(); showToast('AGENDADO'); };
+function openReminderForm() {
+    const userSelect = $('reminder-user-select');
+    userSelect.innerHTML = '<option value="Daniel Farré">Daniel Farré</option><option value="José Ayala">José Ayala</option><option value="David Pérez">David Pérez</option>';
+    $('reminder-modal').style.display = 'flex';
+    $('foto-preview').style.display = 'none';
+    $('reminder-form').reset();
+}
+
+function closeReminderModal() {
+    $('reminder-modal').style.display = 'none';
+}
+
+$('reminder-form').onsubmit = async (e) => { 
+    e.preventDefault(); 
+    const formData = new FormData(e.target);
+    const d = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        dueDate: formData.get('dueDate'),
+        dueTime: formData.get('dueTime'),
+        priority: formData.get('priority'),
+        category: formData.get('category'),
+        usuario: formData.get('usuario'),
+        referencia: formData.get('referencia'),
+        observaciones: formData.get('observaciones'),
+        completed: false
+    };
+    
+    // Manejar foto
+    const fotoFile = formData.get('foto');
+    if(fotoFile && fotoFile.size > 0) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            d.foto = e.target.result;
+            await db.recordatorios.add(d);
+            closeReminderModal();
+            renderRecordatorios();
+            showToast('RECORDATORIO GUARDADO');
+        };
+        reader.readAsDataURL(fotoFile);
+    } else {
+        await db.recordatorios.add(d);
+        closeReminderModal();
+        renderRecordatorios();
+        showToast('RECORDATORIO GUARDADO');
+    }
+};
+
+async function deleteReminder(id) {
+    if(confirm('¿Eliminar este recordatorio?')) {
+        await db.recordatorios.delete(id);
+        showToast('RECORDATORIO ELIMINADO');
+        renderRecordatorios();
+    }
+}
 
 // Data
 async function exportData() {
@@ -713,8 +878,8 @@ async function importData(e) {
 window.showSection = showSection; window.openModal = openModal; window.closeModal = closeModal;
 window.viewDetail = viewDetail; window.closeDetailModal = closeDetailModal; window.login = login;
 window.logout = logout; window.toggleDarkMode = toggleDarkMode; window.generateAISuggestions = generateAISuggestions;
-window.closeAIModal = closeAIModal; window.openReminderModal = openReminderModal; window.closeReminderModal = closeReminderModal;
-window.exportData = exportData; window.importData = importData; window.handleFile = handleFile; window.filterTable = filterTable;
+window.closeAIModal = closeAIModal; window.openReminderForm = openReminderForm; window.closeReminderModal = closeReminderModal;
+window.exportData = exportData; window.importData = importData; window.handleFile = handleFile; window.filterTable = filterTable; window.deleteReminder = deleteReminder; window.previewFoto = previewFoto; window.renderRecordatorios = renderRecordatorios;
 </script>
 </body>
 </html>
