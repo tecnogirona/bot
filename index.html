@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>S.A.T. Dashboard - Gestión Pro</title>
+    <title>S.A.T. Dashboard - Gestión Pro V5.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
-        /* ========== ESTILOS COMPLETOS ========== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; }
         body.dark { background-color: #0f172a; color: #e2e8f0; }
@@ -122,614 +121,615 @@
         .range-btn.active { background: #3b82f6; color: white; }
         body.dark .range-btn { background: #334155; color: #e2e8f0; }
         body.dark .range-btn.active { background: #3b82f6; color: white; }
+        #toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { padding: 0.75rem 1.25rem; border-radius: 8px; color: white; font-size: 0.875rem; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; max-width: 320px; }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+        .toast.warning { background: #f59e0b; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
+
+<div id="toast-container"></div>
+
 <div id="login-screen" class="fixed inset-0 bg-slate-100 flex items-center justify-center z-50 p-4">
   <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm">
-    <h2 class="text-xl font-bold mb-4 text-center">Iniciar sesión</h2>
-    <input id="login-user" type="text" placeholder="Usuario" class="w-full mb-3 px-3 py-2 border rounded-md" />
-    <input id="login-pass" type="password" placeholder="Contraseña" class="w-full mb-4 px-3 py-2 border rounded-md" />
-    <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">Entrar</button>
-    <p id="login-error" class="text-red-500 text-sm mt-3 hidden">Usuario o contraseña incorrectos</p>
+    <div class="flex justify-center mb-4">
+      <div class="bg-blue-600 p-3 rounded-xl text-white"><i data-lucide="wrench" class="w-8 h-8"></i></div>
+    </div>
+    <h2 class="text-xl font-bold mb-1 text-center">SAT Gestión Pro</h2>
+    <p class="text-slate-500 text-sm text-center mb-5">Iniciar sesión</p>
+    <input id="login-user" type="text" placeholder="Usuario" class="w-full mb-3 px-3 py-2 border rounded-md text-sm" />
+    <input id="login-pass" type="password" placeholder="Contraseña" class="w-full mb-4 px-3 py-2 border rounded-md text-sm" />
+    <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium">Entrar</button>
+    <p id="login-error" class="text-red-500 text-sm mt-3 hidden text-center">Usuario o contraseña incorrectos</p>
   </div>
-</div>    
+</div>
+
 <aside class="w-16 md:w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col transition-all duration-300">
-        <div class="p-4 border-b border-slate-100">
-            <div class="flex items-center justify-center md:justify-start gap-2">
-                <div class="bg-blue-600 p-1.5 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
-                <h1 class="text-xl font-bold text-slate-800 tracking-tight hidden md:block">SAT</h1>
+    <div class="p-4 border-b border-slate-100">
+        <div class="flex items-center justify-center md:justify-start gap-2">
+            <div class="bg-blue-600 p-1.5 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
+            <h1 class="text-xl font-bold text-slate-800 tracking-tight hidden md:block">SAT</h1>
+        </div>
+    </div>
+    <nav class="flex-1 p-3 overflow-y-auto">
+        <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Resumen</span></a>
+        <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="check-square" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Reparaciones</span></a>
+        <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Piezas</span></a>
+        <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Pedidos</span></a>
+        <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-3" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Reportes</span></a>
+    </nav>
+    <div class="p-3 border-t border-slate-100 text-[10px] text-slate-400 text-center hidden md:block">v5.3.0 © 2025</div>
+</aside>
+
+<main class="flex-1 flex flex-col overflow-hidden">
+    <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
+        <h2 id="section-title" class="text-sm md:text-lg font-semibold text-slate-700 truncate">Resumen General</h2>
+        <div class="flex items-center gap-2 md:gap-4">
+            <button onclick="exportData()" title="Exportar datos" class="text-slate-600 hover:text-slate-800 text-xs md:text-sm p-1.5 rounded-full"><i data-lucide="download" class="w-4 h-4"></i></button>
+            <label title="Importar datos" class="text-slate-600 hover:text-slate-800 text-xs md:text-sm p-1.5 rounded-full cursor-pointer"><i data-lucide="upload" class="w-4 h-4"></i><input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)"></label>
+            <button onclick="toggleDarkMode()" id="dark-mode-btn" class="text-slate-600 hover:text-slate-800 text-xs md:text-sm p-1.5 rounded-full"><i data-lucide="moon" class="w-4 h-4"></i></button>
+            <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-md font-medium flex items-center gap-1 md:gap-2 transition-colors"><i data-lucide="plus" class="w-3 h-3 md:w-4 md:h-4"></i><span class="hidden sm:inline">Nuevo</span></button>
+            <span id="header-user" class="text-xs text-slate-500 hidden md:block"></span>
+            <button onclick="logout()" class="text-xs md:text-sm text-slate-600 hover:text-red-500">Salir</button>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-3 md:p-8" id="main-view">
+        <div id="view-dashboard" class="space-y-4 md:space-y-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+                <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-blue-50 text-blue-600 p-2 md:p-3 rounded-full"><i data-lucide="package" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Piezas Pedidas</p><h3 id="stat-piezas" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
+                <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-green-50 text-green-600 p-2 md:p-3 rounded-full"><i data-lucide="shopping-cart" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Pedidos Activos</p><h3 id="stat-pedidos" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
+                <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-amber-50 text-amber-600 p-2 md:p-3 rounded-full"><i data-lucide="clock" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Reparaciones Urgentes</p><h3 id="stat-reparaciones" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
+                <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-purple-50 text-purple-600 p-2 md:p-3 rounded-full"><i data-lucide="trending-up" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Beneficio Total</p><h3 id="stat-beneficio" class="text-sm md:text-2xl font-bold text-green-600">0€</h3></div></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                <div class="flat-card p-4 md:p-6"><div class="flex justify-between items-center mb-3"><h4 class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"><i data-lucide="activity" class="w-4 h-4"></i> Actividad Reciente</h4></div><div id="recent-activity" class="space-y-3"><p class="text-slate-400 text-xs italic">Cargando datos...</p></div></div>
+                <div class="flat-card p-4 md:p-6"><div class="flex justify-between items-center mb-3"><h4 class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"><i data-lucide="bell" class="w-4 h-4"></i> Recordatorios Inteligentes</h4><button onclick="openReminderModal()" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-2 py-1 rounded-md flex items-center gap-1"><i data-lucide="plus" class="w-3 h-3"></i> Nuevo</button></div><div id="alert-container" class="space-y-2 max-h-96 overflow-y-auto"><p class="text-slate-400 text-xs italic">Analizando datos...</p></div><div class="mt-3 pt-3 border-t border-slate-100"><button onclick="generateAISuggestions()" id="ai-suggest-btn" class="w-full text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"><i data-lucide="bot" class="w-3 h-3"></i> Sugerencias con IA</button></div></div>
             </div>
         </div>
-        <nav class="flex-1 p-3 overflow-y-auto">
-            <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Resumen</span></a>
-            <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="check-square" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Reparaciones</span></a>
-            <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Pedido Piezas</span></a>
-            <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Pedidos Clientes</span></a>
-            <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-3" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Reportes</span></a>
-        </nav>
-        <div class="p-3 border-t border-slate-100 text-[10px] text-slate-400 text-center hidden md:block">v5.0.0 © 2025</div>
-    </aside>
 
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
-            <h2 id="section-title" class="text-sm md:text-lg font-semibold text-slate-700 truncate">Resumen General</h2>
-            <div class="flex items-center gap-2 md:gap-4">
-                <button onclick="toggleDarkMode()" id="dark-mode-btn" class="text-slate-600 hover:text-slate-800 text-xs md:text-sm p-1.5 rounded-full"><i data-lucide="moon" class="w-4 h-4"></i></button>
-                <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-md font-medium flex items-center gap-1 md:gap-2 transition-colors"><i data-lucide="plus" class="w-3 h-3 md:w-4 md:h-4"></i><span class="hidden sm:inline">Nuevo</span></button>
-                <button onclick="logout()" class="text-xs md:text-sm text-slate-600">Salir</button>
+        <div id="view-reportes" class="hidden space-y-4 md:space-y-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"><div class="metric-box blue"><p>💰 Ingresos</p><h3 id="kpi-ingresos">0€</h3></div><div class="metric-box"><p>📦 Coste Piezas</p><h3 id="kpi-coste-piezas">0€</h3></div><div class="metric-box green"><p>📈 Beneficio</p><h3 id="kpi-beneficio">0€</h3></div><div class="metric-box orange"><p>📊 Margen</p><h3 id="kpi-margen">0%</h3></div></div>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4"><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Total Pedidos</p><h3 id="kpi-total-pedidos" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Entregados</p><h3 id="kpi-pedidos-entregados" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Reparaciones OK</p><h3 id="kpi-reparaciones-completadas" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Piezas Pedidas</p><h3 id="kpi-piezas-pendientes" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Tasa Entrega</p><h3 id="kpi-tasa-entrega" class="text-lg md:text-2xl font-bold">0%</h3></div></div>
+            
+            <div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4"></i> Evolución Mensual de Ingresos (Total)</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
+            
+            <div class="flat-card p-4"><div class="flex flex-wrap justify-between items-center mb-3"><h4 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> Evolución Mensual por Técnico</h4><div class="range-selector" id="range-selector"><button class="range-btn" data-months="3">3 meses</button><button class="range-btn active" data-months="6">6 meses</button><button class="range-btn" data-months="12">12 meses</button></div></div><div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div><div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-center text-xs"></div></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4"></i> Ranking por Usuario (Inc. Garantías)</h4><div id="ranking-usuarios" class="space-y-3"></div></div><div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Gráfico de Rendimiento</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div></div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Pedidos</h4><div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div></div>
+                <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Reparaciones</h4><div class="chart-container"><canvas id="chart-reparaciones-estado"></canvas></div></div>
+                <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="shield-check" class="w-4 h-4 inline mr-2"></i> Estado de Garantías</h4><div class="chart-container"><canvas id="chart-garantias-estado"></canvas></div></div>
             </div>
-        </header>
-
-        <div class="flex-1 overflow-y-auto p-3 md:p-8" id="main-view">
-            <!-- Dashboard -->
-            <div id="view-dashboard" class="space-y-4 md:space-y-6">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                    <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-blue-50 text-blue-600 p-2 md:p-3 rounded-full"><i data-lucide="package" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Piezas Pedidas</p><h3 id="stat-piezas" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
-                    <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-green-50 text-green-600 p-2 md:p-3 rounded-full"><i data-lucide="shopping-cart" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Pedidos Activos</p><h3 id="stat-pedidos" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
-                    <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-amber-50 text-amber-600 p-2 md:p-3 rounded-full"><i data-lucide="clock" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Reparaciones Urgentes</p><h3 id="stat-reparaciones" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
-                    <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-purple-50 text-purple-600 p-2 md:p-3 rounded-full"><i data-lucide="trending-up" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Beneficio Total</p><h3 id="stat-beneficio" class="text-sm md:text-2xl font-bold text-green-600">0€</h3></div></div>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                    <div class="flat-card p-4 md:p-6"><div class="flex justify-between items-center mb-3"><h4 class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"><i data-lucide="activity" class="w-4 h-4"></i> Actividad Reciente</h4></div><div id="recent-activity" class="space-y-3"><p class="text-slate-400 text-xs italic">Cargando datos...</p></div></div>
-                    <div class="flat-card p-4 md:p-6"><div class="flex justify-between items-center mb-3"><h4 class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"><i data-lucide="bell" class="w-4 h-4"></i> Recordatorios Inteligentes</h4><button onclick="openReminderModal()" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-2 py-1 rounded-md flex items-center gap-1"><i data-lucide="plus" class="w-3 h-3"></i> Nuevo</button></div><div id="alert-container" class="space-y-2 max-h-96 overflow-y-auto"><p class="text-slate-400 text-xs italic">Analizando datos...</p></div><div class="mt-3 pt-3 border-t border-slate-100"><button onclick="generateAISuggestions()" id="ai-suggest-btn" class="w-full text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"><i data-lucide="bot" class="w-3 h-3"></i> Sugerencias con IA</button><div id="ai-status" class="text-center text-[10px] text-green-600 mt-1 hidden">✅ IA conectada - Análisis en tiempo real</div></div></div>
-                </div>
-            </div>
-
-            <!-- Reportes -->
-            <div id="view-reportes" class="hidden space-y-4 md:space-y-6">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"><div class="metric-box blue"><p>💰 Ingresos</p><h3 id="kpi-ingresos">0€</h3></div><div class="metric-box"><p>📦 Coste Piezas</p><h3 id="kpi-coste-piezas">0€</h3></div><div class="metric-box green"><p>📈 Beneficio</p><h3 id="kpi-beneficio">0€</h3></div><div class="metric-box orange"><p>📊 Margen</p><h3 id="kpi-margen">0%</h3></div></div>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4"><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Total Pedidos</p><h3 id="kpi-total-pedidos" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Entregados</p><h3 id="kpi-pedidos-entregados" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Reparaciones OK</p><h3 id="kpi-reparaciones-completadas" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Piezas Pedidas</p><h3 id="kpi-piezas-pendientes" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Tasa Entrega</p><h3 id="kpi-tasa-entrega" class="text-lg md:text-2xl font-bold">0%</h3></div></div>
-                <!-- Evolución total -->
-                <div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4"></i> Evolución Mensual de Ingresos (Total)</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
-                <!-- Evolución por usuario -->
-                <div class="flat-card p-4"><div class="flex flex-wrap justify-between items-center mb-3"><h4 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> Evolución Mensual por Técnico</h4><div class="range-selector" id="range-selector"><button class="range-btn" data-months="3">3 meses</button><button class="range-btn active" data-months="6">6 meses</button><button class="range-btn" data-months="12">12 meses</button></div></div><div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div><div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-center text-xs"></div></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4"></i> Ranking por Usuario</h4><div id="ranking-usuarios" class="space-y-3"></div></div><div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Gráfico de Rendimiento</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div></div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6"><div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm md:text-base"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Pedidos</h4><div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div></div><div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm md:text-base"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Reparaciones</h4><div class="chart-container"><canvas id="chart-reparaciones-estado"></canvas></div></div></div>
-                <div class="flat-card overflow-hidden"><div class="px-4 py-3 bg-slate-50 border-b border-slate-200"><h4 class="font-bold text-slate-700 text-sm"><i data-lucide="list" class="w-4 h-4 inline mr-2"></i> Detalle de Ventas y Rentabilidad</h4></div><div class="table-responsive"><table class="w-full text-left text-xs md:text-sm"><thead class="bg-slate-50"><tr><th class="px-2 md:px-4 py-2">Producto</th><th class="px-2 md:px-4 py-2">Tipo</th><th class="px-2 md:px-4 py-2">Compra</th><th class="px-2 md:px-4 py-2">Venta</th><th class="px-2 md:px-4 py-2">Beneficio</th><th class="px-2 md:px-4 py-2 hidden md:table-cell">Margen</th><th class="px-2 md:px-4 py-2">Estado</th></tr></thead><tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100"></tbody></table></div></div>
-            </div>
-
-            <!-- Listados dinámicos -->
-            <div id="view-list" class="hidden"><div class="flat-card overflow-hidden"><div class="table-responsive"><table class="w-full text-left text-xs md:text-sm"><thead class="bg-slate-50 border-b border-slate-200"><tr id="table-head"></tr></thead><tbody id="table-body" class="divide-y divide-slate-100"></tbody></table></div></div></div>
+            
+            <div class="flat-card overflow-hidden"><div class="px-4 py-3 bg-slate-50 border-b border-slate-200"><h4 class="font-bold text-slate-700 text-sm"><i data-lucide="list" class="w-4 h-4 inline mr-2"></i> Detalle de Ventas y Rentabilidad</h4></div><div class="table-responsive"><table class="w-full text-left text-xs md:text-sm"><thead class="bg-slate-50"><tr><th class="px-2 md:px-4 py-2">Producto</th><th class="px-2 md:px-4 py-2">Tipo</th><th class="px-2 md:px-4 py-2">Compra</th><th class="px-2 md:px-4 py-2">Venta</th><th class="px-2 md:px-4 py-2">Beneficio</th><th class="px-2 md:px-4 py-2 hidden md:table-cell">Margen</th><th class="px-2 md:px-4 py-2">Estado</th></tr></thead><tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100"></tbody></table></div></div>
         </div>
-    </main>
 
-    <!-- Modales -->
-    <div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[95vh] flex flex-col"><div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50"><h3 id="modal-title" class="font-bold text-slate-800 text-sm md:text-base">Añadir Registro</h3><button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div><form id="record-form" class="p-4 space-y-3 overflow-y-auto flex-1"><input type="hidden" id="form-id"><div id="form-fields" class="space-y-3"></div></form><div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3"><button type="button" onclick="closeModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cancelar</button><button type="submit" form="record-form" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Guardar</button></div></div></div>
-    <div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[95vh] flex flex-col"><div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50"><h3 id="detail-title" class="font-bold text-slate-800 text-sm md:text-base">Detalles del Registro</h3><button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div><div id="detail-content" class="p-4 overflow-y-auto flex-1"></div><div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3"><button type="button" onclick="closeDetailModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cerrar</button><button type="button" id="detail-edit-btn" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Editar</button><button type="button" id="detail-print-btn" class="flex-1 px-3 py-2 bg-green-600 text-white rounded-md text-sm font-medium">Imprimir</button></div></div></div>
-    <div id="reminder-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"><div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50"><h3 class="font-bold text-slate-800">Nuevo Recordatorio</h3><button onclick="closeReminderModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div><form id="reminder-form" class="p-4 space-y-4"><div><label class="block text-xs font-bold text-slate-500 mb-1">Título *</label><input type="text" name="title" required class="w-full border rounded p-2 text-sm"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Descripción</label><textarea name="description" rows="2" class="w-full border rounded p-2 text-sm"></textarea></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Límite</label><input type="date" name="dueDate" class="w-full border rounded p-2 text-sm"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Prioridad</label><select name="priority" class="w-full border rounded p-2 text-sm"><option value="info">Normal</option><option value="warning">Importante</option><option value="critical">Urgente</option></select></div></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeReminderModal()" class="flex-1 px-3 py-2 border rounded-md text-sm">Cancelar</button><button type="submit" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm">Guardar</button></div></form></div></div>
-    <div id="ai-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden max-h-[80vh] flex flex-col"><div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50"><h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bot" class="w-4 h-4"></i> Análisis IA del Taller</h3><button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div><div id="ai-content" class="p-4 overflow-y-auto flex-1"><p class="text-slate-500 text-sm">Analizando datos...</p></div><div class="px-4 py-3 border-t border-slate-100 bg-slate-50 text-center"><p class="text-[10px] text-green-600">✅ IA conectada - Análisis en tiempo real</p></div></div></div>
-    <div id="image-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4"><div class="relative max-w-full max-h-full"><img id="modal-image" src="" alt="Imagen ampliada" class="modal-img"><button onclick="closeImageModal()" class="absolute top-2 right-2 bg-white rounded-full p-1 text-black hover:bg-gray-200"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
-    <div id="print-area" style="position: fixed; top: -9999px; left: -9999px; width: 210mm; background: white; padding: 20px;"></div>
+        <div id="view-list" class="hidden">
+            <div class="flat-card overflow-hidden">
+                <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+                    <input type="text" id="search-input" placeholder="Buscar..." class="flex-1 border rounded-md px-3 py-1.5 text-sm max-w-xs" oninput="filterTable()">
+                </div>
+                <div class="table-responsive"><table class="w-full text-left text-xs md:text-sm"><thead class="bg-slate-50 border-b border-slate-200"><tr id="table-head"></tr></thead><tbody id="table-body" class="divide-y divide-slate-100"></tbody></table></div>
+            </div>
+        </div>
+    </div>
+</main>
 
-    <script>
-        // ========== CONFIGURACIÓN INICIAL ==========
-        const OPENAI_API_KEY = "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";
-        
-        const db = new Dexie("SAT_Database_V10");
-        db.version(1).stores({
-            piezas: '++id, nombre, cantidad, proveedor, precioCompra, precioVenta, referencia, fechaTrami, estado, observaciones, imagen, fecha, usuario',
-            pedidos: '++id, cliente, producto, precioCompra, precioVenta, cantidad, referencia, fechaTrami, estado, observaciones, fecha, usuario',
-            reparaciones: '++id, ot, marca, modelo, serie, cliente, telefono, email, diagnostico, precio, estado, prioridad, accesorios, password, imagen, fecha, usuario',
-            recordatorios: '++id, title, description, dueDate, priority, completed, createdAt'
-        });
+<div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[95vh] flex flex-col">
+        <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h3 id="modal-title" class="font-bold text-slate-800 text-sm md:text-base">Añadir Registro</h3>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form id="record-form" class="p-4 space-y-3 overflow-y-auto flex-1">
+            <input type="hidden" id="form-id">
+            <input type="hidden" id="form-section">
+            <div id="form-fields" class="space-y-3"></div>
+        </form>
+        <div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3">
+            <button type="button" onclick="closeModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cancelar</button>
+            <button type="submit" form="record-form" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Guardar</button>
+        </div>
+    </div>
+</div>
 
-        const USERS = [
-            { user: "daniel", pass: "1234", nombre: "Daniel Farré" },
-            { user: "Jose", pass: "1234", nombre: "José Ayala" },
-            { user: "david", pass: "1234", nombre: "David Varillas" }
-        ];
-        const USUARIOS = ["Daniel Farré", "José Ayala", "David Varillas"];
-        const IVA = 21;
+<div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[95vh] flex flex-col">
+        <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h3 id="detail-title" class="font-bold text-slate-800 text-sm md:text-base">Detalles del Registro</h3>
+            <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="detail-content" class="p-4 overflow-y-auto flex-1"></div>
+        <div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3">
+            <button type="button" onclick="closeDetailModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cerrar</button>
+            <button type="button" id="detail-edit-btn" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Editar</button>
+            <button type="button" id="detail-print-btn" class="flex-1 px-3 py-2 bg-green-600 text-white rounded-md text-sm font-medium">Imprimir</button>
+        </div>
+    </div>
+</div>
 
-        let currentUser = null, currentUserName = null, currentSection = 'dashboard', charts = {}, currentRange = 6;
+<div id="reminder-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h3 class="font-bold text-slate-800">Nuevo Recordatorio</h3>
+            <button onclick="closeReminderModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form id="reminder-form" class="p-4 space-y-4">
+            <div><label class="block text-xs font-bold text-slate-500 mb-1">Título *</label><input type="text" name="title" required class="w-full border rounded p-2 text-sm"></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-1">Descripción</label><textarea name="description" rows="2" class="w-full border rounded p-2 text-sm"></textarea></div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha límite</label><input type="date" name="dueDate" class="w-full border rounded p-2 text-sm"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Prioridad</label>
+                    <select name="priority" class="w-full border rounded p-2 text-sm">
+                        <option value="info">Normal</option>
+                        <option value="warning">Importante</option>
+                        <option value="critical">Urgente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeReminderModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm">Cancelar</button>
+                <button type="submit" class="flex-1 px-3 py-2 bg-amber-500 text-white rounded-md text-sm font-medium">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-        // ========== FUNCIONES AUXILIARES ==========
-        function normalize(t) { return t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
-        function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-        
-        // ========== LOGIN/LOGOUT ==========
-        function login() {
-            const user = document.getElementById("login-user").value;
-            const pass = document.getElementById("login-pass").value;
-            const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
-            if(found) {
-                currentUser = found.user;
-                currentUserName = found.nombre;
-                localStorage.setItem("sat_user", currentUser);
-                localStorage.setItem("sat_user_name", currentUserName);
-                document.getElementById("login-screen").style.display = "none";
-                initApp();
-            } else {
-                document.getElementById("login-error").classList.remove("hidden");
-            }
-        }
-        function logout() { localStorage.clear(); location.reload(); }
-        
-        // ========== MODO OSCURO ==========
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark'));
-            const btn = document.getElementById('dark-mode-btn');
-            if(btn) { btn.innerHTML = document.body.classList.contains('dark') ? '<i data-lucide="sun" class="w-4 h-4"></i>' : '<i data-lucide="moon" class="w-4 h-4"></i>'; lucide.createIcons(); }
-        }
-        function initDarkMode() { if(localStorage.getItem('darkMode') === 'true') toggleDarkMode(); }
-        
-        // ========== INICIALIZACIÓN ==========
-        function initApp() {
-            initDarkMode();
-            showSection('dashboard');
-            lucide.createIcons();
-            document.getElementById('ai-status').classList.remove('hidden');
-            initRangeSelector();
-            setInterval(() => { if(currentSection === 'dashboard') updateDashboardStats(); if(currentSection === 'reportes') updateReports(); }, 60000);
-        }
-        window.onload = () => {
-            const savedUser = localStorage.getItem("sat_user"), savedName = localStorage.getItem("sat_user_name");
-            if(savedUser && savedName) { currentUser = savedUser; currentUserName = savedName; document.getElementById("login-screen").style.display = "none"; initApp(); }
-            lucide.createIcons();
-        };
+<div id="ai-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden max-h-[80vh] flex flex-col">
+        <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bot" class="w-4 h-4"></i> Análisis del Taller</h3>
+            <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="ai-content" class="p-4 overflow-y-auto flex-1"><p class="text-slate-500 text-sm">Analizando datos...</p></div>
+    </div>
+</div>
 
-        // ========== NAVEGACIÓN ==========
-        function showSection(section) {
-            currentSection = section;
-            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(`link-${section}`).classList.add('active');
-            const titles = { dashboard:'Resumen General', piezas:'Pedido de Piezas', pedidos:'Pedidos de Clientes', reparaciones:'Órdenes de Reparación', reportes:'Reportes y Metricas' };
-            document.getElementById('section-title').textContent = titles[section] + (currentUserName ? ` - ${currentUserName}` : '');
-            document.getElementById('btn-new').style.display = section === 'reportes' ? 'none' : 'flex';
-            const vd = document.getElementById('view-dashboard'), vl = document.getElementById('view-list'), vr = document.getElementById('view-reportes');
-            if(section === 'dashboard') { vd.classList.remove('hidden'); vl.classList.add('hidden'); vr.classList.add('hidden'); updateDashboardStats(); }
-            else if(section === 'reportes') { vd.classList.add('hidden'); vl.classList.add('hidden'); vr.classList.remove('hidden'); updateReports(); }
-            else { vd.classList.add('hidden'); vl.classList.remove('hidden'); vr.classList.add('hidden'); renderTable(section); }
-            lucide.createIcons();
-        }
+<div id="image-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="relative max-w-full max-h-full">
+        <img id="modal-image" src="" alt="Imagen ampliada" class="modal-img">
+        <button onclick="closeImageModal()" class="absolute top-2 right-2 bg-white rounded-full p-1 text-black hover:bg-gray-200"><i data-lucide="x" class="w-6 h-6"></i></button>
+    </div>
+</div>
 
-        // ========== GRÁFICAS ==========
-        async function updateEvolucionMensual() {
-            const pedidos = await db.pedidos.toArray();
-            const hoy = new Date();
-            const meses = [], ingresos = [];
-            for(let i=5; i>=0; i--) {
-                let fecha = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
-                meses.push(fecha.toLocaleDateString('es-ES',{month:'short',year:'numeric'}));
-                let inicio = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-                let fin = new Date(fecha.getFullYear(), fecha.getMonth()+1, 0);
-                let total = pedidos.reduce((sum,p) => {
+<div id="print-area" style="position: fixed; top: -9999px; left: -9999px; width: 210mm; background: white; padding: 20px;"></div>
+
+<script>
+const db = new Dexie("SAT_Database_V11");
+db.version(1).stores({
+    piezas: '++id, nombre, cantidad, proveedor, precioCompra, precioVenta, referencia, fechaTrami, estado, observaciones, imagen, fecha, usuario',
+    pedidos: '++id, cliente, producto, precioCompra, precioVenta, cantidad, referencia, fechaTrami, estado, observaciones, fecha, usuario',
+    reparaciones: '++id, ot, marca, modelo, serie, cliente, telefono, email, diagnostico, precio, estado, prioridad, accesorios, password, imagen, fecha, fechaEntrada, observaciones, usuario, garantia_meses, garantia_fin',
+    recordatorios: '++id, title, description, dueDate, priority, completed, createdAt'
+});
+
+const USERS = [
+    { user: "daniel", pass: "1234", nombre: "Daniel Farré" },
+    { user: "jose", pass: "1234", nombre: "José Ayala" },
+    { user: "david", pass: "1234", nombre: "David Varillas" }
+];
+const USUARIOS = ["Daniel Farré", "José Ayala", "David Varillas"];
+const IVA = 21;
+
+let currentUser = null, currentUserName = null, currentSection = 'dashboard', charts = {}, currentRange = 6;
+
+function normalize(t) { return t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function showToast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => { t.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+function login() {
+    const user = document.getElementById("login-user").value.trim();
+    const pass = document.getElementById("login-pass").value;
+    const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
+    if(found) {
+        currentUser = found.user;
+        currentUserName = found.nombre;
+        localStorage.setItem("sat_user", currentUser);
+        localStorage.setItem("sat_user_name", currentUserName);
+        document.getElementById("login-screen").style.display = "none";
+        initApp();
+    } else {
+        document.getElementById("login-error").classList.remove("hidden");
+    }
+}
+
+function logout() { localStorage.removeItem("sat_user"); localStorage.removeItem("sat_user_name"); location.reload(); }
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    localStorage.setItem('darkMode', isDark);
+    const btn = document.getElementById('dark-mode-btn');
+    if(btn) { btn.innerHTML = isDark ? '<i data-lucide="sun" class="w-4 h-4"></i>' : '<i data-lucide="moon" class="w-4 h-4"></i>'; lucide.createIcons(); }
+}
+
+function initApp() {
+    if(localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark');
+        const btn = document.getElementById('dark-mode-btn');
+        if(btn) { btn.innerHTML = '<i data-lucide="sun" class="w-4 h-4"></i>'; }
+    }
+    lucide.createIcons();
+    const headerUser = document.getElementById('header-user');
+    if(headerUser) headerUser.textContent = currentUserName;
+    showSection('dashboard');
+    initRangeSelector();
+}
+
+window.onload = () => {
+    const savedUser = localStorage.getItem("sat_user"), savedName = localStorage.getItem("sat_user_name");
+    if(savedUser && savedName) {
+        currentUser = savedUser; currentUserName = savedName;
+        document.getElementById("login-screen").style.display = "none";
+        initApp();
+    }
+    lucide.createIcons();
+};
+
+function showSection(section) {
+    currentSection = section;
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    const linkEl = document.getElementById(`link-${section}`);
+    if(linkEl) linkEl.classList.add('active');
+    const titles = { dashboard:'Resumen General', piezas:'Pedido de Piezas', pedidos:'Pedidos de Clientes', reparaciones:'Órdenes de Reparación', reportes:'Reportes y Métricas' };
+    document.getElementById('section-title').textContent = titles[section] || section;
+    document.getElementById('btn-new').style.display = section === 'reportes' ? 'none' : 'flex';
+    const vd = document.getElementById('view-dashboard'), vl = document.getElementById('view-list'), vr = document.getElementById('view-reportes');
+    if(section === 'dashboard') { vd.classList.remove('hidden'); vl.classList.add('hidden'); vr.classList.add('hidden'); updateDashboardStats(); }
+    else if(section === 'reportes') { vd.classList.add('hidden'); vl.classList.add('hidden'); vr.classList.remove('hidden'); updateReports(); }
+    else { vd.classList.add('hidden'); vl.classList.remove('hidden'); vr.classList.add('hidden'); renderTable(section); }
+    lucide.createIcons();
+}
+
+function filterTable() {
+    const q = normalize(document.getElementById('search-input')?.value || '');
+    const body = document.getElementById('table-body');
+    if(!body) return;
+    const rows = body.querySelectorAll('tr');
+    rows.forEach(row => { row.style.display = normalize(row.textContent).includes(q) ? '' : 'none'; });
+}
+
+async function updateEvolucionMensual() {
+    const pedidos = await db.pedidos.toArray();
+    const reparaciones = await db.reparaciones.toArray();
+    const hoy = new Date();
+    const meses = [], ingresos = [];
+    for(let i=5; i>=0; i--) {
+        let fecha = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+        meses.push(fecha.toLocaleDateString('es-ES',{month:'short',year:'numeric'}));
+        let inicio = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+        let fin = new Date(fecha.getFullYear(), fecha.getMonth()+1, 0, 23, 59, 59);
+        let total = pedidos.reduce((sum,p) => {
+            let d = new Date(p.fecha);
+            if(d>=inicio && d<=fin) return sum + ((parseFloat(p.precioVenta)||0) * (parseInt(p.cantidad)||1));
+            return sum;
+        }, 0);
+        total += reparaciones.reduce((sum,r) => {
+            let d = new Date(r.fecha);
+            if(d>=inicio && d<=fin) return sum + (parseFloat(r.precio)||0);
+            return sum;
+        }, 0);
+        ingresos.push(total);
+    }
+    const ctx = document.getElementById('chart-evolucion-mensual')?.getContext('2d');
+    if(ctx) { if(charts.evolucionMensual) charts.evolucionMensual.destroy(); charts.evolucionMensual = new Chart(ctx, { type:'line', data:{ labels:meses, datasets:[{ label:'Ingresos totales (€)', data:ingresos, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.3 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ callbacks:{ label:c=>`${c.raw.toFixed(2)}€` } }, legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>v+'€' } } } } }); }
+}
+
+async function updateEvolucionPorUsuario(months=6) {
+    const pedidos = await db.pedidos.toArray();
+    const reparaciones = await db.reparaciones.toArray();
+    const hoy = new Date();
+    const meses = [];
+    for(let i=months-1; i>=0; i--) {
+        let fecha = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+        meses.push(fecha.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}));
+    }
+    const colores = { "Daniel Farré":"#3b82f6", "José Ayala":"#ef4444", "David Varillas":"#10b981" };
+    const datasets = [];
+    for(const usuario of USUARIOS) {
+        let ingresosPorMes = [];
+        for(let i=months-1; i>=0; i--) {
+            let inicio = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+            let fin = new Date(hoy.getFullYear(), hoy.getMonth()-i+1, 0, 23, 59, 59);
+            let total = pedidos.reduce((sum,p) => {
+                if(p.usuario === usuario && p.fecha) {
                     let d = new Date(p.fecha);
                     if(d>=inicio && d<=fin) return sum + ((parseFloat(p.precioVenta)||0) * (parseInt(p.cantidad)||1));
-                    return sum;
-                }, 0);
-                ingresos.push(total);
-            }
-            const ctx = document.getElementById('chart-evolucion-mensual')?.getContext('2d');
-            if(ctx) { if(charts.evolucionMensual) charts.evolucionMensual.destroy(); charts.evolucionMensual = new Chart(ctx, { type:'line', data:{ labels:meses, datasets:[{ label:'Ingresos totales (€)', data:ingresos, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.3 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ callbacks:{ label:ctx=>`${ctx.raw.toFixed(2)}€` } }, legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>v+'€' } } } } }); }
-        }
-
-        async function updateEvolucionPorUsuario(months=6) {
-            const pedidos = await db.pedidos.toArray();
-            const hoy = new Date();
-            const meses = [];
-            for(let i=months-1; i>=0; i--) {
-                let fecha = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
-                meses.push(fecha.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}));
-            }
-            const colores = { "Daniel Farré":"#3b82f6", "José Ayala":"#ef4444", "David Varillas":"#10b981" };
-            const datasets = [];
-            for(const usuario of USUARIOS) {
-                let ingresosPorMes = [];
-                for(let i=months-1; i>=0; i--) {
-                    let inicio = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
-                    let fin = new Date(hoy.getFullYear(), hoy.getMonth()-i+1, 0);
-                    let total = pedidos.reduce((sum,p) => {
-                        if(p.usuario === usuario && p.fecha) {
-                            let d = new Date(p.fecha);
-                            if(d>=inicio && d<=fin) return sum + ((parseFloat(p.precioVenta)||0) * (parseInt(p.cantidad)||1));
-                        }
-                        return sum;
-                    }, 0);
-                    ingresosPorMes.push(total);
                 }
-                datasets.push({ label:usuario, data:ingresosPorMes, borderColor:colores[usuario], backgroundColor:'transparent', tension:0.3, fill:false, pointBackgroundColor:colores[usuario], pointBorderColor:'#fff', pointRadius:3 });
-            }
-            const ctx = document.getElementById('chart-evolucion-usuarios')?.getContext('2d');
-            if(ctx) { if(charts.evolucionUsuarios) charts.evolucionUsuarios.destroy(); charts.evolucionUsuarios = new Chart(ctx, { type:'line', data:{ labels:meses, datasets }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ callbacks:{ label:ctx=>`${ctx.dataset.label}: ${ctx.raw.toFixed(2)}€` } }, legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>v+'€' } } } } }); }
-            const resumen = USUARIOS.map(u => {
-                let total = datasets.find(d=>d.label===u).data.reduce((a,b)=>a+b,0);
-                return `<div style="background:${colores[u]}20; border-left:3px solid ${colores[u]}" class="p-2 rounded-lg"><p class="font-bold">${u}</p><p class="text-xs">Total: <strong>${total.toFixed(2)}€</strong></p></div>`;
-            }).join('');
-            document.getElementById('user-summary').innerHTML = resumen;
-        }
-
-        function initRangeSelector() {
-            document.querySelectorAll('.range-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentRange = parseInt(btn.dataset.months);
-                    updateEvolucionPorUsuario(currentRange);
-                });
-            });
-        }
-
-        async function updateChartOperacionesUsuario() {
-            const pedidos = await db.pedidos.toArray();
-            const piezas = await db.piezas.toArray();
-            const reparaciones = await db.reparaciones.toArray();
-            const ctx = document.getElementById('chart-operaciones-usuario')?.getContext('2d');
-            if(ctx) { if(charts.operacionesUsuario) charts.operacionesUsuario.destroy(); charts.operacionesUsuario = new Chart(ctx, { type:'bar', data:{ labels:USUARIOS, datasets:[{ label:'Pedidos', data:USUARIOS.map(u=>pedidos.filter(p=>p.usuario===u).length), backgroundColor:'#3b82f6' },{ label:'Piezas', data:USUARIOS.map(u=>piezas.filter(p=>p.usuario===u).length), backgroundColor:'#8b5cf6' },{ label:'Reparaciones', data:USUARIOS.map(u=>reparaciones.filter(r=>r.usuario===u).length), backgroundColor:'#ec4899' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
-        }
-
-        async function updateChartPedidosEstado(pedidos) {
-            const estados = {}; pedidos.forEach(p=>estados[p.estado]=(estados[p.estado]||0)+1);
-            const ctx = document.getElementById('chart-pedidos-estado')?.getContext('2d');
-            if(ctx) { if(charts.pedidosEstado) charts.pedidosEstado.destroy(); charts.pedidosEstado = new Chart(ctx, { type:'doughnut', data:{ labels:Object.keys(estados), datasets:[{ data:Object.values(estados), backgroundColor:['#667eea','#764ba2','#f093fb','#f5576c'], borderColor:'#fff', borderWidth:2 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
-        }
-        async function updateChartReparacionesEstado(reparaciones) {
-            const estados = {}; reparaciones.forEach(r=>estados[r.estado]=(estados[r.estado]||0)+1);
-            const ctx = document.getElementById('chart-reparaciones-estado')?.getContext('2d');
-            if(ctx) { if(charts.reparacionesEstado) charts.reparacionesEstado.destroy(); charts.reparacionesEstado = new Chart(ctx, { type:'doughnut', data:{ labels:Object.keys(estados), datasets:[{ data:Object.values(estados), backgroundColor:['#4facfe','#00f2fe','#43e97b','#fa709a'], borderColor:'#fff', borderWidth:2 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
-        }
-
-        // ========== DASHBOARD Y REPORTES ==========
-        async function updateDashboardStats() {
-            try {
-                const piezas = await db.piezas.toArray();
-                const pedidos = await db.pedidos.toArray();
-                const reparaciones = await db.reparaciones.toArray();
-                let beneficioTotal = 0;
-                pedidos.forEach(p => { const compra=parseFloat(p.precioCompra)||0; const venta=parseFloat(p.precioVenta)||0; const cant=parseInt(p.cantidad)||1; beneficioTotal+=(venta-compra)*cant; });
-                piezas.forEach(p => { if(p.estado==='Vendido'||p.estado==='Instalado') { const compra=parseFloat(p.precioCompra)||0; const venta=parseFloat(p.precioVenta)||0; beneficioTotal+=(venta-compra)*(parseInt(p.cantidad)||1); } });
-                document.getElementById('stat-piezas').textContent = piezas.filter(p=>p.estado==='Pedido').length;
-                document.getElementById('stat-pedidos').textContent = pedidos.filter(p=>p.estado && p.estado!=='Entregado').length;
-                document.getElementById('stat-reparaciones').textContent = reparaciones.filter(r=>r.prioridad==='Alta' && r.estado!=='Completado').length;
-                document.getElementById('stat-beneficio').textContent = beneficioTotal.toFixed(2)+'€';
-                const allActivity = [];
-                piezas.slice(-2).forEach(p=>p.nombre&&allActivity.push({ text:`Pieza: ${p.nombre}`, date:p.fecha?new Date(p.fecha):new Date(), icon:'package', usuario:p.usuario||'Sin asignar' }));
-                pedidos.slice(-2).forEach(p=>p.cliente&&allActivity.push({ text:`Pedido: ${p.producto} - ${p.cliente}`, date:p.fecha?new Date(p.fecha):new Date(), icon:'shopping-cart', usuario:p.usuario||'Sin asignar' }));
-                reparaciones.slice(-2).forEach(r=>r.ot&&allActivity.push({ text:`Reparación OT: ${r.ot}`, date:r.fecha?new Date(r.fecha):new Date(), icon:'check-square', usuario:r.usuario||'Sin asignar' }));
-                allActivity.sort((a,b)=>b.date-a.date);
-                const container = document.getElementById('recent-activity');
-                if(container) {
-                    container.innerHTML = allActivity.length===0 ? '<p class="text-slate-400 text-xs italic">No hay actividad reciente.</p>' : '';
-                    allActivity.slice(0,5).forEach(act => {
-                        let userClass = '';
-                        if(act.usuario==='Daniel Farré') userClass='daniel';
-                        else if(act.usuario==='José Ayala') userClass='jose';
-                        else if(act.usuario==='David Varillas') userClass='david';
-                        container.innerHTML += `<div class="flex items-center gap-2"><div class="w-6 h-6 rounded bg-slate-50 flex items-center justify-center"><i data-lucide="${act.icon}" class="w-3 h-3"></i></div><div class="flex-1"><p class="text-xs font-medium">${act.text}</p><p class="text-[10px] text-slate-400">${act.date.toLocaleString()} ${userClass ? '· <span class="user-badge ' + userClass + '">' + act.usuario + '</span>' : ''}</p></div></div>`;
-                    });
+                return sum;
+            }, 0);
+            total += reparaciones.reduce((sum,r) => {
+                if(r.usuario === usuario && r.fecha) {
+                    let d = new Date(r.fecha);
+                    if(d>=inicio && d<=fin) return sum + (parseFloat(r.precio)||0);
                 }
-                lucide.createIcons();
-                updateIntelligentAlerts();
-            } catch(e) { console.error(e); }
+                return sum;
+            }, 0);
+            ingresosPorMes.push(total);
         }
+        datasets.push({ label:usuario, data:ingresosPorMes, borderColor:colores[usuario], backgroundColor:'transparent', tension:0.3, fill:false, pointRadius:3 });
+    }
+    const ctx = document.getElementById('chart-evolucion-usuarios')?.getContext('2d');
+    if(ctx) { if(charts.evolucionUsuarios) charts.evolucionUsuarios.destroy(); charts.evolucionUsuarios = new Chart(ctx, { type:'line', data:{ labels:meses, datasets }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ callbacks:{ label:c=>`${c.dataset.label}: ${c.raw.toFixed(2)}€` } }, legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>v+'€' } } } } }); }
+    document.getElementById('user-summary').innerHTML = USUARIOS.map(u => {
+        let total = datasets.find(d=>d.label===u).data.reduce((a,b)=>a+b,0);
+        return `<div style="background:${colores[u]}20; border-left:3px solid ${colores[u]}" class="p-2 rounded-lg"><p class="font-bold text-xs">${u}</p><p class="text-xs">Total: <strong>${total.toFixed(2)}€</strong></p></div>`;
+    }).join('');
+}
 
-        async function updateReports() {
-            try {
-                const piezas = await db.piezas.toArray();
-                const pedidos = await db.pedidos.toArray();
-                const reparaciones = await db.reparaciones.toArray();
-                let ingresosTotales=0, costePiezasTotal=0;
-                pedidos.forEach(p=>{ const venta=parseFloat(p.precioVenta)||0; const cant=parseInt(p.cantidad)||1; ingresosTotales+=venta*cant; const compra=parseFloat(p.precioCompra)||0; costePiezasTotal+=compra*cant; });
-                piezas.forEach(p=>{ if(p.estado==='Vendido'||p.estado==='Instalado') { ingresosTotales+=parseFloat(p.precioVenta)||0; costePiezasTotal+=parseFloat(p.precioCompra)||0; } });
-                ingresosTotales += reparaciones.reduce((s,r)=>s+(parseFloat(r.precio)||0),0);
-                const beneficioBruto = ingresosTotales - costePiezasTotal;
-                const margen = ingresosTotales>0 ? (beneficioBruto/ingresosTotales*100).toFixed(1) : 0;
-                document.getElementById('kpi-ingresos').textContent = ingresosTotales.toFixed(2)+'€';
-                document.getElementById('kpi-coste-piezas').textContent = costePiezasTotal.toFixed(2)+'€';
-                document.getElementById('kpi-beneficio').textContent = beneficioBruto.toFixed(2)+'€';
-                document.getElementById('kpi-margen').textContent = margen+'%';
-                document.getElementById('kpi-total-pedidos').textContent = pedidos.length;
-                document.getElementById('kpi-pedidos-entregados').textContent = pedidos.filter(p=>p.estado==='Entregado').length;
-                document.getElementById('kpi-reparaciones-completadas').textContent = reparaciones.filter(r=>r.estado==='Completado'||r.estado==='Entregado').length;
-                document.getElementById('kpi-piezas-pendientes').textContent = piezas.filter(p=>p.estado==='Pedido').length;
-                document.getElementById('kpi-tasa-entrega').textContent = pedidos.length>0 ? Math.round(pedidos.filter(p=>p.estado==='Entregado').length/pedidos.length*100) : 0 + '%';
-                updateChartPedidosEstado(pedidos);
-                updateChartReparacionesEstado(reparaciones);
-                updateDetalleVentas(pedidos, piezas);
-                updateRankingUsuarios(pedidos, piezas, reparaciones);
-                updateChartOperacionesUsuario();
-                updateEvolucionMensual();
-                updateEvolucionPorUsuario(currentRange);
-            } catch(e) { console.error(e); }
-        }
-
-        async function updateRankingUsuarios(pedidos, piezas, reparaciones) {
-            const ranking = USUARIOS.map(u => {
-                const ped = pedidos.filter(p=>p.usuario===u).length;
-                const pie = piezas.filter(p=>p.usuario===u).length;
-                const rep = reparaciones.filter(r=>r.usuario===u).length;
-                const total = ped+pie+rep;
-                return { usuario:u, pedidos:ped, piezas:pie, reparaciones:rep, total };
-            }).sort((a,b)=>b.total-a.total);
-            const container = document.getElementById('ranking-usuarios');
-            if(container) {
-                container.innerHTML = ranking.map(r => {
-                    let avatarClass='', avatarLetter='';
-                    if(r.usuario==='Daniel Farré') { avatarClass='bg-blue-100 text-blue-700'; avatarLetter='D'; }
-                    else if(r.usuario==='José Ayala') { avatarClass='bg-pink-100 text-pink-700'; avatarLetter='J'; }
-                    else { avatarClass='bg-emerald-100 text-emerald-700'; avatarLetter='V'; }
-                    return `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full ${avatarClass} flex items-center justify-center font-bold">${avatarLetter}</div><div><p class="font-medium text-sm">${r.usuario}</p><p class="text-[10px] text-slate-500">${r.total} operaciones totales</p></div></div><div class="flex gap-3 text-center"><div><p class="text-xs font-bold text-blue-600">${r.pedidos}</p><p class="text-[9px] text-slate-400">Pedidos</p></div><div><p class="text-xs font-bold text-purple-600">${r.piezas}</p><p class="text-[9px] text-slate-400">Piezas</p></div><div><p class="text-xs font-bold text-pink-600">${r.reparaciones}</p><p class="text-[9px] text-slate-400">Reparac.</p></div></div></div>`;
-                }).join('');
-            }
-        }
-
-        async function updateDetalleVentas(pedidos, piezas) {
-            const tbody = document.getElementById('detalle-ventas-tbody');
-            if(!tbody) return;
-            const items = [];
-            pedidos.forEach(p => {
-                const compra = parseFloat(p.precioCompra)||0, venta = parseFloat(p.precioVenta)||0, cant = parseInt(p.cantidad)||1;
-                const beneficio = (venta-compra)*cant, margen = venta>0 ? ((venta-compra)/venta*100).toFixed(1) : 0;
-                items.push({ nombre:p.producto, tipo:'Pedido', compra:compra*cant, venta:venta*cant, beneficio, margen, estado:p.estado });
-            });
-            piezas.forEach(p => {
-                if(p.precioVenta && p.precioCompra) {
-                    const compra = parseFloat(p.precioCompra)||0, venta = parseFloat(p.precioVenta)||0;
-                    const beneficio = venta-compra, margen = venta>0 ? ((venta-compra)/venta*100).toFixed(1) : 0;
-                    items.push({ nombre:p.nombre, tipo:'Pieza', compra, venta, beneficio, margen, estado:p.estado });
-                }
-            });
-            items.sort((a,b)=>b.beneficio-a.beneficio);
-            tbody.innerHTML = items.slice(0,15).map(item => `<tr class="hover:bg-slate-50"><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.nombre.substring(0,20))}</td><td class="px-2 md:px-4 py-2 text-xs">${item.tipo}</td><td class="px-2 md:px-4 py-2 text-xs">${item.compra.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs">${item.venta.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs ${item.beneficio>=0?'profit-positive':'profit-negative'}">${item.beneficio.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs hidden md:table-cell ${item.margen>=20?'profit-positive':'profit-negative'}">${item.margen}%</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td></tr>`).join('');
-        }
-
-        function getStatusClass(status) {
-            const s = (status||'').toLowerCase();
-            if(s.includes('pendiente')||s.includes('pedido')||s.includes('espera')) return 'bg-amber-100 text-amber-700';
-            if(s.includes('recibido')||s.includes('entregado')||s.includes('completado')||s.includes('vendido')) return 'bg-green-100 text-green-700';
-            if(s.includes('proceso')||s.includes('reparando')) return 'bg-blue-100 text-blue-700';
-            return 'bg-slate-100 text-slate-700';
-        }
-
-        // ========== CRUD ==========
-        async function renderTable(section) {
-            const data = await db[section].toArray();
-            const head = document.getElementById('table-head'), body = document.getElementById('table-body');
-            if(!head||!body) return;
-            let headers = [];
-            if(section==='piezas') headers = ['Pieza','Proveedor','P.Compra','P.Venta','Usuario','Estado','Fecha','Imagen'];
-            else if(section==='pedidos') headers = ['Producto','Cliente','P.Compra','P.Venta','Estado','Fecha'];
-            else if(section==='reparaciones') headers = ['OT','Cliente','Equipo','Precio','Estado','Fecha','Imagen'];
-            head.innerHTML = headers.map(h=>`<th class="px-2 md:px-4 py-2 text-[10px] md:text-xs font-semibold text-slate-500 uppercase">${h}</th>`).join('') + '<th class="px-2 md:px-4 py-2 text-right text-[10px] md:text-xs font-semibold text-slate-500 uppercase">Acciones</th>';
-            if(data.length===0) { body.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400 text-xs">No hay registros</td></tr>`; return; }
-            body.innerHTML = '';
-            for(const item of data) {
-                let userClass = '';
-                if(item.usuario==='Daniel Farré') userClass='daniel';
-                else if(item.usuario==='José Ayala') userClass='jose';
-                else if(item.usuario==='David Varillas') userClass='david';
-                let content = '';
-                if(section==='piezas') {
-                    content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.nombre||'-')}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.proveedor||'-')}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioCompra||'-'}€</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta||'-'}€</td><td class="px-2 md:px-4 py-2"><span class="user-badge ${userClass} text-[9px]">${item.usuario}</span></td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td><td class="px-2 md:px-4 py-2">${item.imagen ? `<img src="${item.imagen}" class="thumbnail-img" onclick="showImageModal('${item.imagen}')">` : '-'}</td>`;
-                } else if(section==='pedidos') {
-                    content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.producto||'-')}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.cliente||'-')}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioCompra||'-'}€</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta||'-'}€</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
-                } else if(section==='reparaciones') {
-                    content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.ot||'-')}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.cliente||'-')}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precio?item.precio+'€':'-'}</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td><td class="px-2 md:px-4 py-2">${item.imagen ? `<img src="${item.imagen}" class="thumbnail-img" onclick="showImageModal('${item.imagen}')">` : '-'}</td>`;
-                }
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50';
-                tr.innerHTML = `${content}<td class="px-2 md:px-4 py-2 text-right space-x-1"><button onclick='viewDetail("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-green-100"><i data-lucide="eye" class="w-3 h-3"></i></button><button onclick='editRecord("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-blue-100"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick='deleteRecord("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-red-100"><i data-lucide="trash" class="w-3 h-3"></i></button><button onclick='printFromList("${section}", ${item.id})' class="btn-small bg-slate-100 p-1 hover:bg-purple-100"><i data-lucide="printer" class="w-3 h-3"></i></button></td>`;
-                body.appendChild(tr);
-            }
-            lucide.createIcons();
-        }
-
-        // ========== FORMULARIOS DINÁMICOS ==========
-        function openModal(editData=null) {
-            const modal = document.getElementById('modal'), fields = document.getElementById('form-fields'), title = document.getElementById('modal-title'), idInput = document.getElementById('form-id');
-            let activeSection = currentSection === 'dashboard' ? 'reparaciones' : currentSection;
-            if(!modal||!fields||!title||!idInput) return;
-            title.textContent = editData ? `Editar ${activeSection==='reparaciones'?'Reparación':(activeSection==='piezas'?'Pieza':'Pedido')}` : `Nuevo ${activeSection==='reparaciones'?'Reparación':(activeSection==='piezas'?'Pieza':'Pedido')}`;
-            idInput.value = editData ? editData.id : '';
-            let html = '';
-            if(activeSection === 'piezas') {
-                html = `<div class="form-section"><div class="form-section-title"><i data-lucide="package"></i> Datos de la Pieza</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.nombre||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Cantidad *</label><input type="number" name="cantidad" required class="w-full border rounded p-2 text-sm" value="${editData?.cantidad||1}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.proveedor||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Referencia</label><input type="text" name="referencia" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.referencia||'')}"></div></div></div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="euro"></i> Precios y Rentabilidad (IVA ${IVA}% incluido)</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Compra (sin IVA) *</label><input type="number" step="0.01" name="precioCompra" id="precioCompra" class="w-full border rounded p-2 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Venta (sin IVA) *</label><input type="number" step="0.01" name="precioVenta" id="precioVenta" class="w-full border rounded p-2 text-sm" value="${editData?.precioVenta||''}"></div></div><div id="pricePreview" class="price-preview text-xs"></div></div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="image"></i> Imagen (opcional)</div><input type="file" id="imagenInput" accept="image/*" class="w-full border rounded p-2 text-sm"><input type="hidden" name="imagen" id="imagenData" value="${editData?.imagen||''}">${editData?.imagen?`<div class="mt-2"><img src="${editData.imagen}" class="thumbnail-img"><button type="button" onclick="document.getElementById('imagenData').value=''; this.parentElement.remove();" class="text-xs text-red-500 mt-1">Eliminar imagen</button></div>`:''}</div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="calendar"></i> Seguimiento</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Trámite</label><input type="date" name="fechaTrami" class="w-full border rounded p-2 text-sm" value="${editData?.fechaTrami||''}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario *</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario==='Daniel Farré'?'selected':''}>Daniel Farré</option><option ${editData?.usuario==='José Ayala'?'selected':''}>José Ayala</option><option ${editData?.usuario==='David Varillas'?'selected':''}>David Varillas</option></select></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Instalado'?'selected':''}>Instalado</option><option ${editData?.estado==='Vendido'?'selected':''}>Vendido</option></select></div></div><div class="mt-3"><label class="block text-xs font-bold text-slate-500 mb-1">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded p-2 text-sm" placeholder="Notas adicionales...">${escapeHtml(editData?.observaciones||'')}</textarea></div></div>`;
-            } else if(activeSection === 'pedidos') {
-                html = `<div class="form-section"><div class="form-section-title"><i data-lucide="shopping-cart"></i> Datos del Pedido</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Producto/Modelo *</label><input type="text" name="producto" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.producto||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Cantidad *</label><input type="number" name="cantidad" id="cantidad" required class="w-full border rounded p-2 text-sm" value="${editData?.cantidad||1}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.cliente||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Referencia</label><input type="text" name="referencia" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.referencia||'')}"></div></div></div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="euro"></i> Precios y Rentabilidad (IVA ${IVA}% incluido)</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Compra (sin IVA) *</label><input type="number" step="0.01" name="precioCompra" id="precioCompra" class="w-full border rounded p-2 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Venta (sin IVA) *</label><input type="number" step="0.01" name="precioVenta" id="precioVenta" class="w-full border rounded p-2 text-sm" value="${editData?.precioVenta||''}"></div></div><div id="pricePreview" class="price-preview text-xs"></div></div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="calendar"></i> Seguimiento</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Trámite</label><input type="date" name="fechaTrami" class="w-full border rounded p-2 text-sm" value="${editData?.fechaTrami||''}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario *</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario==='Daniel Farré'?'selected':''}>Daniel Farré</option><option ${editData?.usuario==='José Ayala'?'selected':''}>José Ayala</option><option ${editData?.usuario==='David Varillas'?'selected':''}>David Varillas</option></select></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='En Espera'?'selected':''}>En Espera</option><option ${editData?.estado==='Preparando'?'selected':''}>Preparando</option><option ${editData?.estado==='Enviado'?'selected':''}>Enviado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div></div><div class="mt-3"><label class="block text-xs font-bold text-slate-500 mb-1">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded p-2 text-sm" placeholder="Notas adicionales...">${escapeHtml(editData?.observaciones||'')}</textarea></div></div>`;
-            } else if(activeSection === 'reparaciones') {
-                html = `<div class="form-section"><div class="form-section-title"><i data-lucide="file-text"></i> Datos de la Orden</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Nº Orden (OT) *</label><input type="text" name="ot" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.ot||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha Entrada</label><input type="date" name="fechaEntrada" class="w-full border rounded p-2 text-sm" value="${editData?.fechaEntrada||new Date().toISOString().split('T')[0]}"></div></div></div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="smartphone"></i> Datos del Equipo</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Marca *</label><input type="text" name="marca" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.marca||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.modelo||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Nº Serie</label><input type="text" name="serie" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.serie||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Password/Patrón</label><input type="text" name="password" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.password||'')}"></div></div></div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="user"></i> Datos del Cliente</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.cliente||'')}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Teléfono</label><input type="tel" name="telefono" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.telefono||'')}"></div><div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-1">Email</label><input type="email" name="email" class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.email||'')}"></div></div></div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="clipboard-list"></i> Diagnóstico y Presupuesto</div><div><label class="block text-xs font-bold text-slate-500 mb-1">Diagnóstico / Avería</label><textarea name="diagnostico" rows="2" class="w-full border rounded p-2 text-sm">${escapeHtml(editData?.diagnostico||'')}</textarea></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Precio Estimado (€, IVA ${IVA}% incluido)</label><input type="number" step="0.01" name="precio" class="w-full border rounded p-2 text-sm" value="${editData?.precio||''}"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Prioridad</label><select name="prioridad" class="w-full border rounded p-2 text-sm"><option ${editData?.prioridad==='Baja'?'selected':''}>Baja</option><option ${editData?.prioridad==='Media'?'selected':''}>Media</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div></div></div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="image"></i> Imagen (opcional)</div><input type="file" id="imagenInput" accept="image/*" class="w-full border rounded p-2 text-sm"><input type="hidden" name="imagen" id="imagenData" value="${editData?.imagen||''}">${editData?.imagen?`<div class="mt-2"><img src="${editData.imagen}" class="thumbnail-img"><button type="button" onclick="document.getElementById('imagenData').value=''; this.parentElement.remove();" class="text-xs text-red-500 mt-1">Eliminar imagen</button></div>`:''}</div>
-                <div class="form-section"><div class="form-section-title"><i data-lucide="package"></i> Accesorios y Estado</div><div><label class="block text-xs font-bold text-slate-500 mb-1">Accesorios que deja</label><textarea name="accesorios" rows="2" class="w-full border rounded p-2 text-sm">${escapeHtml(editData?.accesorios||'')}</textarea></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3"><div><label class="block text-xs font-bold text-slate-500 mb-1">Estado Reparación</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='Diagnóstico'?'selected':''}>Diagnóstico</option><option ${editData?.estado==='Reparando'?'selected':''}>Reparando</option><option ${editData?.estado==='Espera Piezas'?'selected':''}>Espera Piezas</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Usuario Asignado</label><select name="usuario" required class="w-full border rounded p-2 text-sm"><option value="">Selecciona</option><option ${editData?.usuario==='Daniel Farré'?'selected':''}>Daniel Farré</option><option ${editData?.usuario==='José Ayala'?'selected':''}>José Ayala</option><option ${editData?.usuario==='David Varillas'?'selected':''}>David Varillas</option></select></div></div></div>`;
-            }
-            fields.innerHTML = html;
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            lucide.createIcons();
-            const fileInput = document.getElementById('imagenInput');
-            if(fileInput) fileInput.onchange = async (e) => { const file = e.target.files[0]; if(file) { const base64 = await convertFileToBase64(file); document.getElementById('imagenData').value = base64; } };
-            if(activeSection === 'piezas' || activeSection === 'pedidos') {
-                const compra = document.querySelector('input[name="precioCompra"]'), venta = document.querySelector('input[name="precioVenta"]'), cantidad = document.querySelector('input[name="cantidad"]'), preview = document.getElementById('pricePreview');
-                const update = () => {
-                    const c = parseFloat(compra?.value)||0, v = parseFloat(venta?.value)||0, cant = parseInt(cantidad?.value)||1;
-                    const beneficio = (v-c)*cant, margen = v>0?((v-c)/v*100).toFixed(1):0;
-                    const ivaC = c*IVA/100, ivaV = v*IVA/100;
-                    if(preview) preview.innerHTML = `<div class="grid grid-cols-2 gap-2"><div><strong>Sin IVA:</strong><br>Compra: ${c.toFixed(2)}€<br>Venta: ${v.toFixed(2)}€</div><div><strong>Con IVA (${IVA}%):</strong><br>Compra: ${(c+ivaC).toFixed(2)}€<br>Venta: ${(v+ivaV).toFixed(2)}€</div></div><div class="mt-2 pt-2 border-t border-slate-200"><strong>Beneficio por unidad:</strong> ${(v-c).toFixed(2)}€ (${margen}% margen)<br><strong>Beneficio total (${cant} uds):</strong> <span class="${beneficio>=0?'profit-positive':'profit-negative'}">${beneficio.toFixed(2)}€</span></div>`;
-                };
-                if(compra) compra.addEventListener('input',update);
-                if(venta) venta.addEventListener('input',update);
-                if(cantidad) cantidad.addEventListener('input',update);
-                update();
-            }
-        }
-        function closeModal() { const m=document.getElementById('modal'); if(m){m.classList.add('hidden');m.classList.remove('flex');} document.getElementById('record-form')?.reset(); }
-        async function viewDetail(section,id) {
-            const item = await db[section].get(id);
-            if(!item) return;
-            let userClass=''; if(item.usuario==='Daniel Farré') userClass='daniel'; else if(item.usuario==='José Ayala') userClass='jose'; else if(item.usuario==='David Varillas') userClass='david';
-            let html='';
-            if(section==='piezas') {
-                const compra=parseFloat(item.precioCompra)||0, venta=parseFloat(item.precioVenta)||0, cant=parseInt(item.cantidad)||1, beneficio=(venta-compra)*cant;
-                html = `<div class="detail-row"><div class="detail-label">Pieza</div><div class="detail-value">${escapeHtml(item.nombre)}</div></div><div class="detail-row"><div class="detail-label">Cantidad</div><div class="detail-value">${item.cantidad}</div></div><div class="detail-row"><div class="detail-label">Proveedor</div><div class="detail-value">${escapeHtml(item.proveedor||'-')}</div></div><div class="detail-row"><div class="detail-label">Precio Compra</div><div class="detail-value">${item.precioCompra?item.precioCompra+'€':'-'} (${(item.precioCompra*(1+IVA/100)).toFixed(2)}€ con IVA)</div></div><div class="detail-row"><div class="detail-label">Precio Venta</div><div class="detail-value">${item.precioVenta?item.precioVenta+'€':'-'} (${(item.precioVenta*(1+IVA/100)).toFixed(2)}€ con IVA)</div></div><div class="detail-row"><div class="detail-label">Beneficio</div><div class="detail-value ${beneficio>=0?'profit-positive':'profit-negative'}">${beneficio.toFixed(2)}€</div></div><div class="detail-row"><div class="detail-label">Observaciones</div><div class="detail-value">${escapeHtml(item.observaciones||'-')}</div></div>${item.imagen?`<div class="detail-row"><div class="detail-label">Imagen</div><div class="detail-value"><img src="${item.imagen}" class="thumbnail-img" onclick="showImageModal('${item.imagen}')"></div></div>`:''}<div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div><div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>`;
-            } else if(section==='pedidos') {
-                const compra=parseFloat(item.precioCompra)||0, venta=parseFloat(item.precioVenta)||0, cant=parseInt(item.cantidad)||1, beneficio=(venta-compra)*cant, margen=venta>0?((venta-compra)/venta*100).toFixed(1):0;
-                html = `<div class="detail-row"><div class="detail-label">Producto</div><div class="detail-value">${escapeHtml(item.producto)}</div></div><div class="detail-row"><div class="detail-label">Cantidad</div><div class="detail-value">${item.cantidad||1}</div></div><div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${escapeHtml(item.cliente)}</div></div><div class="detail-row"><div class="detail-label">Precio Compra</div><div class="detail-value">${item.precioCompra?item.precioCompra+'€':'-'} (${(item.precioCompra*(1+IVA/100)).toFixed(2)}€ con IVA)</div></div><div class="detail-row"><div class="detail-label">Precio Venta</div><div class="detail-value">${item.precioVenta?item.precioVenta+'€':'-'} (${(item.precioVenta*(1+IVA/100)).toFixed(2)}€ con IVA)</div></div><div class="detail-row"><div class="detail-label">Beneficio</div><div class="detail-value ${beneficio>=0?'profit-positive':'profit-negative'}">${beneficio.toFixed(2)}€ (${margen}% margen)</div></div><div class="detail-row"><div class="detail-label">Observaciones</div><div class="detail-value">${escapeHtml(item.observaciones||'-')}</div></div><div class="detail-row"><div class="detail-label">Usuario</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div><div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div>`;
-            } else if(section==='reparaciones') {
-                const precioConIVA = item.precio ? (parseFloat(item.precio)*(1+IVA/100)).toFixed(2) : '-';
-                html = `<div class="detail-row"><div class="detail-label">OT</div><div class="detail-value">${escapeHtml(item.ot||'-')}</div></div><div class="detail-row"><div class="detail-label">Fecha Entrada</div><div class="detail-value">${item.fechaEntrada?new Date(item.fechaEntrada).toLocaleDateString():'-'}</div></div><div class="detail-row"><div class="detail-label">Marca/Modelo</div><div class="detail-value">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</div></div><div class="detail-row"><div class="detail-label">Nº Serie</div><div class="detail-value">${escapeHtml(item.serie||'-')}</div></div><div class="detail-row"><div class="detail-label">Password</div><div class="detail-value">${escapeHtml(item.password||'-')}</div></div><div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-value">${escapeHtml(item.cliente)}</div></div><div class="detail-row"><div class="detail-label">Teléfono/Email</div><div class="detail-value">${escapeHtml(item.telefono||'-')} / ${escapeHtml(item.email||'-')}</div></div><div class="detail-row"><div class="detail-label">Diagnóstico</div><div class="detail-value">${escapeHtml(item.diagnostico||'-')}</div></div><div class="detail-row"><div class="detail-label">Precio</div><div class="detail-value">${item.precio?item.precio+'€':'-'} (${precioConIVA}€ con IVA)</div></div><div class="detail-row"><div class="detail-label">Accesorios</div><div class="detail-value">${escapeHtml(item.accesorios||'-')}</div></div>${item.imagen?`<div class="detail-row"><div class="detail-label">Imagen</div><div class="detail-value"><img src="${item.imagen}" class="thumbnail-img" onclick="showImageModal('${item.imagen}')"></div></div>`:''}<div class="detail-row"><div class="detail-label">Prioridad</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getPriorityClass(item.prioridad)}">${item.prioridad}</span></div></div><div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(item.estado)}">${item.estado}</span></div></div><div class="detail-row"><div class="detail-label">Técnico</div><div class="detail-value"><span class="user-badge ${userClass}">${item.usuario}</span></div></div>`;
-            }
-            document.getElementById('detail-content').innerHTML = html;
-            document.getElementById('detail-edit-btn').onclick = () => { closeDetailModal(); editRecord(section, id); };
-            document.getElementById('detail-print-btn').onclick = () => { printDocument(section, id); };
-            document.getElementById('detail-modal').classList.remove('hidden'); document.getElementById('detail-modal').classList.add('flex');
-            lucide.createIcons();
-        }
-        function closeDetailModal() { const m=document.getElementById('detail-modal'); if(m){m.classList.add('hidden');m.classList.remove('flex');} }
-        document.getElementById('record-form').addEventListener('submit', async(e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            const imgData = document.getElementById('imagenData')?.value;
-            if(imgData) data.imagen = imgData;
-            const id = document.getElementById('form-id')?.value;
-            let activeSection = currentSection === 'dashboard' ? 'reparaciones' : currentSection;
-            data.fecha = new Date().toISOString();
-            if(id) await db[activeSection].update(parseInt(id), data);
-            else await db[activeSection].add(data);
-            closeModal();
-            showSection(currentSection);
+function initRangeSelector() {
+    document.querySelectorAll('.range-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRange = parseInt(btn.dataset.months);
+            updateEvolucionPorUsuario(currentRange);
         });
-        async function editRecord(section,id) { const item = await db[section].get(id); if(item) { currentSection = section; openModal(item); } }
-        async function deleteRecord(section,id) { if(confirm('¿Eliminar este registro?')) { await db[section].delete(id); showSection(currentSection); } }
-        function getPriorityClass(p) { const v=(p||'').toLowerCase(); if(v==='alta') return 'bg-red-100 text-red-700'; if(v==='media') return 'bg-amber-100 text-amber-700'; return 'bg-green-100 text-green-700'; }
-        function convertFileToBase64(file) { return new Promise((res,rej)=>{ const r=new FileReader(); r.readAsDataURL(file); r.onload=()=>res(r.result); r.onerror=e=>rej(e); }); }
-        
-        // ========== ALERTAS INTELIGENTES ==========
-        async function updateIntelligentAlerts() {
-            try {
-                const piezas = await db.piezas.toArray(), pedidos = await db.pedidos.toArray(), reparaciones = await db.reparaciones.toArray(), recordatorios = await db.recordatorios.toArray(), now = new Date();
-                const alerts = [];
-                reparaciones.forEach(rep => {
-                    const last = new Date(rep.fecha), hours = Math.floor((now-last)/(1000*60*60));
-                    if(rep.estado!=='Completado' && rep.estado!=='Entregado') {
-                        if(hours>=72) alerts.push({ id:`rep_${rep.id}`, title:`⚠️ Reparación estancada: ${rep.ot}`, description:`${rep.marca} ${rep.modelo} - ${hours}h sin actualizar`, priority:'critical', type:'reparacion' });
-                        else if(hours>=48) alerts.push({ id:`rep_${rep.id}`, title:`🕐 Reparación sin avance: ${rep.ot}`, description:`${rep.marca} ${rep.modelo} - ${hours}h sin novedades`, priority:'warning', type:'reparacion' });
-                        else if(hours>=24) alerts.push({ id:`rep_${rep.id}`, title:`ℹ️ Revisar reparación: ${rep.ot}`, description:`${rep.marca} ${rep.modelo} - 24h sin actualizar`, priority:'info', type:'reparacion' });
-                    }
-                });
-                piezas.forEach(p => { if(p.estado==='Pedido' && p.fechaTrami) { const days = Math.floor((now-new Date(p.fechaTrami))/(1000*60*60*24)); if(days>=15) alerts.push({ id:`pieza_${p.id}`, title:`⚠️ Pieza muy retrasada: ${p.nombre}`, description:`${days} días en pedido`, priority:'critical', type:'pieza' }); else if(days>=7) alerts.push({ id:`pieza_${p.id}`, title:`🕐 Pieza retrasada: ${p.nombre}`, description:`${days} días en espera`, priority:'warning', type:'pieza' }); } });
-                pedidos.forEach(p => { if(p.estado!=='Entregado' && p.fechaTrami) { const days = Math.floor((now-new Date(p.fechaTrami))/(1000*60*60*24)); if(days>=10) alerts.push({ id:`pedido_${p.id}`, title:`⚠️ Pedido muy retrasado: ${p.producto}`, description:`Cliente: ${p.cliente} - ${days} días pendiente`, priority:'critical', type:'pedido' }); else if(days>=5) alerts.push({ id:`pedido_${p.id}`, title:`🕐 Pedido pendiente: ${p.producto}`, description:`${days} días sin entregar`, priority:'warning', type:'pedido' }); } });
-                recordatorios.forEach(rem => { if(!rem.completed) { let prio=rem.priority||'info'; if(rem.dueDate) { const left=Math.ceil((new Date(rem.dueDate)-now)/(1000*60*60*24)); if(left<0) prio='critical'; else if(left<3) prio='warning'; } alerts.push({ id:`rem_${rem.id}`, title:`📌 ${rem.title}`, description:rem.description||'Sin descripción', priority:prio, dueDate:rem.dueDate, type:'recordatorio' }); } });
-                alerts.sort((a,b)=>({critical:0,warning:1,info:2}[a.priority]-({critical:0,warning:1,info:2}[b.priority])));
-                const container = document.getElementById('alert-container');
-                if(!container) return;
-                if(alerts.length===0) container.innerHTML='<div class="text-center text-slate-400 text-xs py-4">✅ Todo al día. No hay alertas pendientes.</div>';
-                else container.innerHTML = alerts.map(a=>`<div class="alert-card p-3 rounded-lg ${a.priority==='critical'?'alert-critical':a.priority==='warning'?'alert-warning':'alert-info'}" onclick='handleAlertClick(${JSON.stringify(a)})'><div class="flex justify-between items-start"><p class="text-sm font-semibold">${escapeHtml(a.title)}</p><span class="text-[9px] px-1.5 py-0.5 rounded ${a.priority==='critical'?'bg-red-100 text-red-700':a.priority==='warning'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${a.priority==='critical'?'URGENTE':a.priority==='warning'?'ATENCIÓN':'INFO'}</span></div><p class="text-xs text-slate-600 mt-1">${escapeHtml(a.description)}</p>${a.dueDate?`<p class="text-[10px] text-slate-400 mt-1">📅 Vence: ${new Date(a.dueDate).toLocaleDateString()}</p>`:''}</div>`).join('');
-                lucide.createIcons();
-            } catch(e) { console.error(e); }
-        }
-        function handleAlertClick(alert) {
-            if(alert.type==='reparacion') showSection('reparaciones');
-            else if(alert.type==='pieza') showSection('piezas');
-            else if(alert.type==='pedido') showSection('pedidos');
-            else if(alert.type==='recordatorio') { if(confirm(`¿Marcar como completado: ${alert.title}?`)) { const id=alert.id.replace('rem_',''); db.recordatorios.update(parseInt(id),{completed:true}).then(()=>updateIntelligentAlerts()); } }
-        }
-        function openReminderModal() { const m=document.getElementById('reminder-modal'); if(m){m.classList.remove('hidden');m.classList.add('flex'); lucide.createIcons();} }
-        function closeReminderModal() { const m=document.getElementById('reminder-modal'); if(m){m.classList.add('hidden');m.classList.remove('flex');} }
-        document.getElementById('reminder-form')?.addEventListener('submit', async(e)=>{ e.preventDefault(); let data=Object.fromEntries(new FormData(e.target)); data.createdAt=new Date().toISOString(); data.completed=false; await db.recordatorios.add(data); closeReminderModal(); updateIntelligentAlerts(); });
-        
-        // ========== SUGERENCIAS IA ==========
-        async function generateAISuggestions() {
-            const modal = document.getElementById('ai-modal'), content = document.getElementById('ai-content');
-            if(!modal||!content) return;
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            content.innerHTML = '<div class="text-center py-8"><i data-lucide="loader" class="w-8 h-8 animate-spin mx-auto text-blue-500"></i><p class="text-sm mt-2">Analizando datos del taller...</p></div>';
-            lucide.createIcons();
-            try {
-                const piezas = await db.piezas.toArray(), pedidos = await db.pedidos.toArray(), reparaciones = await db.reparaciones.toArray();
-                const stats = {
-                    totalPiezas:piezas.length, piezasPendientes:piezas.filter(p=>p.estado==='Pedido').length, piezasRecibidas:piezas.filter(p=>p.estado==='Recibido').length,
-                    totalPedidos:pedidos.length, pedidosPendientes:pedidos.filter(p=>p.estado!=='Entregado').length, pedidosEntregados:pedidos.filter(p=>p.estado==='Entregado').length,
-                    totalReparaciones:reparaciones.length, reparacionesPendientes:reparaciones.filter(r=>r.estado!=='Completado' && r.estado!=='Entregado').length,
-                    reparacionesCompletadas:reparaciones.filter(r=>r.estado==='Completado'||r.estado==='Entregado').length,
-                    beneficioTotal:pedidos.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1),0)
-                };
-                const suggestions = [];
-                if(stats.piezasPendientes>3) suggestions.push({ type:'critical', icon:'alert-triangle', title:'Piezas pendientes', description:`Tienes ${stats.piezasPendientes} piezas en espera.`, action:'Contacta con proveedores.' });
-                else if(stats.piezasPendientes>0) suggestions.push({ type:'warning', icon:'clock', title:'Piezas en tránsito', description:`${stats.piezasPendientes} piezas pendientes.`, action:'Sigue el estado de los pedidos.' });
-                else suggestions.push({ type:'success', icon:'check-circle', title:'Stock OK', description:'No hay piezas pendientes.', action:'Puedes planificar nuevas compras.' });
-                if(stats.pedidosPendientes>5) suggestions.push({ type:'critical', icon:'shopping-cart', title:'Pedidos acumulados', description:`${stats.pedidosPendientes} pedidos sin entregar.`, action:'Prioriza los más antiguos.' });
-                else if(stats.pedidosPendientes>0) suggestions.push({ type:'warning', icon:'package', title:'Pedidos pendientes', description:`${stats.pedidosPendientes} pedidos en proceso.`, action:'Revisa plazos de entrega.' });
-                else suggestions.push({ type:'success', icon:'check-circle', title:'Pedidos al día', description:'Todos entregados.', action:'Excelente gestión.' });
-                if(stats.reparacionesPendientes>3) suggestions.push({ type:'critical', icon:'wrench', title:'Reparaciones acumuladas', description:`${stats.reparacionesPendientes} reparaciones en curso.`, action:'Asigna más recursos.' });
-                else if(stats.reparacionesPendientes>0) suggestions.push({ type:'warning', icon:'clock', title:'Reparaciones activas', description:`${stats.reparacionesPendientes} equipos en reparación.`, action:'Mantén actualizados los estados.' });
-                else suggestions.push({ type:'success', icon:'check-circle', title:'Taller al día', description:'No hay reparaciones pendientes.', action:'Buen ritmo.' });
-                if(stats.beneficioTotal<500) suggestions.push({ type:'warning', icon:'trending-down', title:'Margen bajo', description:`Beneficio: ${stats.beneficioTotal.toFixed(2)}€`, action:'Revisa precios o costes.' });
-                else if(stats.beneficioTotal<1500) suggestions.push({ type:'info', icon:'trending-up', title:'Rentabilidad media', description:`Beneficio: ${stats.beneficioTotal.toFixed(2)}€`, action:'Se puede mejorar.' });
-                else suggestions.push({ type:'success', icon:'trending-up', title:'Rentabilidad excelente', description:`Beneficio: ${stats.beneficioTotal.toFixed(2)}€`, action:'Sigue así.' });
-                const tasa = stats.totalReparaciones>0 ? (stats.reparacionesCompletadas/stats.totalReparaciones*100).toFixed(0) : 0;
-                if(tasa<50) suggestions.push({ type:'critical', icon:'thumbs-down', title:'Baja eficiencia', description:`Solo ${tasa}% completadas.`, action:'Revisa procesos.' });
-                else if(tasa<80) suggestions.push({ type:'warning', icon:'activity', title:'Eficiencia mejorable', description:`${tasa}% OK.`, action:'Optimiza tiempos.' });
-                else suggestions.push({ type:'success', icon:'thumbs-up', title:'Alta eficiencia', description:`${tasa}% completadas.`, action:'Excelente rendimiento.' });
-                content.innerHTML = `<div class="grid grid-cols-3 gap-2 mb-4"><div class="bg-blue-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">📦 Piezas</p><p class="text-sm font-bold">${stats.totalPiezas}</p><p class="text-[9px] ${stats.piezasPendientes>0?'text-amber-600':'text-green-600'}">${stats.piezasPendientes} pend.</p></div><div class="bg-green-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">🛒 Pedidos</p><p class="text-sm font-bold">${stats.totalPedidos}</p><p class="text-[9px] ${stats.pedidosPendientes>0?'text-amber-600':'text-green-600'}">${stats.pedidosEntregados} entreg.</p></div><div class="bg-purple-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">🔧 Reparac.</p><p class="text-sm font-bold">${stats.totalReparaciones}</p><p class="text-[9px] ${stats.reparacionesPendientes>0?'text-amber-600':'text-green-600'}">${stats.reparacionesCompletadas} OK</p></div></div><h4 class="font-bold text-sm mb-2 flex items-center gap-2"><i data-lucide="lightbulb" class="w-4 h-4"></i> Recomendaciones</h4>${suggestions.map(s=>`<div class="suggestion-card ${s.type}"><div class="flex items-start gap-3"><i data-lucide="${s.icon}" class="w-5 h-5 mt-0.5 ${s.type==='critical'?'text-red-500':s.type==='warning'?'text-amber-500':s.type==='success'?'text-green-500':'text-blue-500'}"></i><div class="flex-1"><h4 class="font-bold text-sm">${s.title}</h4><p class="text-xs text-slate-600 mt-1">${s.description}</p><p class="text-xs font-medium mt-1 ${s.type==='critical'?'text-red-600':s.type==='warning'?'text-amber-600':'text-green-600'}">💡 ${s.action}</p></div></div></div>`).join('')}<div class="mt-3 p-2 bg-slate-100 rounded-lg text-center text-[10px] text-slate-500">📊 Datos actualizados al ${new Date().toLocaleString()}</div>`;
-                lucide.createIcons();
-            } catch(e) { content.innerHTML = '<div class="text-red-500 text-sm text-center p-4">❌ Error al generar sugerencias.</div>'; }
-        }
-        function closeAIModal() { const m=document.getElementById('ai-modal'); if(m){m.classList.add('hidden');m.classList.remove('flex');} }
-        function showImageModal(src) { const m=document.getElementById('image-modal'); document.getElementById('modal-image').src=src; m.classList.remove('hidden'); lucide.createIcons(); }
-        function closeImageModal() { document.getElementById('image-modal').classList.add('hidden'); }
-        
-        // ========== IMPRESIÓN ==========
-        async function printDocument(section,id) {
-            const item = await db[section].get(id);
-            if(!item) return;
-            const fechaActual = new Date().toLocaleString(), empresa="S.A.T. Servicio Técnico Autorizado", telefono="900 123 456", email="sat@tecnico.com";
-            let html='';
-            if(section==='reparaciones') {
-                const precioConIVA = item.precio ? (parseFloat(item.precio)*(1+IVA/100)).toFixed(2) : '-';
-                html = `<div class="print-header"><h1>${empresa}</h1><p>Orden de Reparación / Trabajo</p><p>Tel: ${telefono} | Email: ${email}</p><p>Fecha: ${fechaActual}</p></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DATOS DE LA ORDEN</h3><table class="print-table"><tr><th width="30%">Nº Orden (OT):</th><td>${item.ot||'-'}</td></tr><tr><th>Fecha Entrada:</th><td>${item.fechaEntrada?new Date(item.fechaEntrada).toLocaleDateString():'-'}</td></tr><tr><th>Fecha Registro:</th><td>${new Date(item.fecha).toLocaleString()}</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DATOS DEL EQUIPO</h3><table class="print-table"><tr><th width="30%">Marca:</th><td>${item.marca||'-'}</td></tr><tr><th>Modelo:</th><td>${item.modelo||'-'}</td></tr><tr><th>Nº Serie:</th><td>${item.serie||'-'}</td></tr><tr><th>Password/Patrón:</th><td>${item.password||'-'}</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DATOS DEL CLIENTE</h3><table class="print-table"><tr><th width="30%">Cliente:</th><td>${item.cliente||'-'}</td></tr><tr><th>Teléfono:</th><td>${item.telefono||'-'}</td></tr><tr><th>Email:</th><td>${item.email||'-'}</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DIAGNÓSTICO Y PRESUPUESTO</h3><table class="print-table"><tr><th width="30%">Diagnóstico/Avería:</th><td>${item.diagnostico||'-'}</td></tr><tr><th>Precio Estimado (sin IVA):</th><td>${item.precio?item.precio+'€':'-'}</td></tr><tr><th>IVA (${IVA}%):</th><td>${item.precio?(item.precio*IVA/100).toFixed(2)+'€':'-'}</td></tr><tr><th><strong>Total con IVA:</strong></th><td><strong>${precioConIVA}€</strong></td></tr><tr><th>Prioridad:</th><td>${item.prioridad||'-'}</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">ACCESORIOS Y ESTADO</h3><table class="print-table"><tr><th width="30%">Accesorios que deja:</th><td>${item.accesorios||'Ninguno'}</td></tr><tr><th>Estado Reparación:</th><td>${item.estado||'-'}</td></tr><tr><th>Técnico Asignado:</th><td>${item.usuario||'-'}</td></tr></table></div>
-                ${item.imagen?`<div><h3 style="background:#f0f0f0;padding:8px;">IMAGEN ADJUNTA</h3><img src="${item.imagen}" style="max-width:100%; border:1px solid #ccc;"></div>`:''}
-                <div class="signature-line"><div class="signature-item"><hr><p>Firma del Cliente</p></div><div class="signature-item"><hr><p>Firma del Técnico</p></div></div>
-                <div class="print-footer"><p>Documento generado por SAT Gestión Pro - ${fechaActual}</p><p>Gracias por confiar en nosotros</p></div>`;
-            } else if(section==='pedidos') {
-                const compra=parseFloat(item.precioCompra)||0, venta=parseFloat(item.precioVenta)||0, cant=parseInt(item.cantidad)||1, totalSinIVA=venta*cant, totalConIVA=totalSinIVA*(1+IVA/100);
-                html = `<div class="print-header"><h1>${empresa}</h1><p>Orden de Pedido / Presupuesto</p><p>Tel: ${telefono} | Email: ${email}</p><p>Fecha: ${fechaActual}</p></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DATOS DEL PEDIDO</h3><table class="print-table"><tr><th width="30%">Referencia:</th><td>${item.referencia||'-'}</td></tr><tr><th>Fecha Pedido:</th><td>${item.fechaTrami?new Date(item.fechaTrami).toLocaleDateString():new Date(item.fecha).toLocaleDateString()}</td></tr><tr><th>Estado:</th><td>${item.estado||'-'}</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DATOS DEL CLIENTE</h3><table class="print-table"><tr><th width="30%">Cliente:</th><td>${item.cliente||'-'}</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DETALLE DEL PRODUCTO</h3><table class="print-table"><tr><th width="30%">Producto/Modelo:</th><td>${item.producto||'-'}</td></tr><tr><th>Cantidad:</th><td>${cant}</td></tr><tr><th>Precio Unitario (sin IVA):</th><td>${venta.toFixed(2)}€</td></tr><tr><th>Precio Unitario (con IVA):</th><td>${(venta*(1+IVA/100)).toFixed(2)}€</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">RESUMEN ECONÓMICO</h3><table class="print-table"><tr><th width="30%">Subtotal (sin IVA):</th><td>${totalSinIVA.toFixed(2)}€</td></tr><tr><th>IVA (${IVA}%):</th><td>${(totalSinIVA*IVA/100).toFixed(2)}€</td></tr><tr><th><strong>TOTAL:</strong></th><td><strong>${totalConIVA.toFixed(2)}€</strong></td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">OBSERVACIONES</h3><p style="padding:10px;border:1px solid #ddd;">${item.observaciones||'Sin observaciones'}</p></div>
-                <div class="signature-line"><div class="signature-item"><hr><p>Firma del Cliente</p></div><div class="signature-item"><hr><p>Sello del Taller</p></div></div>
-                <div class="print-footer"><p>Documento generado por SAT Gestión Pro - ${fechaActual}</p><p>Gracias por su compra</p></div>`;
-            } else if(section==='piezas') {
-                const compra=parseFloat(item.precioCompra)||0, venta=parseFloat(item.precioVenta)||0, cant=parseInt(item.cantidad)||1, totalSinIVA=venta*cant, totalConIVA=totalSinIVA*(1+IVA/100);
-                html = `<div class="print-header"><h1>${empresa}</h1><p>Albarán de Pedido de Piezas</p><p>Tel: ${telefono} | Email: ${email}</p><p>Fecha: ${fechaActual}</p></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DATOS DEL PEDIDO</h3><table class="print-table"><tr><th width="30%">Referencia:</th><td>${item.referencia||'-'}</td></tr><tr><th>Proveedor:</th><td>${item.proveedor||'-'}</td></tr><tr><th>Fecha Pedido:</th><td>${item.fechaTrami?new Date(item.fechaTrami).toLocaleDateString():new Date(item.fecha).toLocaleDateString()}</td></tr><tr><th>Estado:</th><td>${item.estado||'-'}</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">DETALLE DE LA PIEZA</h3><table class="print-table"><tr><th width="30%">Pieza:</th><td>${item.nombre||'-'}</td></tr><tr><th>Cantidad:</th><td>${cant}</td></tr><tr><th>Precio Compra (sin IVA):</th><td>${compra.toFixed(2)}€</td></tr><tr><th>Precio Venta (sin IVA):</th><td>${venta.toFixed(2)}€</td></tr><tr><th>Precio Venta con IVA:</th><td>${(venta*(1+IVA/100)).toFixed(2)}€</td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">RESUMEN ECONÓMICO</h3><table class="print-table"><tr><th width="30%">Coste total para taller:</th><td>${(compra*cant).toFixed(2)}€</td></tr><tr><th>Venta total (sin IVA):</th><td>${totalSinIVA.toFixed(2)}€</td></tr><tr><th>IVA (${IVA}%):</th><td>${(totalSinIVA*IVA/100).toFixed(2)}€</td></tr><tr><th><strong>Total Venta con IVA:</strong></th><td><strong>${totalConIVA.toFixed(2)}€</strong></td></tr></table></div>
-                <div><h3 style="background:#f0f0f0;padding:8px;">OBSERVACIONES</h3><p style="padding:10px;border:1px solid #ddd;">${item.observaciones||'Sin observaciones'}</p></div>
-                ${item.imagen?`<div><h3 style="background:#f0f0f0;padding:8px;">IMAGEN ADJUNTA</h3><img src="${item.imagen}" style="max-width:100%; border:1px solid #ccc;"></div>`:''}
-                <div class="signature-line"><div class="signature-item"><hr><p>Firma del Recepcionista</p></div><div class="signature-item"><hr><p>Sello del Taller</p></div></div>
-                <div class="print-footer"><p>Documento generado por SAT Gestión Pro - ${fechaActual}</p><p>Pieza original con garantía</p></div>`;
-            }
-            const printArea = document.getElementById('print-area');
-            printArea.innerHTML = html;
-            printArea.style.position = 'fixed'; printArea.style.top = '0'; printArea.style.left = '0'; printArea.style.width = '100%'; printArea.style.background = 'white'; printArea.style.zIndex = '9999';
-            window.print();
-            setTimeout(() => { printArea.style.position = 'fixed'; printArea.style.top = '-9999px'; printArea.style.left = '-9999px'; }, 1000);
-        }
-        async function printFromList(section,id) { await printDocument(section,id); }
+    });
+}
 
-        // Exposición global
-        window.showSection = showSection; window.openModal = openModal; window.closeModal = closeModal; window.viewDetail = viewDetail;
-        window.closeDetailModal = closeDetailModal; window.editRecord = editRecord; window.deleteRecord = deleteRecord; window.login = login;
-        window.logout = logout; window.openReminderModal = openReminderModal; window.closeReminderModal = closeReminderModal;
-        window.generateAISuggestions = generateAISuggestions; window.closeAIModal = closeAIModal; window.handleAlertClick = handleAlertClick;
-        window.printDocument = printDocument; window.printFromList = printFromList; window.toggleDarkMode = toggleDarkMode;
-        window.showImageModal = showImageModal; window.closeImageModal = closeImageModal;
-    </script>
+async function updateDashboardStats() {
+    try {
+        const piezas = await db.piezas.toArray(), pedidos = await db.pedidos.toArray(), reparaciones = await db.reparaciones.toArray();
+        let beneficioTotal = 0;
+        pedidos.forEach(p => { beneficioTotal += ((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1); });
+        piezas.forEach(p => { if(p.estado==='Vendido'||p.estado==='Instalado') beneficioTotal += ((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1); });
+        document.getElementById('stat-piezas').textContent = piezas.filter(p=>p.estado==='Pedido').length;
+        document.getElementById('stat-pedidos').textContent = pedidos.filter(p=>p.estado!=='Entregado').length;
+        document.getElementById('stat-reparaciones').textContent = reparaciones.filter(r=>r.prioridad==='Alta' && r.estado!=='Completado' && r.estado!=='Entregado').length;
+        document.getElementById('stat-beneficio').textContent = beneficioTotal.toFixed(2)+'€';
+        const allActivity = [];
+        piezas.slice(-3).forEach(p=>p.nombre&&allActivity.push({ text:`Pieza: ${p.nombre}`, date:new Date(p.fecha), icon:'package', usuario:p.usuario }));
+        pedidos.slice(-3).forEach(p=>p.cliente&&allActivity.push({ text:`Pedido: ${p.producto} — ${p.cliente}`, date:new Date(p.fecha), icon:'shopping-cart', usuario:p.usuario }));
+        reparaciones.slice(-3).forEach(r=>r.ot&&allActivity.push({ text:`Reparación OT: ${r.ot}`, date:new Date(r.fecha), icon:'check-square', usuario:r.usuario }));
+        allActivity.sort((a,b)=>b.date-a.date);
+        const container = document.getElementById('recent-activity');
+        if(container) {
+            container.innerHTML = allActivity.length===0 ? '<p class="text-slate-400 text-xs italic">No hay actividad.</p>' : '';
+            allActivity.slice(0,6).forEach(act => {
+                let userClass = act.usuario==='Daniel Farré'?'daniel':act.usuario==='José Ayala'?'jose':act.usuario==='David Varillas'?'david':'';
+                container.innerHTML += `<div class="flex items-center gap-2"><div class="w-6 h-6 rounded bg-slate-50 flex items-center justify-center flex-shrink-0"><i data-lucide="${act.icon}" class="w-3 h-3"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-medium truncate">${escapeHtml(act.text)}</p><p class="text-[10px] text-slate-400">${act.date.toLocaleString('es-ES')} · <span class="user-badge ${userClass}">${escapeHtml(act.usuario||'')}</span></p></div></div>`;
+            });
+        }
+        lucide.createIcons();
+        updateIntelligentAlerts();
+    } catch(e) { console.error(e); }
+}
+
+async function updateReports() {
+    try {
+        const piezas = await db.piezas.toArray(), pedidos = await db.pedidos.toArray(), reparaciones = await db.reparaciones.toArray();
+        let ingresos=0, costes=0;
+        pedidos.forEach(p=>{ let v=(parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1), c=(parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1); ingresos+=v; costes+=c; });
+        piezas.forEach(p=>{ if(p.estado==='Vendido'||p.estado==='Instalado'){ ingresos+=parseFloat(p.precioVenta)||0; costes+=parseFloat(p.precioCompra)||0; } });
+        ingresos += reparaciones.reduce((s,r)=>s+(parseFloat(r.precio)||0),0);
+        document.getElementById('kpi-ingresos').textContent = ingresos.toFixed(2)+'€';
+        document.getElementById('kpi-coste-piezas').textContent = costes.toFixed(2)+'€';
+        document.getElementById('kpi-beneficio').textContent = (ingresos-costes).toFixed(2)+'€';
+        document.getElementById('kpi-margen').textContent = ingresos>0?((ingresos-costes)/ingresos*100).toFixed(1)+'%':'0%';
+        document.getElementById('kpi-total-pedidos').textContent = pedidos.length;
+        document.getElementById('kpi-pedidos-entregados').textContent = pedidos.filter(p=>p.estado==='Entregado').length;
+        document.getElementById('kpi-reparaciones-completadas').textContent = reparaciones.filter(r=>r.estado==='Completado'||r.estado==='Entregado').length;
+        document.getElementById('kpi-piezas-pendientes').textContent = piezas.filter(p=>p.estado==='Pedido').length;
+        document.getElementById('kpi-tasa-entrega').textContent = pedidos.length>0?Math.round(pedidos.filter(p=>p.estado==='Entregado').length/pedidos.length*100)+'%':'0%';
+        updateChartPedidosEstado(pedidos);
+        updateChartReparacionesEstado(reparaciones);
+        updateChartGarantiasEstado(reparaciones);
+        updateDetalleVentas(pedidos, piezas);
+        updateRankingUsuarios(pedidos, piezas, reparaciones);
+        updateChartOperacionesUsuario();
+        updateEvolucionMensual();
+        updateEvolucionPorUsuario(currentRange);
+    } catch(e) { console.error(e); }
+}
+
+async function updateRankingUsuarios(pedidos, piezas, reparaciones) {
+    const ranking = USUARIOS.map(u => {
+        const ped = pedidos.filter(p=>p.usuario===u).length;
+        const pie = piezas.filter(p=>p.usuario===u).length;
+        const rep = reparaciones.filter(r=>r.usuario===u).length;
+        const gar = reparaciones.filter(r=>r.usuario===u && r.garantia_fin && new Date(r.garantia_fin)>new Date()).length;
+        return { usuario:u, pedidos:ped, piezas:pie, reparaciones:rep, garantias:gar, total:ped+pie+rep };
+    }).sort((a,b)=>b.total-a.total);
+    const container = document.getElementById('ranking-usuarios');
+    if(container) {
+        container.innerHTML = ranking.map(r => {
+            let avatarClass = r.usuario==='Daniel Farré'?'bg-blue-100 text-blue-700':r.usuario==='José Ayala'?'bg-pink-100 text-pink-700':'bg-emerald-100 text-emerald-700';
+            return `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full ${avatarClass} flex items-center justify-center font-bold">${r.usuario[0]}</div><div><p class="font-medium text-sm">${escapeHtml(r.usuario)}</p><p class="text-[10px] text-slate-500">${r.total} op. totales</p></div></div><div class="flex gap-2 text-center"><div><p class="text-xs font-bold text-blue-600">${r.pedidos}</p><p class="text-[9px] text-slate-400">Ped.</p></div><div><p class="text-xs font-bold text-purple-600">${r.piezas}</p><p class="text-[9px] text-slate-400">Piez.</p></div><div><p class="text-xs font-bold text-pink-600">${r.reparaciones}</p><p class="text-[9px] text-slate-400">Rep.</p></div><div><p class="text-xs font-bold text-green-600">${r.garantias}</p><p class="text-[9px] text-slate-400">Gar.</p></div></div></div>`;
+        }).join('');
+    }
+}
+
+async function updateChartGarantiasEstado(reparaciones) {
+    const hoy = new Date();
+    const stats = { vigente:0, expirada:0, proxima:0 };
+    reparaciones.forEach(r => {
+        if(r.garantia_fin) {
+            const fin = new Date(r.garantia_fin), diff = Math.ceil((fin-hoy)/(1000*60*60*24));
+            if(diff < 0) stats.expirada++;
+            else if(diff <= 15) stats.proxima++;
+            else stats.vigente++;
+        }
+    });
+    const ctx = document.getElementById('chart-garantias-estado')?.getContext('2d');
+    if(ctx) { if(charts.garantiasEstado) charts.garantiasEstado.destroy(); charts.garantiasEstado = new Chart(ctx, { type:'pie', data:{ labels:['Vigentes','Expiradas','Próx. Caducar'], datasets:[{ data:[stats.vigente, stats.expirada, stats.proxima], backgroundColor:['#10b981','#ef4444','#f59e0b'] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
+}
+
+async function updateChartOperacionesUsuario() {
+    const pedidos = await db.pedidos.toArray(), piezas = await db.piezas.toArray(), reparaciones = await db.reparaciones.toArray();
+    const ctx = document.getElementById('chart-operaciones-usuario')?.getContext('2d');
+    if(ctx) { if(charts.operacionesUsuario) charts.operacionesUsuario.destroy(); charts.operacionesUsuario = new Chart(ctx, { type:'bar', data:{ labels:USUARIOS, datasets:[{ label:'Pedidos', data:USUARIOS.map(u=>pedidos.filter(p=>p.usuario===u).length), backgroundColor:'#3b82f6' },{ label:'Piezas', data:USUARIOS.map(u=>piezas.filter(p=>p.usuario===u).length), backgroundColor:'#8b5cf6' },{ label:'Reparaciones', data:USUARIOS.map(u=>reparaciones.filter(r=>r.usuario===u).length), backgroundColor:'#ec4899' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
+}
+
+async function updateChartPedidosEstado(pedidos) {
+    const estados = {}; pedidos.forEach(p=>estados[p.estado]=(estados[p.estado]||0)+1);
+    const ctx = document.getElementById('chart-pedidos-estado')?.getContext('2d');
+    if(ctx) { if(charts.pedidosEstado) charts.pedidosEstado.destroy(); charts.pedidosEstado = new Chart(ctx, { type:'doughnut', data:{ labels:Object.keys(estados), datasets:[{ data:Object.values(estados), backgroundColor:['#667eea','#764ba2','#f093fb','#f5576c'] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
+}
+
+async function updateChartReparacionesEstado(reparaciones) {
+    const estados = {}; reparaciones.forEach(r=>estados[r.estado]=(estados[r.estado]||0)+1);
+    const ctx = document.getElementById('chart-reparaciones-estado')?.getContext('2d');
+    if(ctx) { if(charts.reparacionesEstado) charts.reparacionesEstado.destroy(); charts.reparacionesEstado = new Chart(ctx, { type:'doughnut', data:{ labels:Object.keys(estados), datasets:[{ data:Object.values(estados), backgroundColor:['#4facfe','#00f2fe','#43e97b','#fa709a'] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
+}
+
+async function updateDetalleVentas(pedidos, piezas) {
+    const tbody = document.getElementById('detalle-ventas-tbody');
+    if(!tbody) return;
+    const items = [];
+    pedidos.forEach(p => { let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0, cant=parseInt(p.cantidad)||1; items.push({ nombre:p.producto, tipo:'Pedido', compra:c*cant, venta:v*cant, beneficio:(v-c)*cant, margen:v>0?((v-c)/v*100).toFixed(1):0, estado:p.estado }); });
+    piezas.forEach(p => { if(p.precioVenta){ let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0; items.push({ nombre:p.nombre, tipo:'Pieza', compra:c, venta:v, beneficio:v-c, margen:v>0?((v-c)/v*100).toFixed(1):0, estado:p.estado }); } });
+    items.sort((a,b)=>b.beneficio-a.beneficio);
+    tbody.innerHTML = items.slice(0,15).map(i => `<tr class="hover:bg-slate-50"><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(i.nombre)}</td><td class="px-2 md:px-4 py-2 text-xs">${i.tipo}</td><td class="px-2 md:px-4 py-2 text-xs">${i.compra.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs">${i.venta.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs ${i.beneficio>=0?'profit-positive':'profit-negative'}">${i.beneficio.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs hidden md:table-cell">${i.margen}%</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(i.estado)}">${escapeHtml(i.estado)}</span></td></tr>`).join('');
+}
+
+function getStatusClass(status) {
+    const s = (status||'').toLowerCase();
+    if(s.includes('pendiente')||s.includes('pedido')||s.includes('espera')) return 'bg-amber-100 text-amber-700';
+    if(s.includes('recibido')||s.includes('entregado')||s.includes('completado')||s.includes('vendido')) return 'bg-green-100 text-green-700';
+    return 'bg-blue-100 text-blue-700';
+}
+
+async function renderTable(section) {
+    const data = await db[section].toArray();
+    const head = document.getElementById('table-head'), body = document.getElementById('table-body');
+    if(!head||!body) return;
+    let headers = section==='piezas'?['Pieza','Proveedor','P.Venta','Usuario','Estado','Imagen']:section==='pedidos'?['Producto','Cliente','P.Venta','Estado','Fecha']:['OT','Cliente','Equipo','Garantía','Estado','Imagen'];
+    head.innerHTML = headers.map(h=>`<th class="px-2 md:px-4 py-2 text-[10px] md:text-xs font-semibold text-slate-500 uppercase">${h}</th>`).join('') + '<th class="px-2 md:px-4 py-2 text-right">Acciones</th>';
+    body.innerHTML = data.length===0 ? '<tr><td colspan="9" class="p-6 text-center text-slate-400 text-xs">Sin datos.</td></tr>' : '';
+    data.forEach(item => {
+        let userClass = item.usuario==='Daniel Farré'?'daniel':item.usuario==='José Ayala'?'jose':item.usuario==='David Varillas'?'david':'';
+        let content = '';
+        if(section==='piezas') content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.nombre)}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.proveedor)}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta}€</td><td class="px-2 md:px-4 py-2"><span class="user-badge ${userClass} text-[9px]">${escapeHtml(item.usuario)}</span></td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${escapeHtml(item.estado)}</span></td><td class="px-2 md:px-4 py-2">${item.imagen?`<img src="${item.imagen}" class="thumbnail-img" onclick="showImageModal('${item.imagen}')">`:'-'}</td>`;
+        else if(section==='pedidos') content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.producto)}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.cliente)}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta}€</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${escapeHtml(item.estado)}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
+        else if(section==='reparaciones') {
+            let gHtml = '-'; if(item.garantia_fin){ let diff=Math.ceil((new Date(item.garantia_fin)-new Date())/(1000*60*60*24)); gHtml=diff<0?'<span class="badge-guarantee badge-expired">Expirada</span>':`<span class="badge-guarantee ${diff<=15?'badge-days-left':'badge-in-warranty'}">${diff}d</span>`; }
+            content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.ot)}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.cliente)}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</td><td class="px-2 md:px-4 py-2 text-xs">${gHtml}</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${escapeHtml(item.estado)}</span></td><td class="px-2 md:px-4 py-2">${item.imagen?`<img src="${item.imagen}" class="thumbnail-img" onclick="showImageModal('${item.imagen}')">`:'-'}</td>`;
+        }
+        const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `${content}<td class="px-2 md:px-4 py-2 text-right space-x-1"><button onclick='viewDetail("${section}", ${item.id})' class="btn-small bg-slate-100 hover:bg-green-100"><i data-lucide="eye" class="w-3 h-3"></i></button><button onclick='editRecord("${section}", ${item.id})' class="btn-small bg-slate-100 hover:bg-blue-100"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick='deleteRecord("${section}", ${item.id})' class="btn-small bg-slate-100 hover:bg-red-100"><i data-lucide="trash" class="w-3 h-3"></i></button></td>`;
+        body.appendChild(tr);
+    });
+    lucide.createIcons();
+}
+
+function openModal(editData=null) {
+    const modal = document.getElementById('modal'), fields = document.getElementById('form-fields'), idInput = document.getElementById('form-id'), sectionInput = document.getElementById('form-section');
+    let active = currentSection==='dashboard'?'reparaciones':currentSection;
+    idInput.value = editData?editData.id:''; sectionInput.value = active;
+    let html = '';
+    if(active==='piezas') html = `<div class="form-section"><div class="form-section-title"><i data-lucide="package"></i> Pieza</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Nombre *</label><input type="text" name="nombre" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.nombre||'')}"></div><div><label class="text-xs font-bold">Cantidad *</label><input type="number" name="cantidad" required class="w-full border rounded p-2 text-sm" value="${editData?.cantidad||1}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="euro"></i> Precios</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded p-2 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-xs font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded p-2 text-sm" value="${editData?.precioVenta||''}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="user"></i> Asignación</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Técnico *</label><select name="usuario" required class="w-full border rounded p-2 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div><div><label class="text-xs font-bold">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Vendido'?'selected':''}>Vendido</option></select></div></div></div><input type="hidden" name="imagen" id="imagenData" value="${editData?.imagen||''}"><div><label class="text-xs font-bold">Imagen</label><input type="file" onchange="handleFile(this)" class="w-full text-xs"></div>`;
+    else if(active==='pedidos') html = `<div class="form-section"><div class="form-section-title"><i data-lucide="shopping-cart"></i> Pedido</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Producto *</label><input type="text" name="producto" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.producto||'')}"></div><div><label class="text-xs font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.cliente||'')}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="euro"></i> Precios</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded p-2 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-xs font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded p-2 text-sm" value="${editData?.precioVenta||''}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="user"></i> Asignación</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Técnico *</label><select name="usuario" required class="w-full border rounded p-2 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div><div><label class="text-xs font-bold">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='En Espera'?'selected':''}>En Espera</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div></div></div>`;
+    else if(active==='reparaciones') html = `<div class="form-section"><div class="form-section-title"><i data-lucide="check-square"></i> Reparación</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">OT *</label><input type="text" name="ot" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.ot||'')}"></div><div><label class="text-xs font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.cliente||'')}"></div><div><label class="text-xs font-bold">Marca *</label><input type="text" name="marca" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.marca||'')}"></div><div><label class="text-xs font-bold">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.modelo||'')}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="shield-check"></i> Garantía y Prioridad</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded p-2 text-sm" value="${editData?.garantia_meses||0}"></div><div><label class="text-xs font-bold">Prioridad</label><select name="prioridad" class="w-full border rounded p-2 text-sm"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="stethoscope"></i> Estado</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Técnico *</label><select name="usuario" required class="w-full border rounded p-2 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div><div><label class="text-xs font-bold">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="euro"></i> Precio</div><input type="number" step="0.01" name="precio" class="w-full border rounded p-2 text-sm" value="${editData?.precio||''}"></div><div class="form-section"><div class="form-section-title"><i data-lucide="file-text"></i> Notas</div><textarea name="observaciones" rows="3" class="w-full border rounded p-2 text-sm">${escapeHtml(editData?.observaciones||'')}</textarea></div><input type="hidden" name="imagen" id="imagenData" value="${editData?.imagen||''}"><div><label class="text-xs font-bold">Imagen</label><input type="file" onchange="handleFile(this)" class="w-full text-xs"></div>`;
+    fields.innerHTML = html; modal.classList.remove('hidden'); modal.classList.add('flex'); lucide.createIcons();
+}
+
+async function handleFile(input) {
+    const file = input.files[0];
+    if(file) {
+        const r = new FileReader(); r.readAsDataURL(file);
+        r.onload = () => { document.getElementById('imagenData').value = r.result; };
+    }
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
+
+document.getElementById('record-form').addEventListener('submit', async(e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const id = document.getElementById('form-id').value, section = document.getElementById('form-section').value;
+    try {
+        if(section==='reparaciones' && data.garantia_meses>0 && (data.estado==='Entregado'||data.estado==='Completado')){
+            let f = new Date(); f.setMonth(f.getMonth()+parseInt(data.garantia_meses)); data.garantia_fin = f.toISOString();
+        }
+        if(id) {
+            const old = await db[section].get(parseInt(id));
+            const merged = {...old, ...data}; merged.fecha = old.fecha;
+            if(!data.imagen && old.imagen) merged.imagen = old.imagen;
+            await db[section].put(merged);
+        } else {
+            data.fecha = new Date().toISOString();
+            await db[section].add(data);
+        }
+        showToast('Guardado'); closeModal(); showSection(currentSection);
+    } catch(err) { showToast('Error', 'error'); }
+});
+
+async function editRecord(section, id) { const item = await db[section].get(id); if(item) openModal(item); }
+async function deleteRecord(section, id) { if(confirm('¿Eliminar?')){ await db[section].delete(id); showSection(currentSection); } }
+
+async function viewDetail(section, id) {
+    const item = await db[section].get(id); if(!item) return;
+    let html = Object.entries(item).map(([k,v]) => k==='imagen'?`<div class="detail-row"><div class="detail-label">${k}</div><div class="detail-value"><img src="${v}" class="w-32 rounded"></div></div>`:`<div class="detail-row"><div class="detail-label">${k}</div><div class="detail-value">${escapeHtml(v)}</div></div>`).join('');
+    document.getElementById('detail-content').innerHTML = html;
+    document.getElementById('detail-modal').classList.remove('hidden'); document.getElementById('detail-modal').classList.add('flex');
+}
+function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
+
+async function updateIntelligentAlerts() {
+    const rep = await db.reparaciones.toArray(), pie = await db.piezas.toArray(), rec = await db.recordatorios.toArray(), now = new Date();
+    const alerts = [];
+    rep.forEach(r => {
+        if(r.garantia_fin){ let d=Math.ceil((new Date(r.garantia_fin)-now)/(1000*60*60*24)); if(d>=0 && d<=15) alerts.push({ title:`Garantía por caducar: ${r.ot}`, desc:`${d} días para ${r.cliente}`, prio:'warning' }); }
+        if(r.prioridad==='Alta' && r.estado==='Pendiente') alerts.push({ title:`Urgente: ${r.ot}`, desc:`Reparación prioritaria pendiente`, prio:'critical' });
+    });
+    rec.forEach(r => { if(!r.completed) alerts.push({ title:r.title, desc:r.description, prio:r.priority }); });
+    const container = document.getElementById('alert-container');
+    if(container) container.innerHTML = alerts.map(a => `<div class="alert-card p-3 rounded-lg ${a.prio==='critical'?'alert-critical':a.prio==='warning'?'alert-warning':'alert-info'}"><p class="text-sm font-bold">${escapeHtml(a.title)}</p><p class="text-xs">${escapeHtml(a.desc)}</p></div>`).join('');
+}
+
+function openReminderModal() { document.getElementById('reminder-modal').classList.remove('hidden'); document.getElementById('reminder-modal').classList.add('flex'); }
+function closeReminderModal() { document.getElementById('reminder-modal').classList.add('hidden'); }
+document.getElementById('reminder-form').onsubmit = async(e) => {
+    e.preventDefault(); const data = Object.fromEntries(new FormData(e.target));
+    data.completed = false; await db.recordatorios.add(data); closeReminderModal(); updateIntelligentAlerts();
+};
+
+async function generateAISuggestions() {
+    showToast('Analizando datos...');
+    const modal = document.getElementById('ai-modal'); modal.classList.remove('hidden'); modal.classList.add('flex');
+    const r = await db.reparaciones.toArray();
+    document.getElementById('ai-content').innerHTML = `<div class="suggestion-card info"><h4 class="font-bold">Resumen de Taller</h4><p class="text-xs">Tienes ${r.filter(x=>x.estado==='Pendiente').length} reparaciones pendientes. Deberías priorizar las de Daniel ya que tiene más carga.</p></div>`;
+}
+
+function showImageModal(src) { document.getElementById('modal-image').src = src; document.getElementById('image-modal').classList.remove('hidden'); document.getElementById('image-modal').classList.add('flex'); }
+function closeImageModal() { document.getElementById('image-modal').classList.add('hidden'); }
+
+async function exportData() {
+    const d = { piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), reparaciones: await db.reparaciones.toArray() };
+    const blob = new Blob([JSON.stringify(d)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup.json'; a.click();
+}
+async function importData(e) {
+    const f = e.target.files[0]; if(!f) return;
+    const d = JSON.parse(await f.text());
+    for(let s in d) { for(let i of d[s]){ delete i.id; await db[s].add(i); } }
+    showSection(currentSection);
+}
+
+window.showSection = showSection; window.openModal = openModal; window.closeModal = closeModal;
+window.viewDetail = viewDetail; window.closeDetailModal = closeDetailModal; window.editRecord = editRecord;
+window.deleteRecord = deleteRecord; window.login = login; window.logout = logout;
+window.openReminderModal = openReminderModal; window.closeReminderModal = closeReminderModal;
+window.generateAISuggestions = generateAISuggestions; window.closeAIModal = closeAIModal;
+window.toggleDarkMode = toggleDarkMode; window.showImageModal = showImageModal;
+window.closeImageModal = closeImageModal; window.exportData = exportData;
+window.importData = importData; window.filterTable = filterTable;
+</script>
 </body>
 </html>
