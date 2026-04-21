@@ -2,307 +2,289 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>S.A.T. Dashboard - Gestión Pro V5.3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>S.A.T. Dashboard Pro V8.1 - Full Data Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; }
+        
+        /* Reset y Estilos Base */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; transition: background-color 0.3s; }
         body.dark { background-color: #0f172a; color: #e2e8f0; }
+
+        /* Contenedores con Scroll Habilitado */
+        .scroll-container { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+        .horizontal-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* UI Elements */
+        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         body.dark .flat-card { background-color: #1e293b; border-color: #334155; }
-        body.dark .flat-card .text-slate-700 { color: #cbd5e1; }
-        body.dark .flat-card .text-slate-500 { color: #94a3b8; }
-        body.dark .flat-card .text-slate-800 { color: #f1f5f9; }
-        body.dark .bg-slate-50 { background-color: #0f172a; }
-        body.dark .border-slate-100 { border-color: #334155; }
-        body.dark .border-slate-200 { border-color: #334155; }
-        body.dark .bg-white { background-color: #1e293b; }
-        body.dark .text-slate-600 { color: #cbd5e1; }
-        body.dark .text-slate-400 { color: #94a3b8; }
-        body.dark .form-section { background-color: #0f172a; border-color: #334155; }
-        body.dark input, body.dark select, body.dark textarea { background-color: #334155; border-color: #475569; color: #f1f5f9; }
-        body.dark .metric-box { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; transition: background-color 0.3s; }
-        .btn-small { padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; transition: all 0.2s; cursor: pointer; }
-        .sidebar-link { display: flex; align-items: center; padding: 10px 12px; color: #64748b; border-radius: 6px; margin-bottom: 4px; transition: all 0.2s; cursor: pointer; }
-        .sidebar-link.active { background-color: #f1f5f9; color: #0f172a; font-weight: 500; }
-        body.dark .sidebar-link.active { background-color: #334155; color: #f1f5f9; }
-        .sidebar-link:hover:not(.active) { background-color: #f8fafc; color: #334155; }
-        body.dark .sidebar-link:hover:not(.active) { background-color: #334155; color: #f1f5f9; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .detail-row { display: grid; grid-template-columns: 130px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-label { font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; }
-        .detail-value { color: #1e293b; font-size: 0.875rem; word-break: break-word; }
-        .badge-guarantee { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
-        .badge-in-warranty { background-color: #dcfce7; color: #166534; }
-        .badge-expired { background-color: #fee2e2; color: #991b1b; }
-        .badge-days-left { background-color: #fef3c7; color: #92400e; }
-        .metric-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 15px; text-align: center; }
-        .metric-box h3 { font-size: 1.5rem; font-weight: 700; margin: 8px 0; }
-        .metric-box p { font-size: 0.7rem; opacity: 0.9; }
-        .metric-box.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .metric-box.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .metric-box.blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .chart-container { position: relative; height: 250px; margin-bottom: 20px; }
-        .user-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
-        .user-badge.daniel { background-color: #dbeafe; color: #1e40af; }
-        .user-badge.jose { background-color: #fce7f3; color: #be185d; }
-        .user-badge.david { background-color: #d1fae5; color: #065f46; }
-        .form-section { background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e2e8f0; transition: background-color 0.3s; }
-        .form-section-title { font-weight: 600; color: #1e293b; margin-bottom: 0.75rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
-        .profit-positive { color: #10b981; font-weight: bold; }
-        .profit-negative { color: #ef4444; font-weight: bold; }
-        .price-preview { background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.8rem; }
-        .alert-card { transition: all 0.2s; cursor: pointer; }
-        .alert-card:hover { transform: translateX(4px); }
-        .alert-critical { border-left: 4px solid #ef4444; background: #fef2f2; }
-        .alert-warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
-        .alert-info { border-left: 4px solid #3b82f6; background: #eff6ff; }
-        body.dark .alert-critical { background: #450a0a; border-left-color: #ef4444; }
-        body.dark .alert-warning { background: #451a03; border-left-color: #f59e0b; }
-        body.dark .alert-info { background: #172554; border-left-color: #3b82f6; }
-        .suggestion-card { background: white; border-radius: 12px; padding: 12px; margin-bottom: 10px; border-left: 4px solid; transition: all 0.2s; }
+        
+        /* Colores distintos para Sidebar y Header en tema oscuro */
+        aside { background: white; }
+        body.dark aside { background-color: #1a2744; }
+        header { background: white; }
+        body.dark header { background-color: #0f172a; }
+        
+        .sidebar-link { display: flex; align-items: center; padding: 10px; color: #64748b; border-radius: 6px; margin-bottom: 2px; transition: all 0.2s; cursor: pointer; }
+        .sidebar-link.active { background-color: #e2e8f0; color: #2563eb; font-weight: 600; }
+        body.dark .sidebar-link.active { background-color: #334155; color: #3b82f6; }
+        
+        .metric-box { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border-radius: 10px; padding: 12px; text-align: center; }
+        .form-section { background: #f8fafc; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; border: 1px solid #e2e8f0; }
+        body.dark .form-section { background: #0f172a; border-color: #334155; }
+        
+        .suggestion-card { background: white; border-radius: 8px; padding: 10px; margin-bottom: 8px; border-left: 4px solid; }
         body.dark .suggestion-card { background: #1e293b; }
         .suggestion-card.critical { border-left-color: #ef4444; background: #fef2f2; }
         .suggestion-card.warning { border-left-color: #f59e0b; background: #fffbeb; }
         .suggestion-card.success { border-left-color: #10b981; background: #ecfdf5; }
         .suggestion-card.info { border-left-color: #3b82f6; background: #eff6ff; }
         body.dark .suggestion-card.critical { background: #450a0a; }
-        body.dark .suggestion-card.warning { background: #451a03; }
-        body.dark .suggestion-card.success { background: #064e3b; }
-        body.dark .suggestion-card.info { background: #172554; }
-        .suggestion-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .thumbnail-img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #e2e8f0; }
-        .modal-img { max-width: 100%; max-height: 70vh; border-radius: 8px; }
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; background: white; }
-            .no-print { display: none !important; }
-            button, .btn-small, .sidebar-link, header, aside { display: none !important; }
-        }
+
+        .user-badge { display: inline-block; padding: 1px 6px; border-radius: 10px; font-size: 0.65rem; font-weight: 600; }
+        .user-badge.daniel { background-color: #dbeafe; color: #1e40af; }
+        .user-badge.jose { background-color: #fce7f3; color: #be185d; }
+        .user-badge.david { background-color: #d1fae5; color: #065f46; }
+
+        .status-pill { padding: 1px 6px; border-radius: 10px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+        .chart-container { position: relative; height: 220px; width: 100%; }
+        
+        /* Modales Adaptables */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 50; display: none; align-items: center; justify-content: center; padding: 10px; }
+        .modal-content { background: white; width: 100%; max-width: 800px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; }
+        body.dark .modal-content { background: #1e293b; }
+        .modal-body { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
+
+        /* Ajustes Mobile S24 Ultra y similares */
         @media (max-width: 768px) {
-            .sidebar-link span { display: none; }
-            .sidebar-link i { margin-right: 0 !important; }
-            aside { width: 60px; }
-            .p-6 { padding: 1rem; }
-            .px-8 { padding-left: 1rem; padding-right: 1rem; }
-            .text-lg { font-size: 1rem; }
-            .grid { gap: 0.75rem; }
-            .flat-card.p-6 { padding: 1rem; }
-            .detail-row { grid-template-columns: 100px 1fr; }
-            table { font-size: 0.7rem; }
-            td, th { padding: 0.5rem !important; }
+            .sidebar-text { display: none; }
+            aside { width: 60px !important; }
+            .main-header { padding: 0 15px; }
+            .metric-grid { grid-template-columns: 1fr 1fr; }
+            .modal-content { max-height: 95vh; }
         }
-        @media (max-width: 480px) {
-            .metric-box h3 { font-size: 1.2rem; }
-            .btn-small { padding: 2px 4px; }
-            .form-section { padding: 0.75rem; }
-        }
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .print-header h1 { font-size: 24px; margin: 0; }
-        .print-header p { color: #666; margin: 5px 0; }
-        .print-footer { text-align: center; margin-top: 30px; padding-top: 10px; border-top: 1px solid #ccc; font-size: 10px; color: #666; }
-        .print-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        .print-table th, .print-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .print-table th { background-color: #f2f2f2; }
-        .signature-line { margin-top: 40px; display: flex; justify-content: space-between; }
-        .signature-item { text-align: center; width: 200px; }
-        .signature-line hr { margin-top: 30px; width: 100%; }
-        .range-selector { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 15px; }
-        .range-btn { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; background: #f1f5f9; border: none; transition: all 0.2s; }
-        .range-btn.active { background: #3b82f6; color: white; }
-        body.dark .range-btn { background: #334155; color: #e2e8f0; }
-        body.dark .range-btn.active { background: #3b82f6; color: white; }
-        #toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { padding: 0.75rem 1.25rem; border-radius: 8px; color: white; font-size: 0.875rem; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; max-width: 320px; }
-        .toast.success { background: #10b981; }
-        .toast.error { background: #ef4444; }
-        .toast.warning { background: #f59e0b; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
+        @media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { position: absolute; top: 0; left: 0; width: 100%; } }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden">
+<body class="flex">
 
-<div id="toast-container"></div>
+<div id="toast-container" class="fixed top-4 right-4 z-[100] space-y-2"></div>
 
-<div id="login-screen" class="fixed inset-0 bg-slate-100 flex items-center justify-center z-50 p-4">
-  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm">
-    <div class="flex justify-center mb-4">
-      <div class="bg-blue-600 p-3 rounded-xl text-white"><i data-lucide="wrench" class="w-8 h-8"></i></div>
+<!-- Login -->
+<div id="login-screen" class="fixed inset-0 bg-slate-200 flex items-center justify-center z-[60] p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-300">
+        <div class="flex justify-center mb-6"><div class="bg-blue-600 p-4 rounded-2xl text-white shadow-xl"><i data-lucide="wrench" class="w-10 h-10"></i></div></div>
+        <h2 class="text-2xl font-bold mb-1 text-center text-slate-800">SAT Pro V8.1</h2>
+        <p class="text-slate-500 text-xs text-center mb-8 uppercase tracking-widest font-bold">Fluid Edition</p>
+        <div class="space-y-4">
+            <input id="login-user" type="text" placeholder="Usuario" class="w-full px-4 py-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+            <input id="login-pass" type="password" placeholder="Contraseña" class="w-full px-4 py-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-bold shadow-lg active:scale-95 transition-all">ACCEDER</button>
+        </div>
+        <p id="login-error" class="text-red-500 text-xs mt-4 hidden text-center font-bold">DATOS INCORRECTOS</p>
     </div>
-    <h2 class="text-xl font-bold mb-1 text-center">SAT Gestión Pro</h2>
-    <p class="text-slate-500 text-sm text-center mb-5">Iniciar sesión</p>
-    <input id="login-user" type="text" placeholder="Usuario" class="w-full mb-3 px-3 py-2 border rounded-md text-sm" />
-    <input id="login-pass" type="password" placeholder="Contraseña" class="w-full mb-4 px-3 py-2 border rounded-md text-sm" />
-    <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium">Entrar</button>
-    <p id="login-error" class="text-red-500 text-sm mt-3 hidden text-center">Usuario o contraseña incorrectos</p>
-  </div>
 </div>
 
-<aside class="w-16 md:w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col transition-all duration-300">
-    <div class="p-4 border-b border-slate-100">
-        <div class="flex items-center justify-center md:justify-start gap-2">
-            <div class="bg-blue-600 p-1.5 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
-            <h1 class="text-xl font-bold text-slate-800 tracking-tight hidden md:block">SAT</h1>
-        </div>
+<!-- Sidebar -->
+<aside class="w-16 md:w-56 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col z-30">
+    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+        <div class="bg-blue-600 p-1.5 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
+        <h1 class="text-lg font-black text-slate-800 dark:text-white sidebar-text tracking-tighter">SAT V8.1</h1>
     </div>
-    <nav class="flex-1 p-3 overflow-y-auto">
-        <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Resumen</span></a>
-        <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="check-square" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Reparaciones</span></a>
-        <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Piezas</span></a>
-        <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Pedidos</span></a>
-        <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-3" class="w-5 h-5 mr-0 md:mr-3"></i><span class="hidden md:inline">Reportes</span></a>
+    <nav class="flex-1 p-2 space-y-0.5 overflow-y-auto">
+        <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Resumen</span></a>
+        <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="clipboard-list" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">SAT</span></a>
+        <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Piezas</span></a>
+        <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Pedidos</span></a>
+        <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Métricas</span></a>
+        <a href="#" onclick="showSection('recordatorios')" id="link-recordatorios" class="sidebar-link"><i data-lucide="calendar" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text text-sm">Agenda</span></a>
     </nav>
-    <div class="p-3 border-t border-slate-100 text-[10px] text-slate-400 text-center hidden md:block">v5.3.0 © 2025</div>
+    <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+        <button onclick="logout()" class="flex items-center gap-3 text-slate-400 hover:text-red-600 transition-colors w-full p-2">
+            <i data-lucide="log-out" class="w-5 h-5"></i><span class="sidebar-text text-xs font-bold uppercase">Salir</span>
+        </button>
+    </div>
 </aside>
 
-<main class="flex-1 flex flex-col overflow-hidden">
-    <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
-        <h2 id="section-title" class="text-sm md:text-lg font-semibold text-slate-700 truncate">Resumen General</h2>
-        <div class="flex items-center gap-2 md:gap-4">
-            <button onclick="exportData()" title="Exportar datos" class="text-slate-600 hover:text-slate-800 text-xs md:text-sm p-1.5 rounded-full"><i data-lucide="download" class="w-4 h-4"></i></button>
-            <label title="Importar datos" class="text-slate-600 hover:text-slate-800 text-xs md:text-sm p-1.5 rounded-full cursor-pointer"><i data-lucide="upload" class="w-4 h-4"></i><input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)"></label>
-            <button onclick="toggleDarkMode()" id="dark-mode-btn" class="text-slate-600 hover:text-slate-800 text-xs md:text-sm p-1.5 rounded-full"><i data-lucide="moon" class="w-4 h-4"></i></button>
-            <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-md font-medium flex items-center gap-1 md:gap-2 transition-colors"><i data-lucide="plus" class="w-3 h-3 md:w-4 md:h-4"></i><span class="hidden sm:inline">Nuevo</span></button>
-            <span id="header-user" class="text-xs text-slate-500 hidden md:block"></span>
-            <button onclick="logout()" class="text-xs md:text-sm text-slate-600 hover:text-red-500">Salir</button>
+<!-- Main -->
+<main class="flex-1 flex flex-col min-w-0">
+    <header class="h-14 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-6 z-20 flex-shrink-0">
+        <h2 id="section-title" class="text-base font-black text-slate-700 dark:text-white uppercase tracking-tight truncate">Dashboard</h2>
+        <div class="flex items-center gap-3">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500"><i data-lucide="moon" id="dark-icon" class="w-4 h-4"></i></button>
+            <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 shadow-md active:scale-95 transition-all"><i data-lucide="plus" class="w-4 h-4"></i><span>NUEVO</span></button>
         </div>
     </header>
 
-    <div class="flex-1 overflow-y-auto p-3 md:p-8" id="main-view">
-        <div id="view-dashboard" class="space-y-4 md:space-y-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-blue-50 text-blue-600 p-2 md:p-3 rounded-full"><i data-lucide="package" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Piezas Pedidas</p><h3 id="stat-piezas" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
-                <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-green-50 text-green-600 p-2 md:p-3 rounded-full"><i data-lucide="shopping-cart" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Pedidos Activos</p><h3 id="stat-pedidos" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
-                <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-amber-50 text-amber-600 p-2 md:p-3 rounded-full"><i data-lucide="clock" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Reparaciones Urgentes</p><h3 id="stat-reparaciones" class="text-lg md:text-2xl font-bold text-slate-800">0</h3></div></div>
-                <div class="flat-card p-3 md:p-6 flex items-center gap-2 md:gap-4"><div class="bg-purple-50 text-purple-600 p-2 md:p-3 rounded-full"><i data-lucide="trending-up" class="w-4 h-4 md:w-6 md:h-6"></i></div><div><p class="text-[10px] md:text-sm text-slate-500 font-medium">Beneficio Total</p><h3 id="stat-beneficio" class="text-sm md:text-2xl font-bold text-green-600">0€</h3></div></div>
+    <div class="flex-1 scroll-container p-3 md:p-6" id="main-view">
+        <!-- Dashboard View -->
+        <div id="view-dashboard" class="space-y-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="flat-card p-3"><p class="text-[9px] font-bold text-slate-400 uppercase">Piezas Pend.</p><div class="flex items-end justify-between mt-1"><h3 id="stat-piezas" class="text-xl font-black">0</h3><div class="text-blue-500"><i data-lucide="package" class="w-4 h-4"></i></div></div></div>
+                <div class="flat-card p-3"><p class="text-[9px] font-bold text-slate-400 uppercase">Pedidos Act.</p><div class="flex items-end justify-between mt-1"><h3 id="stat-pedidos" class="text-xl font-black">0</h3><div class="text-green-500"><i data-lucide="shopping-cart" class="w-4 h-4"></i></div></div></div>
+                <div class="flat-card p-3"><p class="text-[9px] font-bold text-slate-400 uppercase">Reparaciones OK</p><div class="flex items-end justify-between mt-1"><h3 id="stat-reparaciones" class="text-xl font-black">0</h3><div class="text-purple-500"><i data-lucide="check-circle" class="w-4 h-4"></i></div></div></div>
+                <div class="flat-card p-3"><p class="text-[9px] font-bold text-slate-400 uppercase">Beneficio Est.</p><div class="flex items-end justify-between mt-1"><h3 id="stat-beneficio" class="text-xl font-black text-emerald-600">0€</h3><div class="text-emerald-500"><i data-lucide="trending-up" class="w-4 h-4"></i></div></div></div>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                <div class="flat-card p-4 md:p-6"><div class="flex justify-between items-center mb-3"><h4 class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"><i data-lucide="activity" class="w-4 h-4"></i> Actividad Reciente</h4></div><div id="recent-activity" class="space-y-3"><p class="text-slate-400 text-xs italic">Cargando datos...</p></div></div>
-                <div class="flat-card p-4 md:p-6"><div class="flex justify-between items-center mb-3"><h4 class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"><i data-lucide="bell" class="w-4 h-4"></i> Recordatorios Inteligentes</h4><button onclick="openReminderModal()" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-2 py-1 rounded-md flex items-center gap-1"><i data-lucide="plus" class="w-3 h-3"></i> Nuevo</button></div><div id="alert-container" class="space-y-2 max-h-96 overflow-y-auto"><p class="text-slate-400 text-xs italic">Analizando datos...</p></div><div class="mt-3 pt-3 border-t border-slate-100"><button onclick="generateAISuggestions()" id="ai-suggest-btn" class="w-full text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"><i data-lucide="bot" class="w-3 h-3"></i> Sugerencias con IA</button></div></div>
-            </div>
-        </div>
-
-        <div id="view-reportes" class="hidden space-y-4 md:space-y-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"><div class="metric-box blue"><p>💰 Ingresos</p><h3 id="kpi-ingresos">0€</h3></div><div class="metric-box"><p>📦 Coste Piezas</p><h3 id="kpi-coste-piezas">0€</h3></div><div class="metric-box green"><p>📈 Beneficio</p><h3 id="kpi-beneficio">0€</h3></div><div class="metric-box orange"><p>📊 Margen</p><h3 id="kpi-margen">0%</h3></div></div>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4"><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Total Pedidos</p><h3 id="kpi-total-pedidos" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Entregados</p><h3 id="kpi-pedidos-entregados" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Reparaciones OK</p><h3 id="kpi-reparaciones-completadas" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Piezas Pedidas</p><h3 id="kpi-piezas-pendientes" class="text-lg md:text-2xl font-bold">0</h3></div><div class="flat-card p-2 md:p-4 text-center"><p class="text-[10px] md:text-xs text-slate-500">Tasa Entrega</p><h3 id="kpi-tasa-entrega" class="text-lg md:text-2xl font-bold">0%</h3></div></div>
-            <div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4"></i> Evolución Mensual de Ingresos (Total)</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
-            <div class="flat-card p-4"><div class="flex flex-wrap justify-between items-center mb-3"><h4 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> Evolución Mensual por Técnico</h4><div class="range-selector" id="range-selector"><button class="range-btn" data-months="3">3 meses</button><button class="range-btn active" data-months="6">6 meses</button><button class="range-btn" data-months="12">12 meses</button></div></div><div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div><div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-center text-xs"></div></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4"></i> Ranking por Usuario (Inc. Garantías)</h4><div id="ranking-usuarios" class="space-y-3"></div></div><div class="flat-card p-4"><h4 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Gráfico de Rendimiento</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div></div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-                <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Pedidos</h4><div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div></div>
-                <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-2"></i> Estado de Reparaciones</h4><div class="chart-container"><canvas id="chart-reparaciones-estado"></canvas></div></div>
-                <div class="flat-card p-4 md:p-6"><h4 class="font-bold text-slate-700 mb-3 text-sm"><i data-lucide="shield-check" class="w-4 h-4 inline mr-2"></i> Estado de Garantías</h4><div class="chart-container"><canvas id="chart-garantias-estado"></canvas></div></div>
-            </div>
-            <div class="flat-card overflow-hidden"><div class="px-4 py-3 bg-slate-50 border-b border-slate-200"><h4 class="font-bold text-slate-700 text-sm"><i data-lucide="list" class="w-4 h-4 inline mr-2"></i> Detalle de Ventas y Rentabilidad</h4></div><div class="table-responsive"><table class="w-full text-left text-xs md:text-sm"><thead class="bg-slate-50"><tr><th class="px-2 md:px-4 py-2">Producto</th><th class="px-2 md:px-4 py-2">Tipo</th><th class="px-2 md:px-4 py-2">Compra</th><th class="px-2 md:px-4 py-2">Venta</th><th class="px-2 md:px-4 py-2">Beneficio</th><th class="px-2 md:px-4 py-2 hidden md:table-cell">Margen</th><th class="px-2 md:px-4 py-2">Estado</th></tr></thead><tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100"></tbody></table></div></div>
-        </div>
-
-        <div id="view-list" class="hidden">
-            <div class="flat-card overflow-hidden">
-                <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
-                    <input type="text" id="search-input" placeholder="Buscar..." class="flex-1 border rounded-md px-3 py-1.5 text-sm max-w-xs" oninput="filterTable()">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="flat-card p-4"><h4 class="text-xs font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2 uppercase tracking-tighter"><i data-lucide="activity" class="w-4 h-4 text-blue-500"></i> ÚLTIMOS MOVIMIENTOS</h4><div id="recent-activity" class="space-y-2"></div></div>
+                    <div class="flat-card p-4"><h4 class="text-xs font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2 uppercase tracking-tighter"><i data-lucide="bot" class="w-4 h-4 text-purple-500"></i> ANÁLISIS IA - FULL DATA</h4><div id="ai-dashboard-summary" class="bg-slate-50 dark:bg-slate-900 p-3 rounded-lg text-xs text-slate-500 italic min-h-[80px] flex items-center justify-center">Generando primer análisis...</div><button onclick="generateAISuggestions()" class="w-full mt-3 bg-slate-800 text-white py-2 rounded-lg text-[10px] font-bold tracking-widest flex items-center justify-center gap-2 hover:bg-black transition-all"><i data-lucide="sparkles" class="w-3 h-3"></i> ACTUALIZAR INFORME IA</button></div>
                 </div>
-                <div class="table-responsive"><table class="w-full text-left text-xs md:text-sm"><thead class="bg-slate-50 border-b border-slate-200"><tr id="table-head"></tr></thead><tbody id="table-body" class="divide-y divide-slate-100"></tbody></table></div>
+                <div class="flat-card p-4 flex flex-col"><h4 class="text-xs font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2 uppercase tracking-tighter"><i data-lucide="bell" class="w-4 h-4 text-amber-500"></i> AGENDA Y ALERTAS</h4><div id="alert-container" class="flex-1 space-y-2 max-h-[400px] overflow-y-auto pr-1"></div><button onclick="openReminderModal()" class="w-full mt-3 py-2 bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-bold border border-blue-100 dark:border-slate-600">+ NUEVO RECORDATORIO</button></div>
+            </div>
+        </div>
+
+        <!-- List View -->
+        <div id="view-list" class="hidden space-y-3">
+            <div class="flex flex-col md:flex-row gap-3 items-center justify-between">
+                <div class="relative w-full md:max-w-xs"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="search-input" placeholder="Buscar en registros..." class="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none" oninput="filterTable()"></div>
+                <div class="flex gap-2 w-full md:w-auto"><button onclick="exportData()" class="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 flex items-center justify-center gap-2"><i data-lucide="download" class="w-3 h-3"></i> EXPORTAR</button><label class="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 flex items-center justify-center gap-2 cursor-pointer"><i data-lucide="upload" class="w-3 h-3"></i> IMPORTAR<input type="file" id="import-file" class="hidden" onchange="importData(event)"></label></div>
+            </div>
+            <div class="flat-card overflow-hidden"><div class="horizontal-scroll"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700"><tr id="table-head" class="text-[9px] font-black uppercase text-slate-500 tracking-widest"></tr></thead><tbody id="table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-xs"></tbody></table></div></div>
+        </div>
+
+        <!-- Reports View -->
+        <div id="view-reportes" class="hidden space-y-4 pb-10">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="metric-box">Ingresos<h3 id="kpi-ingresos" class="text-lg font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background:#475569">Costes<h3 id="kpi-costes" class="text-lg font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background:#059669">Beneficio<h3 id="kpi-beneficio" class="text-lg font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background:#d97706">Margen<h3 id="kpi-margen" class="text-lg font-black mt-1">0%</h3></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="flat-card p-4"><h4 class="text-[10px] font-bold mb-3 uppercase">Evolución de Ingresos</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
+                <div class="flat-card p-4"><div class="flex justify-between items-center mb-3"><h4 class="text-[10px] font-bold uppercase">Rendimiento por Técnico</h4><div class="flex gap-1" id="range-selector"><button class="range-btn" data-months="3">3m</button><button class="range-btn active" data-months="6">6m</button><button class="range-btn" data-months="12">12m</button></div></div><div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div><div id="user-summary" class="grid grid-cols-3 gap-2 mt-3 text-center text-[9px]"></div></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="flat-card p-4"><h4 class="text-[10px] font-bold mb-3 uppercase">Ranking Global (Inc. Garantías)</h4><div id="ranking-usuarios" class="space-y-2"></div></div>
+                <div class="flat-card p-4"><h4 class="text-[10px] font-bold mb-3 uppercase">Volumen de Operaciones</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flat-card p-3"><h4 class="text-[9px] font-bold mb-2 uppercase">Pedidos</h4><div class="chart-container" style="height:150px"><canvas id="chart-pedidos-estado"></canvas></div></div>
+                <div class="flat-card p-3"><h4 class="text-[9px] font-bold mb-2 uppercase">Reparaciones</h4><div class="chart-container" style="height:150px"><canvas id="chart-reparaciones-estado"></canvas></div></div>
+                <div class="flat-card p-3"><h4 class="text-[9px] font-bold mb-2 uppercase">Garantías</h4><div class="chart-container" style="height:150px"><canvas id="chart-garantias-estado"></canvas></div></div>
+            </div>
+            <div class="flat-card overflow-hidden"><div class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase">Auditoría de Ventas y Rentabilidad</div><div class="horizontal-scroll"><table class="w-full text-left text-[10px] min-w-[600px]"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="px-4 py-2">Producto</th><th class="px-4 py-2">Técnico</th><th class="px-4 py-2">Venta</th><th class="px-4 py-2">Beneficio</th><th class="px-4 py-2">Margen</th><th class="px-4 py-2">Estado</th></tr></thead><tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody></table></div></div>
+        </div>
+
+        <!-- Recordatorios View -->
+        <div id="view-recordatorios" class="hidden space-y-4 pb-10">
+            <div class="flat-card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-sm font-black text-slate-800 dark:text-white uppercase">Gestión de Agenda</h3>
+                    <button onclick="openReminderForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 shadow-md active:scale-95 transition-all"><i data-lucide="plus" class="w-4 h-4"></i>NUEVO</button>
+                </div>
+                <div id="recordatorios-list" class="space-y-3"></div>
             </div>
         </div>
     </div>
 </main>
 
-<div id="modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[95vh] flex flex-col">
-        <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 id="modal-title" class="font-bold text-slate-800 text-sm md:text-base">Añadir Registro</h3>
-            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+<!-- Modals -->
+<div id="modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+            <h3 id="modal-title" class="font-black text-slate-800 dark:text-white uppercase tracking-tighter">Nuevo Registro</h3>
+            <button onclick="closeModal()" class="p-2 text-slate-400 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <form id="record-form" class="p-4 space-y-3 overflow-y-auto flex-1">
-            <input type="hidden" id="form-id">
-            <input type="hidden" id="form-section">
-            <div id="form-fields" class="space-y-3"></div>
-        </form>
-        <div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3">
-            <button type="button" onclick="closeModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cancelar</button>
-            <button type="submit" form="record-form" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Guardar</button>
+        <div class="modal-body">
+            <form id="record-form" class="space-y-4">
+                <input type="hidden" id="form-id">
+                <input type="hidden" id="form-section">
+                <div id="form-fields" class="space-y-4"></div>
+            </form>
         </div>
-    </div>
-</div>
-
-<div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-2 md:p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[95vh] flex flex-col">
-        <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 id="detail-title" class="font-bold text-slate-800 text-sm md:text-base">Detalles del Registro</h3>
-            <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-        <div id="detail-content" class="p-4 overflow-y-auto flex-1"></div>
-        <div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex gap-3">
-            <button type="button" onclick="closeDetailModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm font-medium">Cerrar</button>
-            <button type="button" id="detail-edit-btn" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">Editar</button>
-            <button type="button" id="detail-print-btn" class="flex-1 px-3 py-2 bg-green-600 text-white rounded-md text-sm font-medium">Imprimir</button>
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex gap-3">
+            <button type="button" onclick="closeModal()" class="flex-1 py-3 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all">CANCELAR</button>
+            <button type="submit" form="record-form" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-all">GUARDAR</button>
         </div>
     </div>
 </div>
 
-<div id="reminder-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 class="font-bold text-slate-800">Nuevo Recordatorio</h3>
-            <button onclick="closeReminderModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+<div id="detail-modal" class="modal-overlay">
+    <div class="modal-content max-w-2xl">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+            <h3 class="font-black text-slate-800 dark:text-white uppercase tracking-tighter">Detalle Registro</h3>
+            <button onclick="closeDetailModal()" class="p-2 text-slate-400 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <form id="reminder-form" class="p-4 space-y-4">
-            <div><label class="block text-xs font-bold text-slate-500 mb-1">Título *</label><input type="text" name="title" required class="w-full border rounded p-2 text-sm"></div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-1">Descripción</label><textarea name="description" rows="2" class="w-full border rounded p-2 text-sm"></textarea></div>
-            <div class="grid grid-cols-2 gap-3">
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">Fecha límite</label><input type="date" name="dueDate" class="w-full border rounded p-2 text-sm"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">Prioridad</label>
-                    <select name="priority" class="w-full border rounded p-2 text-sm">
-                        <option value="info">Normal</option>
-                        <option value="warning">Importante</option>
-                        <option value="critical">Urgente</option>
-                    </select>
+        <div class="modal-body" id="detail-content"></div>
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+            <button id="detail-print-btn" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="printer" class="w-4 h-4"></i> PDF</button>
+            <button id="detail-edit-btn" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="edit-3" class="w-4 h-4"></i> EDITAR</button>
+            <button id="detail-delete-btn" class="px-4 py-3 bg-red-100 text-red-600 rounded-xl font-bold active:scale-95 transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>
+    </div>
+</div>
+
+<div id="ai-modal" class="modal-overlay">
+    <div class="modal-content max-w-xl">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-purple-600 text-white">
+            <h3 class="font-black uppercase tracking-tighter flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5"></i> Auditoría Inteligente</h3>
+            <button onclick="closeAIModal()" class="p-2 text-white/70 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div class="modal-body bg-slate-50 dark:bg-slate-900" id="ai-content"></div>
+    </div>
+</div>
+
+<div id="reminder-modal" class="modal-overlay">
+    <div class="modal-content max-w-2xl">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-amber-500 text-white">
+            <h3 class="font-black uppercase tracking-tighter">Nuevo Recordatorio / Agenda</h3>
+            <button onclick="closeReminderModal()" class="p-2 text-white/70 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="reminder-form" class="space-y-4">
+                <div class="form-section">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Título *</label>
+                    <input type="text" name="title" required class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase mt-3 block">Descripción</label>
+                    <textarea name="description" rows="3" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"></textarea>
                 </div>
-            </div>
-            <div class="flex gap-3 pt-2">
-                <button type="button" onclick="closeReminderModal()" class="flex-1 px-3 py-2 border border-slate-200 text-slate-600 rounded-md text-sm">Cancelar</button>
-                <button type="submit" class="flex-1 px-3 py-2 bg-amber-500 text-white rounded-md text-sm font-medium">Guardar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="ai-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden max-h-[80vh] flex flex-col">
-        <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bot" class="w-4 h-4"></i> Análisis Detallado del Taller</h3>
-            <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Fecha</label><input type="date" name="dueDate" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Hora</label><input type="time" name="dueTime" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Prioridad</label><select name="priority" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"><option value="info">Normal</option><option value="warning">Importante</option><option value="critical">Urgente</option></select></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Categoría</label><select name="category" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"><option value="taller">Taller</option><option value="cliente">Cliente</option><option value="pago">Pagos</option><option value="otro">Otro</option></select></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Responsable</label><select name="usuario" id="reminder-user-select" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700"></select></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase">Referencia (Opcional)</label><input type="text" name="referencia" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700" placeholder="OT, Pedido, etc."></div>
+                </div>
+                <div class="form-section">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Observaciones</label>
+                    <textarea name="observaciones" rows="2" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700" placeholder="Notas adicionales"></textarea>
+                </div>
+                <div class="form-section">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Foto/Imagen (Opcional)</label>
+                    <input type="file" name="foto" accept="image/*" class="w-full border rounded-lg p-2.5 mt-1 text-sm outline-none dark:bg-slate-800 dark:border-slate-700" onchange="previewFoto(event)">
+                    <img id="foto-preview" style="display:none; margin-top:10px; max-width:100%; border-radius:8px; max-height:200px;">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all mt-2 uppercase">Guardar Recordatorio</button>
+            </form>
         </div>
-        <div id="ai-content" class="p-4 overflow-y-auto flex-1"><p class="text-slate-500 text-sm">Analizando datos...</p></div>
     </div>
 </div>
 
-<div id="image-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="relative max-w-full max-h-full">
-        <img id="modal-image" src="" alt="Imagen ampliada" class="modal-img">
-        <button onclick="closeImageModal()" class="absolute top-2 right-2 bg-white rounded-full p-1 text-black hover:bg-gray-200"><i data-lucide="x" class="w-6 h-6"></i></button>
-    </div>
-</div>
-
-<div id="print-area" style="position: fixed; top: -9999px; left: -9999px; width: 210mm; background: white; padding: 20px;"></div>
+<div id="print-area" class="hidden"></div>
 
 <script>
-const db = new Dexie("SAT_Database_V11");
+// Dexie DB V8.1
+const db = new Dexie("SAT_Database_V8_1");
 db.version(1).stores({
-    piezas: '++id, nombre, cantidad, proveedor, precioCompra, precioVenta, referencia, fechaTrami, estado, observaciones, imagen, fecha, usuario',
-    pedidos: '++id, cliente, producto, precioCompra, precioVenta, cantidad, referencia, fechaTrami, estado, observaciones, fecha, usuario',
-    reparaciones: '++id, ot, marca, modelo, serie, cliente, telefono, email, diagnostico, precio, estado, prioridad, accesorios, password, imagen, fecha, fechaEntrada, observaciones, usuario, garantia_meses, garantia_fin',
-    recordatorios: '++id, title, description, dueDate, priority, completed, createdAt'
+    reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, telefono, email, diagnostico, precio, coste_piezas, beneficio, accesorios, ubicacion_taller',
+    piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta, referencia, stock_actual, stock_minimo, categoria',
+    pedidos: '++id, cliente, producto, estado, fecha, usuario, precioCompra, precioVenta, cantidad, telefono_cliente, notas_entrega, forma_pago',
+    recordatorios: '++id, title, description, dueDate, priority, completed, category, usuario'
 });
 
 const USERS = [
@@ -310,460 +292,594 @@ const USERS = [
     { user: "jose", pass: "1234", nombre: "José Ayala" },
     { user: "david", pass: "1234", nombre: "David Varillas" }
 ];
-const USUARIOS = ["Daniel Farré", "José Ayala", "David Varillas"];
-const IVA = 21;
+const USUARIOS = USERS.map(u => u.nombre);
+let currentUser = null, currentSection = 'dashboard', charts = {}, currentRange = 6;
 
-let currentUser = null, currentUserName = null, currentSection = 'dashboard', charts = {}, currentRange = 6;
-
-function normalize(t) { return t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
-function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+// Helpers
+const $ = id => document.getElementById(id);
+const normalize = t => t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const escapeHtml = str => str ? String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : '';
 
 function showToast(msg, type='success') {
-    const c = document.getElementById('toast-container');
+    const c = $('toast-container');
     const t = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.textContent = msg;
+    t.className = `px-6 py-3 rounded-xl text-white font-bold text-xs mb-2 shadow-2xl transition-all transform translate-y-0 opacity-100 ${type==='success'?'bg-emerald-600':'bg-red-600'}`;
+    t.textContent = msg.toUpperCase();
     c.appendChild(t);
-    setTimeout(() => { t.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3000);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(-20px)'; setTimeout(() => t.remove(), 300); }, 3000);
 }
 
+// Auth
 function login() {
-    const user = document.getElementById("login-user").value.trim();
-    const pass = document.getElementById("login-pass").value;
+    const user = $('login-user').value.trim(), pass = $('login-pass').value;
     const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
     if(found) {
-        currentUser = found.user;
-        currentUserName = found.nombre;
-        localStorage.setItem("sat_user", currentUser);
-        localStorage.setItem("sat_user_name", currentUserName);
-        document.getElementById("login-screen").style.display = "none";
+        currentUser = found;
+        localStorage.setItem("sat_user_v8_1", JSON.stringify(found));
+        $('login-screen').classList.add('hidden');
         initApp();
     } else {
-        document.getElementById("login-error").classList.remove("hidden");
+        $('login-error').classList.remove('hidden');
     }
 }
+function logout() { localStorage.removeItem("sat_user_v8_1"); location.reload(); }
 
-function logout() { localStorage.removeItem("sat_user"); localStorage.removeItem("sat_user_name"); location.reload(); }
-
-function toggleDarkMode() {
-    document.body.classList.toggle('dark');
-    const isDark = document.body.classList.contains('dark');
-    localStorage.setItem('darkMode', isDark);
-    const btn = document.getElementById('dark-mode-btn');
-    if(btn) { btn.innerHTML = isDark ? '<i data-lucide="sun" class="w-4 h-4"></i>' : '<i data-lucide="moon" class="w-4 h-4"></i>'; lucide.createIcons(); }
-}
-
+// Init
 function initApp() {
-    if(localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark');
-        const btn = document.getElementById('dark-mode-btn');
-        if(btn) { btn.innerHTML = '<i data-lucide="sun" class="w-4 h-4"></i>'; }
-    }
     lucide.createIcons();
-    const headerUser = document.getElementById('header-user');
-    if(headerUser) headerUser.textContent = currentUserName;
     showSection('dashboard');
     initRangeSelector();
+    if(localStorage.getItem('darkMode') === 'true') toggleDarkMode(true);
 }
 
 window.onload = () => {
-    const savedUser = localStorage.getItem("sat_user"), savedName = localStorage.getItem("sat_user_name");
-    if(savedUser && savedName) {
-        currentUser = savedUser; currentUserName = savedName;
-        document.getElementById("login-screen").style.display = "none";
+    const saved = localStorage.getItem("sat_user_v8_1");
+    if(saved) {
+        currentUser = JSON.parse(saved);
+        $('login-screen').classList.add('hidden');
         initApp();
     }
-    lucide.createIcons();
 };
 
+function toggleDarkMode(force) {
+    const isDark = force !== undefined ? force : !document.body.classList.contains('dark');
+    document.body.classList.toggle('dark', isDark);
+    localStorage.setItem('darkMode', isDark);
+    $('dark-icon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+    lucide.createIcons();
+}
+
+// Navigation
 function showSection(section) {
     currentSection = section;
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-    const linkEl = document.getElementById(`link-${section}`);
-    if(linkEl) linkEl.classList.add('active');
-    const titles = { dashboard:'Resumen General', piezas:'Pedido de Piezas', pedidos:'Pedidos de Clientes', reparaciones:'Órdenes de Reparación', reportes:'Reportes y Métricas' };
-    document.getElementById('section-title').textContent = titles[section] || section;
-    document.getElementById('btn-new').style.display = section === 'reportes' ? 'none' : 'flex';
-    const vd = document.getElementById('view-dashboard'), vl = document.getElementById('view-list'), vr = document.getElementById('view-reportes');
-    if(section === 'dashboard') { vd.classList.remove('hidden'); vl.classList.add('hidden'); vr.classList.add('hidden'); updateDashboardStats(); }
-    else if(section === 'reportes') { vd.classList.add('hidden'); vl.classList.add('hidden'); vr.classList.remove('hidden'); updateReports(); }
-    else { vd.classList.add('hidden'); vl.classList.remove('hidden'); vr.classList.add('hidden'); renderTable(section); }
+    const link = $(`link-${section}`);
+    if(link) link.classList.add('active');
+    
+    const titles = { dashboard:'Resumen Ejecutivo', reparaciones:'Servicio Técnico (SAT)', piezas:'Gestión de Stock', pedidos:'Ventas y Pedidos', reportes:'Auditoría y Reportes', recordatorios:'Gestión de Agenda' };
+    $('section-title').textContent = titles[section];
+    $('btn-new').style.display = section === 'reportes' || section === 'recordatorios' ? 'none' : 'flex';
+
+    $('view-dashboard').classList.toggle('hidden', section !== 'dashboard');
+    $('view-list').classList.toggle('hidden', !['reparaciones','piezas','pedidos'].includes(section));
+    $('view-reportes').classList.toggle('hidden', section !== 'reportes');
+    $('view-recordatorios').classList.toggle('hidden', section !== 'recordatorios');
+
+    if(section === 'dashboard') updateDashboard();
+    else if(section === 'reportes') updateReports();
+    else if(section === 'recordatorios') renderRecordatorios();
+    else renderTable(section);
+    
     lucide.createIcons();
 }
 
-function filterTable() {
-    const q = normalize(document.getElementById('search-input')?.value || '');
-    const body = document.getElementById('table-body');
-    if(!body) return;
-    const rows = body.querySelectorAll('tr');
-    rows.forEach(row => { row.style.display = normalize(row.textContent).includes(q) ? '' : 'none'; });
+// Stats & Dashboard
+async function updateDashboard() {
+    const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    $('stat-reparaciones').textContent = reps.filter(r => r.estado === 'Completado' || r.estado === 'Entregado').length;
+    $('stat-piezas').textContent = pie.filter(p => p.estado === 'Pedido').length;
+    $('stat-pedidos').textContent = ped.filter(p => p.estado !== 'Entregado').length;
+    
+    let totalBeneficio = ped.reduce((s, p) => s + ((parseFloat(p.precioVenta)||0) - (parseFloat(p.precioCompra)||0)) * (parseInt(p.cantidad)||1), 0);
+    pie.forEach(p => { if(p.estado==='Instalado'||p.estado==='Vendido') totalBeneficio += (parseFloat(p.precioVenta)||0) - (parseFloat(p.precioCompra)||0); });
+    reps.forEach(r => { if(r.precio) totalBeneficio += (parseFloat(r.precio)||0) - (parseFloat(r.coste_piezas)||0); });
+    
+    $('stat-beneficio').textContent = totalBeneficio.toFixed(2) + '€';
+    
+    updateRecentActivity(reps, pie, ped);
+    updateAlerts(reps);
+    generateAISuggestions(true);
 }
 
-async function updateEvolucionMensual() {
-    const pedidos = await db.pedidos.toArray();
-    const reparaciones = await db.reparaciones.toArray();
-    const hoy = new Date();
-    const meses = [], ingresos = [];
-    for(let i=5; i>=0; i--) {
-        let fecha = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
-        meses.push(fecha.toLocaleDateString('es-ES',{month:'short',year:'numeric'}));
-        let inicio = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-        let fin = new Date(fecha.getFullYear(), fecha.getMonth()+1, 0, 23, 59, 59);
-        let total = pedidos.reduce((sum,p) => {
-            let d = new Date(p.fecha);
-            if(d>=inicio && d<=fin) return sum + ((parseFloat(p.precioVenta)||0) * (parseInt(p.cantidad)||1));
-            return sum;
-        }, 0);
-        total += reparaciones.reduce((sum,r) => {
-            let d = new Date(r.fecha);
-            if(d>=inicio && d<=fin) return sum + (parseFloat(r.precio)||0);
-            return sum;
-        }, 0);
-        ingresos.push(total);
-    }
-    const ctx = document.getElementById('chart-evolucion-mensual')?.getContext('2d');
-    if(ctx) { if(charts.evolucionMensual) charts.evolucionMensual.destroy(); charts.evolucionMensual = new Chart(ctx, { type:'line', data:{ labels:meses, datasets:[{ label:'Ingresos totales (€)', data:ingresos, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.3 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ callbacks:{ label:c=>`${c.raw.toFixed(2)}€` } }, legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>v+'€' } } } } }); }
+function updateRecentActivity(reps, pie, ped) {
+    const activity = [];
+    reps.slice(-5).forEach(r => activity.push({ text: `SAT: ${r.ot} - ${r.cliente}`, date: new Date(r.fecha), icon: 'clipboard-list', user: r.usuario }));
+    pie.slice(-5).forEach(p => activity.push({ text: `STOCK: ${p.nombre}`, date: new Date(p.fecha), icon: 'package', user: p.usuario }));
+    ped.slice(-5).forEach(p => activity.push({ text: `PEDIDO: ${p.producto}`, date: new Date(p.fecha), icon: 'shopping-cart', user: p.usuario }));
+    activity.sort((a,b) => b.date - a.date);
+    const container = $('recent-activity');
+    container.innerHTML = activity.length ? activity.slice(0,6).map(a => {
+        let uClass = a.user === 'Daniel Farré' ? 'daniel' : a.user === 'José Ayala' ? 'jose' : 'david';
+        return `<div class="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all"><div class="p-1.5 bg-white dark:bg-slate-700 rounded shadow-sm border border-slate-100 dark:border-slate-600"><i data-lucide="${a.icon}" class="w-3.5 h-3.5"></i></div><div class="flex-1 min-w-0"><p class="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate">${escapeHtml(a.text)}</p><p class="text-[9px] text-slate-400 font-medium">${a.date.toLocaleString()} · <span class="user-badge ${uClass}">${a.user}</span></p></div></div>`;
+    }).join('') : '<p class="text-xs text-slate-400 italic">Sin actividad.</p>';
+    lucide.createIcons();
 }
 
-async function updateEvolucionPorUsuario(months=6) {
-    const pedidos = await db.pedidos.toArray();
-    const reparaciones = await db.reparaciones.toArray();
-    const hoy = new Date();
-    const meses = [];
-    for(let i=months-1; i>=0; i--) {
-        let fecha = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
-        meses.push(fecha.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}));
-    }
-    const colores = { "Daniel Farré":"#3b82f6", "José Ayala":"#ef4444", "David Varillas":"#10b981" };
-    const datasets = [];
-    for(const usuario of USUARIOS) {
-        let ingresosPorMes = [];
-        for(let i=months-1; i>=0; i--) {
-            let inicio = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
-            let fin = new Date(hoy.getFullYear(), hoy.getMonth()-i+1, 0, 23, 59, 59);
-            let total = pedidos.reduce((sum,p) => {
-                if(p.usuario === usuario && p.fecha) {
-                    let d = new Date(p.fecha);
-                    if(d>=inicio && d<=fin) return sum + ((parseFloat(p.precioVenta)||0) * (parseInt(p.cantidad)||1));
-                }
-                return sum;
-            }, 0);
-            total += reparaciones.reduce((sum,r) => {
-                if(r.usuario === usuario && r.fecha) {
-                    let d = new Date(r.fecha);
-                    if(d>=inicio && d<=fin) return sum + (parseFloat(r.precio)||0);
-                }
-                return sum;
-            }, 0);
-            ingresosPorMes.push(total);
+async function updateAlerts(reps) {
+    const recs = await db.recordatorios.toArray();
+    const alerts = [];
+    const now = new Date();
+    reps.forEach(r => {
+        if(r.garantia_fin) {
+            const diff = Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24));
+            if(diff >= 0 && diff <= 15) alerts.push({ title: `GARANTÍA OT:${r.ot}`, desc: `Vence en ${diff} días`, prio: 'warning', cat: 'SAT' });
         }
-        datasets.push({ label:usuario, data:ingresosPorMes, borderColor:colores[usuario], backgroundColor:'transparent', tension:0.3, fill:false, pointRadius:3 });
+        if(r.prioridad === 'Alta' && r.estado === 'Pendiente') alerts.push({ title: `SAT URGENTE: ${r.ot}`, desc: r.cliente, prio: 'critical', cat: 'SAT' });
+    });
+    recs.forEach(r => { if(!r.completed) alerts.push({ title: r.title, desc: r.description || 'Sin detalles', prio: r.priority, cat: r.category || 'AGENDA', user: r.usuario, id: r.id }); });
+    const container = $('alert-container');
+    container.innerHTML = alerts.length ? alerts.map(a => `<div class="suggestion-card ${a.prio} relative overflow-hidden"><div class="flex items-center justify-between mb-1"><span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-white/50 dark:bg-black/20">${a.cat}</span><span class="text-[8px] font-bold text-slate-400">${a.user||''}</span></div><p class="text-[11px] font-black text-slate-800 dark:text-white">${escapeHtml(a.title)}</p><p class="text-[9px] text-slate-500 mt-0.5">${escapeHtml(a.desc)}</p></div>`).join('') : '<p class="text-center text-slate-400 text-[10px] py-6 italic">No hay alertas activas.</p>';
+}
+
+// Recordatorios
+async function renderRecordatorios() {
+    const recs = await db.recordatorios.toArray();
+    const container = $('recordatorios-list');
+    if(!recs.length) { container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 italic">Sin recordatorios. Crea uno nuevo.</p>'; return; }
+    container.innerHTML = recs.map(r => `
+        <div class="flat-card p-4 border-l-4 ${r.priority === 'critical' ? 'border-red-500' : r.priority === 'warning' ? 'border-amber-500' : 'border-blue-500'}">
+            <div class="flex items-start justify-between mb-2">
+                <div class="flex-1">
+                    <p class="font-bold text-slate-800 dark:text-white">${escapeHtml(r.title)}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">${r.dueDate ? new Date(r.dueDate).toLocaleDateString() : 'Sin fecha'} ${r.dueTime ? '@ ' + r.dueTime : ''}</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="deleteReminder(${r.id})" class="text-red-500 hover:text-red-700 text-lg" title="Eliminar">🗑</button>
+                </div>
+            </div>
+            ${r.description ? `<p class="text-[11px] text-slate-600 dark:text-slate-400 mb-2">${escapeHtml(r.description)}</p>` : ''}
+            <div class="flex gap-2 flex-wrap">
+                <span class="text-[9px] font-bold px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">${r.category}</span>
+                <span class="text-[9px] font-bold px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">${r.usuario}</span>
+                ${r.referencia ? `<span class="text-[9px] font-bold px-2 py-1 rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">Ref: ${escapeHtml(r.referencia)}</span>` : ''}
+            </div>
+            ${r.observaciones ? `<p class="text-[10px] text-slate-600 dark:text-slate-400 mt-2 italic">📝 ${escapeHtml(r.observaciones)}</p>` : ''}
+            ${r.foto ? `<img src="${r.foto}" style="margin-top:10px; max-width:100%; border-radius:8px; max-height:200px;">` : ''}
+        </div>
+    `).join('');
+    lucide.createIcons();
+}
+
+function previewFoto(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = $('foto-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+// Reports
+async function updateReports() {
+    const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    let ingresos=0, costes=0;
+    ped.forEach(p => { ingresos += (parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1); costes += (parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1); });
+    pie.forEach(p => { if(p.estado==='Instalado'||p.estado==='Vendido'){ ingresos += parseFloat(p.precioVenta)||0; costes += parseFloat(p.precioCompra)||0; } });
+    reps.forEach(r => { if(r.precio){ ingresos += parseFloat(r.precio)||0; costes += parseFloat(r.coste_piezas)||0; } });
+    $('kpi-ingresos').textContent = ingresos.toFixed(2) + '€';
+    $('kpi-costes').textContent = costes.toFixed(2) + '€';
+    $('kpi-beneficio').textContent = (ingresos - costes).toFixed(2) + '€';
+    $('kpi-margen').textContent = ingresos > 0 ? ((ingresos-costes)/ingresos*100).toFixed(1) + '%' : '0%';
+    updateEvolucionMensual(reps, ped);
+    updateEvolucionPorUsuario(reps, ped, currentRange);
+    updateRankingUsuarios(reps, pie, ped);
+    updateChartOperaciones(reps, pie, ped);
+    updateSmallCharts(reps, ped);
+    updateDetalleVentas(reps, pie, ped);
+}
+
+async function updateEvolucionMensual(reps, ped) {
+    const hoy = new Date(); const meses = [], data = [];
+    for(let i=5; i>=0; i--) {
+        let f = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+        meses.push(f.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}));
+        let ini = new Date(f.getFullYear(), f.getMonth(), 1), fin = new Date(f.getFullYear(), f.getMonth()+1, 0, 23, 59, 59);
+        let total = ped.reduce((s,p) => (new Date(p.fecha)>=ini && new Date(p.fecha)<=fin) ? s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)) : s, 0);
+        total += reps.reduce((s,r) => (new Date(r.fecha)>=ini && new Date(r.fecha)<=fin) ? s + (parseFloat(r.precio)||0) : s, 0);
+        data.push(total);
     }
-    const ctx = document.getElementById('chart-evolucion-usuarios')?.getContext('2d');
-    if(ctx) { if(charts.evolucionUsuarios) charts.evolucionUsuarios.destroy(); charts.evolucionUsuarios = new Chart(ctx, { type:'line', data:{ labels:meses, datasets }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ callbacks:{ label:c=>`${c.dataset.label}: ${c.raw.toFixed(2)}€` } }, legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>v+'€' } } } } }); }
-    document.getElementById('user-summary').innerHTML = USUARIOS.map(u => {
-        let total = datasets.find(d=>d.label===u).data.reduce((a,b)=>a+b,0);
-        return `<div style="background:${colores[u]}20; border-left:3px solid ${colores[u]}" class="p-2 rounded-lg"><p class="font-bold text-xs">${u}</p><p class="text-xs">Total: <strong>${total.toFixed(2)}€</strong></p></div>`;
+    const ctx = $('chart-evolucion-mensual')?.getContext('2d');
+    if(ctx) { if(charts.ev) charts.ev.destroy(); charts.ev = new Chart(ctx, { type:'line', data:{ labels:meses, datasets:[{ label:'Ingresos', data, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.1)', fill:true, tension:0.3, pointRadius:3 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ font:{size:9} } }, x:{ ticks:{ font:{size:9} } } } } }); }
+}
+
+async function updateEvolucionPorUsuario(reps, ped, months) {
+    const hoy = new Date(); const meses = [];
+    for(let i=months-1; i>=0; i--) meses.push(new Date(hoy.getFullYear(), hoy.getMonth()-i, 1).toLocaleDateString('es-ES',{month:'short'}));
+    const colores = { "Daniel Farré":"#3b82f6", "José Ayala":"#ef4444", "David Varillas":"#10b981" };
+    const datasets = USUARIOS.map(u => {
+        let vals = [];
+        for(let i=months-1; i>=0; i--) {
+            let ini = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1), fin = new Date(hoy.getFullYear(), hoy.getMonth()-i+1, 0, 23, 59, 59);
+            let total = ped.reduce((s,p) => (p.usuario===u && new Date(p.fecha)>=ini && new Date(p.fecha)<=fin) ? s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)) : s, 0);
+            total += reps.reduce((s,r) => (r.usuario===u && new Date(r.fecha)>=ini && new Date(r.fecha)<=fin) ? s + (parseFloat(r.precio)||0) : s, 0);
+            vals.push(total);
+        }
+        return { label:u, data:vals, borderColor:colores[u], backgroundColor:'transparent', tension:0.3, pointRadius:2, borderWidth:2 };
+    });
+    const ctx = $('chart-evolucion-usuarios')?.getContext('2d');
+    if(ctx) { if(charts.evU) charts.evU.destroy(); charts.evU = new Chart(ctx, { type:'line', data:{ labels:meses, datasets }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:9} } } }, scales:{ y:{ ticks:{ font:{size:9} } }, x:{ ticks:{ font:{size:9} } } } } }); }
+    $('user-summary').innerHTML = datasets.map(d => `<div style="border-left:3px solid ${d.borderColor}" class="bg-slate-50 dark:bg-slate-800 p-1.5 rounded font-bold">${d.label}<br>${d.data.reduce((a,b)=>a+b,0).toFixed(0)}€</div>`).join('');
+}
+
+async function updateRankingUsuarios(reps, pie, ped) {
+    const ranking = USUARIOS.map(u => {
+        const p = ped.filter(x=>x.usuario===u).length, pi = pie.filter(x=>x.usuario===u).length, r = reps.filter(x=>x.usuario===u).length;
+        const g = reps.filter(x=>x.usuario===u && x.garantia_fin && new Date(x.garantia_fin)>new Date()).length;
+        return { user:u, total:p+pi+r, p, pi, r, g };
+    }).sort((a,b)=>b.total-a.total);
+    $('ranking-usuarios').innerHTML = ranking.map(r => {
+        let av = r.user === 'Daniel Farré' ? 'bg-blue-100 text-blue-700' : r.user === 'José Ayala' ? 'bg-pink-100 text-pink-700' : 'bg-emerald-100 text-emerald-700';
+        return `<div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"><div class="flex items-center gap-3"><div class="w-7 h-7 rounded-full ${av} flex items-center justify-center font-black text-[10px]">${r.user[0]}</div><div><p class="font-bold text-[11px]">${r.user}</p><p class="text-[9px] text-slate-500 font-medium">${r.total} ops</p></div></div><div class="flex gap-2.5 text-center"><div><p class="text-[10px] font-black text-blue-600">${r.p}</p><p class="text-[7px] text-slate-400 font-bold uppercase">Ped</p></div><div><p class="text-[10px] font-black text-purple-600">${r.pi}</p><p class="text-[7px] text-slate-400 font-bold uppercase">Stk</p></div><div><p class="text-[10px] font-black text-pink-600">${r.r}</p><p class="text-[7px] text-slate-400 font-bold uppercase">Sat</p></div><div><p class="text-[10px] font-black text-green-600">${r.g}</p><p class="text-[7px] text-slate-400 font-bold uppercase">Gar</p></div></div></div>`;
     }).join('');
+}
+
+async function updateChartOperaciones(reps, pie, ped) {
+    const ctx = $('chart-operaciones-usuario')?.getContext('2d');
+    if(ctx) { if(charts.op) charts.op.destroy(); charts.op = new Chart(ctx, { type:'bar', data:{ labels:USUARIOS, datasets:[{ label:'Pedidos', data:USUARIOS.map(u=>ped.filter(x=>x.usuario===u).length), backgroundColor:'#3b82f6' },{ label:'Piezas', data:USUARIOS.map(u=>pie.filter(x=>x.usuario===u).length), backgroundColor:'#8b5cf6' },{ label:'SAT', data:USUARIOS.map(u=>reps.filter(x=>x.usuario===u).length), backgroundColor:'#ec4899' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:9} } } }, scales:{ y:{ ticks:{ font:{size:9} } }, x:{ ticks:{ font:{size:9} } } } } }); }
+}
+
+function updateSmallCharts(reps, ped) {
+    const config = (ctx, labels, data, colors) => new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:0 }] }, options:{ responsive:true, maintainAspectRatio:false, cutout:'70%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:6, font:{size:8} } } } } });
+    const pedE = {}; ped.forEach(x=>pedE[x.estado]=(pedE[x.estado]||0)+1);
+    if($('chart-pedidos-estado')) config($('chart-pedidos-estado').getContext('2d'), Object.keys(pedE), Object.values(pedE), ['#6366f1','#8b5cf6','#d8b4fe']);
+    const repE = {}; reps.forEach(x=>repE[x.estado]=(repE[x.estado]||0)+1);
+    if($('chart-reparaciones-estado')) config($('chart-reparaciones-estado').getContext('2d'), Object.keys(repE), Object.values(repE), ['#3b82f6','#0ea5e9','#22d3ee','#a5f3fc']);
+    const hoy = new Date(); const gS = { Vigente:0, Expirada:0, Proxima:0 };
+    reps.forEach(r => { if(r.garantia_fin){ let d=Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24)); if(d<0) gS.Expirada++; else if(d<=15) gS.Proxima++; else gS.Vigente++; } });
+    if($('chart-garantias-estado')) config($('chart-garantias-estado').getContext('2d'), Object.keys(gS), Object.values(gS), ['#10b981','#ef4444','#f59e0b']);
+}
+
+function updateDetalleVentas(reps, pie, ped) {
+    const items = [];
+    ped.forEach(p => { let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0, cant=parseInt(p.cantidad)||1; items.push({ n:p.producto, u:p.usuario, v:v*cant, b:(v-c)*cant, m:v>0?((v-c)/v*100).toFixed(1):0, e:p.estado }); });
+    pie.forEach(p => { if(p.precioVenta){ let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0; items.push({ n:p.nombre, u:p.usuario, v, b:v-c, m:v>0?((v-c)/v*100).toFixed(1):0, e:p.estado }); } });
+    reps.forEach(r => { if(r.precio){ let c=parseFloat(r.coste_piezas)||0, v=parseFloat(r.precio)||0; items.push({ n:`SAT: ${r.ot}`, u:r.usuario, v, b:v-c, m:v>0?((v-c)/v*100).toFixed(1):0, e:r.estado }); } });
+    items.sort((a,b)=>b.b-a.b);
+    $('detalle-ventas-tbody').innerHTML = items.slice(0,12).map(i => `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"><td class="px-4 py-2 font-bold text-slate-700 dark:text-slate-300">${escapeHtml(i.n)}</td><td class="px-4 py-2 text-slate-500">${i.u}</td><td class="px-4 py-2 font-medium">${i.v.toFixed(2)}€</td><td class="px-4 py-2 font-black ${i.b>=0?'text-emerald-600':'text-red-600'}">${i.b.toFixed(2)}€</td><td class="px-4 py-2 text-slate-400">${i.m}%</td><td class="px-4 py-2"><span class="status-pill ${getStatusClass(i.e)}">${i.e}</span></td></tr>`).join('');
 }
 
 function initRangeSelector() {
     document.querySelectorAll('.range-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
             currentRange = parseInt(btn.dataset.months);
-            updateEvolucionPorUsuario(currentRange);
+            const [reps, ped] = await Promise.all([db.reparaciones.toArray(), db.pedidos.toArray()]);
+            updateEvolucionPorUsuario(reps, ped, currentRange);
         });
     });
 }
 
-async function updateDashboardStats() {
-    try {
-        const piezas = await db.piezas.toArray(), pedidos = await db.pedidos.toArray(), reparaciones = await db.reparaciones.toArray();
-        let beneficioTotal = 0;
-        pedidos.forEach(p => { beneficioTotal += ((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1); });
-        piezas.forEach(p => { if(p.estado==='Vendido'||p.estado==='Instalado') beneficioTotal += ((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1); });
-        document.getElementById('stat-piezas').textContent = piezas.filter(p=>p.estado==='Pedido').length;
-        document.getElementById('stat-pedidos').textContent = pedidos.filter(p=>p.estado!=='Entregado').length;
-        document.getElementById('stat-reparaciones').textContent = reparaciones.filter(r=>r.prioridad==='Alta' && r.estado!=='Completado' && r.estado!=='Entregado').length;
-        document.getElementById('stat-beneficio').textContent = beneficioTotal.toFixed(2)+'€';
-        const allActivity = [];
-        piezas.slice(-3).forEach(p=>p.nombre&&allActivity.push({ text:`Pieza: ${p.nombre}`, date:new Date(p.fecha), icon:'package', usuario:p.usuario }));
-        pedidos.slice(-3).forEach(p=>p.cliente&&allActivity.push({ text:`Pedido: ${p.producto} — ${p.cliente}`, date:new Date(p.fecha), icon:'shopping-cart', usuario:p.usuario }));
-        reparaciones.slice(-3).forEach(r=>r.ot&&allActivity.push({ text:`Reparación OT: ${r.ot}`, date:new Date(r.fecha), icon:'check-square', usuario:r.usuario }));
-        allActivity.sort((a,b)=>b.date-a.date);
-        const container = document.getElementById('recent-activity');
-        if(container) {
-            container.innerHTML = allActivity.length===0 ? '<p class="text-slate-400 text-xs italic">No hay actividad.</p>' : '';
-            allActivity.slice(0,6).forEach(act => {
-                let userClass = act.usuario==='Daniel Farré'?'daniel':act.usuario==='José Ayala'?'jose':act.usuario==='David Varillas'?'david':'';
-                container.innerHTML += `<div class="flex items-center gap-2"><div class="w-6 h-6 rounded bg-slate-50 flex items-center justify-center flex-shrink-0"><i data-lucide="${act.icon}" class="w-3 h-3"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-medium truncate">${escapeHtml(act.text)}</p><p class="text-[10px] text-slate-400">${act.date.toLocaleString('es-ES')} · <span class="user-badge ${userClass}">${escapeHtml(act.usuario||'')}</span></p></div></div>`;
-            });
-        }
-        lucide.createIcons();
-        updateIntelligentAlerts();
-    } catch(e) { console.error(e); }
-}
-
-async function updateReports() {
-    try {
-        const piezas = await db.piezas.toArray(), pedidos = await db.pedidos.toArray(), reparaciones = await db.reparaciones.toArray();
-        let ingresos=0, costes=0;
-        pedidos.forEach(p=>{ let v=(parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1), c=(parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1); ingresos+=v; costes+=c; });
-        piezas.forEach(p=>{ if(p.estado==='Vendido'||p.estado==='Instalado'){ ingresos+=parseFloat(p.precioVenta)||0; costes+=parseFloat(p.precioCompra)||0; } });
-        ingresos += reparaciones.reduce((s,r)=>s+(parseFloat(r.precio)||0),0);
-        document.getElementById('kpi-ingresos').textContent = ingresos.toFixed(2)+'€';
-        document.getElementById('kpi-coste-piezas').textContent = costes.toFixed(2)+'€';
-        document.getElementById('kpi-beneficio').textContent = (ingresos-costes).toFixed(2)+'€';
-        document.getElementById('kpi-margen').textContent = ingresos>0?((ingresos-costes)/ingresos*100).toFixed(1)+'%':'0%';
-        document.getElementById('kpi-total-pedidos').textContent = pedidos.length;
-        document.getElementById('kpi-pedidos-entregados').textContent = pedidos.filter(p=>p.estado==='Entregado').length;
-        document.getElementById('kpi-reparaciones-completadas').textContent = reparaciones.filter(r=>r.estado==='Completado'||r.estado==='Entregado').length;
-        document.getElementById('kpi-piezas-pendientes').textContent = piezas.filter(p=>p.estado==='Pedido').length;
-        document.getElementById('kpi-tasa-entrega').textContent = pedidos.length>0?Math.round(pedidos.filter(p=>p.estado==='Entregado').length/pedidos.length*100)+'%':'0%';
-        updateChartPedidosEstado(pedidos);
-        updateChartReparacionesEstado(reparaciones);
-        updateChartGarantiasEstado(reparaciones);
-        updateDetalleVentas(pedidos, piezas);
-        updateRankingUsuarios(pedidos, piezas, reparaciones);
-        updateChartOperacionesUsuario();
-        updateEvolucionMensual();
-        updateEvolucionPorUsuario(currentRange);
-    } catch(e) { console.error(e); }
-}
-
-async function updateRankingUsuarios(pedidos, piezas, reparaciones) {
-    const ranking = USUARIOS.map(u => {
-        const ped = pedidos.filter(p=>p.usuario===u).length;
-        const pie = piezas.filter(p=>p.usuario===u).length;
-        const rep = reparaciones.filter(r=>r.usuario===u).length;
-        const gar = reparaciones.filter(r=>r.usuario===u && r.garantia_fin && new Date(r.garantia_fin)>new Date()).length;
-        return { usuario:u, pedidos:ped, piezas:pie, reparaciones:rep, garantias:gar, total:ped+pie+rep };
-    }).sort((a,b)=>b.total-a.total);
-    const container = document.getElementById('ranking-usuarios');
-    if(container) {
-        container.innerHTML = ranking.map(r => {
-            let avatarClass = r.usuario==='Daniel Farré'?'bg-blue-100 text-blue-700':r.usuario==='José Ayala'?'bg-pink-100 text-pink-700':'bg-emerald-100 text-emerald-700';
-            return `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full ${avatarClass} flex items-center justify-center font-bold">${r.usuario[0]}</div><div><p class="font-medium text-sm">${escapeHtml(r.usuario)}</p><p class="text-[10px] text-slate-500">${r.total} op. totales</p></div></div><div class="flex gap-2 text-center"><div><p class="text-xs font-bold text-blue-600">${r.pedidos}</p><p class="text-[9px] text-slate-400">Ped.</p></div><div><p class="text-xs font-bold text-purple-600">${r.piezas}</p><p class="text-[9px] text-slate-400">Piez.</p></div><div><p class="text-xs font-bold text-pink-600">${r.reparaciones}</p><p class="text-[9px] text-slate-400">Rep.</p></div><div><p class="text-xs font-bold text-green-600">${r.garantias}</p><p class="text-[9px] text-slate-400">Gar.</p></div></div></div>`;
-        }).join('');
-    }
-}
-
-async function updateChartGarantiasEstado(reparaciones) {
-    const hoy = new Date();
-    const stats = { vigente:0, expirada:0, proxima:0 };
-    reparaciones.forEach(r => {
-        if(r.garantia_fin) {
-            const fin = new Date(r.garantia_fin), diff = Math.ceil((fin-hoy)/(1000*60*60*24));
-            if(diff < 0) stats.expirada++;
-            else if(diff <= 15) stats.proxima++;
-            else stats.vigente++;
-        }
-    });
-    const ctx = document.getElementById('chart-garantias-estado')?.getContext('2d');
-    if(ctx) { if(charts.garantiasEstado) charts.garantiasEstado.destroy(); charts.garantiasEstado = new Chart(ctx, { type:'pie', data:{ labels:['Vigentes','Expiradas','Próx. Caducar'], datasets:[{ data:[stats.vigente, stats.expirada, stats.proxima], backgroundColor:['#10b981','#ef4444','#f59e0b'] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
-}
-
-async function updateChartOperacionesUsuario() {
-    const pedidos = await db.pedidos.toArray(), piezas = await db.piezas.toArray(), reparaciones = await db.reparaciones.toArray();
-    const ctx = document.getElementById('chart-operaciones-usuario')?.getContext('2d');
-    if(ctx) { if(charts.operacionesUsuario) charts.operacionesUsuario.destroy(); charts.operacionesUsuario = new Chart(ctx, { type:'bar', data:{ labels:USUARIOS, datasets:[{ label:'Pedidos', data:USUARIOS.map(u=>pedidos.filter(p=>p.usuario===u).length), backgroundColor:'#3b82f6' },{ label:'Piezas', data:USUARIOS.map(u=>piezas.filter(p=>p.usuario===u).length), backgroundColor:'#8b5cf6' },{ label:'Reparaciones', data:USUARIOS.map(u=>reparaciones.filter(r=>r.usuario===u).length), backgroundColor:'#ec4899' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
-}
-
-async function updateChartPedidosEstado(pedidos) {
-    const estados = {}; pedidos.forEach(p=>estados[p.estado]=(estados[p.estado]||0)+1);
-    const ctx = document.getElementById('chart-pedidos-estado')?.getContext('2d');
-    if(ctx) { if(charts.pedidosEstado) charts.pedidosEstado.destroy(); charts.pedidosEstado = new Chart(ctx, { type:'doughnut', data:{ labels:Object.keys(estados), datasets:[{ data:Object.values(estados), backgroundColor:['#667eea','#764ba2','#f093fb','#f5576c'] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
-}
-
-async function updateChartReparacionesEstado(reparaciones) {
-    const estados = {}; reparaciones.forEach(r=>estados[r.estado]=(estados[r.estado]||0)+1);
-    const ctx = document.getElementById('chart-reparaciones-estado')?.getContext('2d');
-    if(ctx) { if(charts.reparacionesEstado) charts.reparacionesEstado.destroy(); charts.reparacionesEstado = new Chart(ctx, { type:'doughnut', data:{ labels:Object.keys(estados), datasets:[{ data:Object.values(estados), backgroundColor:['#4facfe','#00f2fe','#43e97b','#fa709a'] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } } } }); }
-}
-
-async function updateDetalleVentas(pedidos, piezas) {
-    const tbody = document.getElementById('detalle-ventas-tbody');
-    if(!tbody) return;
-    const items = [];
-    pedidos.forEach(p => { let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0, cant=parseInt(p.cantidad)||1; items.push({ nombre:p.producto, tipo:'Pedido', compra:c*cant, venta:v*cant, beneficio:(v-c)*cant, margen:v>0?((v-c)/v*100).toFixed(1):0, estado:p.estado }); });
-    piezas.forEach(p => { if(p.precioVenta){ let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0; items.push({ nombre:p.nombre, tipo:'Pieza', compra:c, venta:v, beneficio:v-c, margen:v>0?((v-c)/v*100).toFixed(1):0, estado:p.estado }); } });
-    items.sort((a,b)=>b.beneficio-a.beneficio);
-    tbody.innerHTML = items.slice(0,15).map(i => `<tr class="hover:bg-slate-50"><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(i.nombre)}</td><td class="px-2 md:px-4 py-2 text-xs">${i.tipo}</td><td class="px-2 md:px-4 py-2 text-xs">${i.compra.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs">${i.venta.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs ${i.beneficio>=0?'profit-positive':'profit-negative'}">${i.beneficio.toFixed(2)}€</td><td class="px-2 md:px-4 py-2 text-xs hidden md:table-cell">${i.margen}%</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(i.estado)}">${escapeHtml(i.estado)}</span></td></tr>`).join('');
-}
-
-function getStatusClass(status) {
-    const s = (status||'').toLowerCase();
-    if(s.includes('pendiente')||s.includes('pedido')||s.includes('espera')) return 'bg-amber-100 text-amber-700';
-    if(s.includes('recibido')||s.includes('entregado')||s.includes('completado')||s.includes('vendido')) return 'bg-green-100 text-green-700';
-    return 'bg-blue-100 text-blue-700';
-}
-
+// Tables
 async function renderTable(section) {
     const data = await db[section].toArray();
-    const head = document.getElementById('table-head'), body = document.getElementById('table-body');
-    if(!head||!body) return;
-    let headers = section==='piezas'?['Pieza','Proveedor','P.Venta','Usuario','Estado','Imagen']:section==='pedidos'?['Producto','Cliente','P.Venta','Estado','Fecha']:['OT','Cliente','Equipo','Garantía','Estado','Imagen'];
-    head.innerHTML = headers.map(h=>`<th class="px-2 md:px-4 py-2 text-[10px] md:text-xs font-semibold text-slate-500 uppercase">${h}</th>`).join('') + '<th class="px-2 md:px-4 py-2 text-right">Acciones</th>';
-    body.innerHTML = data.length===0 ? '<tr><td colspan="9" class="p-6 text-center text-slate-400 text-xs">Sin datos.</td></tr>' : '';
-    data.forEach(item => {
-        let userClass = item.usuario==='Daniel Farré'?'daniel':item.usuario==='José Ayala'?'jose':item.usuario==='David Varillas'?'david':'';
+    const head = $('table-head'), body = $('table-body');
+    let headers = section === 'reparaciones' ? ['OT', 'Cliente', 'Equipo', 'Serie', 'Estado', 'Ubicación'] : section === 'piezas' ? ['Pieza', 'Ref.', 'Stock', 'Mín.', 'Estado'] : ['Producto', 'Cliente', 'Pago', 'Estado', 'Fecha'];
+    head.innerHTML = headers.map(h => `<th class="px-4 py-3">${h}</th>`).join('') + '<th class="px-4 py-3"></th>';
+    body.innerHTML = data.length ? '' : '<tr><td colspan="7" class="p-12 text-center text-slate-400 italic text-xs">Sin registros.</td></tr>';
+    data.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach(item => {
         let content = '';
-        if(section==='piezas') content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.nombre)}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.proveedor)}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta}€</td><td class="px-2 md:px-4 py-2"><span class="user-badge ${userClass} text-[9px]">${escapeHtml(item.usuario)}</span></td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${escapeHtml(item.estado)}</span></td><td class="px-2 md:px-4 py-2">${item.imagen?`<img src="${item.imagen}" class="thumbnail-img" onclick="showImageModal('${item.imagen}')">`:'-'}</td>`;
-        else if(section==='pedidos') content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.producto)}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.cliente)}</td><td class="px-2 md:px-4 py-2 text-xs">${item.precioVenta}€</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${escapeHtml(item.estado)}</span></td><td class="px-2 md:px-4 py-2 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`;
-        else if(section==='reparaciones') {
-            let gHtml = '-'; if(item.garantia_fin){ let diff=Math.ceil((new Date(item.garantia_fin)-new Date())/(1000*60*60*24)); gHtml=diff<0?'<span class="badge-guarantee badge-expired">Expirada</span>':`<span class="badge-guarantee ${diff<=15?'badge-days-left':'badge-in-warranty'}">${diff}d</span>`; }
-            content = `<td class="px-2 md:px-4 py-2 text-xs font-medium">${escapeHtml(item.ot)}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.cliente)}</td><td class="px-2 md:px-4 py-2 text-xs">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</td><td class="px-2 md:px-4 py-2 text-xs">${gHtml}</td><td class="px-2 md:px-4 py-2"><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusClass(item.estado)}">${escapeHtml(item.estado)}</span></td><td class="px-2 md:px-4 py-2">${item.imagen?`<img src="${item.imagen}" class="thumbnail-img" onclick="showImageModal('${item.imagen}')">`:'-'}</td>`;
+        if(section === 'reparaciones') {
+            content = `<td class="px-4 py-3 font-black text-blue-600">${escapeHtml(item.ot)}</td><td class="px-4 py-3 font-bold">${escapeHtml(item.cliente)}</td><td class="px-4 py-3 text-[10px] text-slate-500">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</td><td class="px-4 py-3 text-[10px] font-mono">${escapeHtml(item.serie||'-')}</td><td class="px-4 py-3"><span class="status-pill ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-4 py-3 text-[10px] italic text-slate-400">${escapeHtml(item.ubicacion_taller||'-')}</td>`;
+        } else if(section === 'piezas') {
+            const lowStock = item.stock_actual <= item.stock_minimo;
+            content = `<td class="px-4 py-3 font-bold">${escapeHtml(item.nombre)}</td><td class="px-4 py-3 text-[10px] font-mono">${escapeHtml(item.referencia||'-')}</td><td class="px-4 py-3 font-black ${lowStock?'text-red-500':'text-slate-700'}">${item.stock_actual||0}</td><td class="px-4 py-3 text-[10px] text-slate-400">${item.stock_minimo||0}</td><td class="px-4 py-3"><span class="status-pill ${getStatusClass(item.estado)}">${item.estado}</span></td>`;
+        } else {
+            content = `<td class="px-4 py-3 font-bold">${escapeHtml(item.producto)}</td><td class="px-4 py-3 text-[10px]">${escapeHtml(item.cliente)}</td><td class="px-4 py-3 text-[9px] font-bold uppercase text-slate-400">${escapeHtml(item.forma_pago||'-')}</td><td class="px-4 py-3"><span class="status-pill ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-4 py-3 text-[10px] text-slate-500">${new Date(item.fecha).toLocaleDateString()}</td>`;
         }
-        const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
-        tr.innerHTML = `${content}<td class="px-2 md:px-4 py-2 text-right space-x-1"><button onclick='viewDetail("${section}", ${item.id})' class="btn-small bg-slate-100 hover:bg-green-100"><i data-lucide="eye" class="w-3 h-3"></i></button><button onclick='editRecord("${section}", ${item.id})' class="btn-small bg-slate-100 hover:bg-blue-100"><i data-lucide="edit-2" class="w-3 h-3"></i></button><button onclick='deleteRecord("${section}", ${item.id})' class="btn-small bg-slate-100 hover:bg-red-100"><i data-lucide="trash" class="w-3 h-3"></i></button></td>`;
+        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-all";
+        tr.innerHTML = `${content}<td class="px-4 py-3 text-right"><button onclick="viewDetail('${section}', ${item.id})" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><i data-lucide="maximize-2" class="w-4 h-4"></i></button></td>`;
+        tr.onclick = (e) => { if(!e.target.closest('button')) viewDetail(section, item.id); };
         body.appendChild(tr);
     });
     lucide.createIcons();
 }
 
-function openModal(editData=null) {
-    const modal = document.getElementById('modal'), fields = document.getElementById('form-fields'), idInput = document.getElementById('form-id'), sectionInput = document.getElementById('form-section');
-    let active = currentSection==='dashboard'?'reparaciones':currentSection;
-    idInput.value = editData?editData.id:''; sectionInput.value = active;
+function getStatusClass(s) {
+    s = (s||'').toLowerCase();
+    if(['entregado','completado','recibido','instalado','vendido','cobrado'].some(x => s.includes(x))) return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+    if(['pendiente','pedido','espera','proceso'].some(x => s.includes(x))) return 'bg-amber-100 text-amber-700 border border-amber-200';
+    return 'bg-blue-100 text-blue-700 border border-blue-200';
+}
+
+function filterTable() {
+    const q = normalize($('search-input').value);
+    const rows = $('table-body').querySelectorAll('tr');
+    rows.forEach(r => { r.style.display = normalize(r.textContent).includes(q) ? '' : 'none'; });
+}
+
+// Modals
+function openModal(editData = null) {
+    const modal = $('modal'), fields = $('form-fields'), idIn = $('form-id'), secIn = $('form-section');
+    let active = ['dashboard','reportes'].includes(currentSection) ? 'reparaciones' : currentSection;
+    idIn.value = editData ? editData.id : ''; secIn.value = active;
+    $('modal-title').textContent = editData ? `EDITAR ${active.toUpperCase()}` : `NUEVO ${active.toUpperCase()}`;
     let html = '';
-    if(active==='piezas') html = `<div class="form-section"><div class="form-section-title"><i data-lucide="package"></i> Pieza</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Nombre *</label><input type="text" name="nombre" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.nombre||'')}"></div><div><label class="text-xs font-bold">Cantidad *</label><input type="number" name="cantidad" required class="w-full border rounded p-2 text-sm" value="${editData?.cantidad||1}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="euro"></i> Precios</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded p-2 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-xs font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded p-2 text-sm" value="${editData?.precioVenta||''}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="user"></i> Asignación</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Técnico *</label><select name="usuario" required class="w-full border rounded p-2 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div><div><label class="text-xs font-bold">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Vendido'?'selected':''}>Vendido</option></select></div></div></div><input type="hidden" name="imagen" id="imagenData" value="${editData?.imagen||''}"><div><label class="text-xs font-bold">Imagen</label><input type="file" onchange="handleFile(this)" class="w-full text-xs"></div>`;
-    else if(active==='pedidos') html = `<div class="form-section"><div class="form-section-title"><i data-lucide="shopping-cart"></i> Pedido</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Producto *</label><input type="text" name="producto" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.producto||'')}"></div><div><label class="text-xs font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.cliente||'')}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="euro"></i> Precios</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded p-2 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-xs font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded p-2 text-sm" value="${editData?.precioVenta||''}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="user"></i> Asignación</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Técnico *</label><select name="usuario" required class="w-full border rounded p-2 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div><div><label class="text-xs font-bold">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='En Espera'?'selected':''}>En Espera</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div></div></div>`;
-    else if(active==='reparaciones') html = `<div class="form-section"><div class="form-section-title"><i data-lucide="check-square"></i> Reparación</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">OT *</label><input type="text" name="ot" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.ot||'')}"></div><div><label class="text-xs font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.cliente||'')}"></div><div><label class="text-xs font-bold">Marca *</label><input type="text" name="marca" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.marca||'')}"></div><div><label class="text-xs font-bold">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded p-2 text-sm" value="${escapeHtml(editData?.modelo||'')}"></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="shield-check"></i> Garantía y Prioridad</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded p-2 text-sm" value="${editData?.garantia_meses||0}"></div><div><label class="text-xs font-bold">Prioridad</label><select name="prioridad" class="w-full border rounded p-2 text-sm"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="stethoscope"></i> Estado</div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold">Técnico *</label><select name="usuario" required class="w-full border rounded p-2 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div><div><label class="text-xs font-bold">Estado</label><select name="estado" class="w-full border rounded p-2 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div></div></div><div class="form-section"><div class="form-section-title"><i data-lucide="euro"></i> Precio</div><input type="number" step="0.01" name="precio" class="w-full border rounded p-2 text-sm" value="${editData?.precio||''}"></div><div class="form-section"><div class="form-section-title"><i data-lucide="file-text"></i> Notas</div><textarea name="observaciones" rows="3" class="w-full border rounded p-2 text-sm">${escapeHtml(editData?.observaciones||'')}</textarea></div><input type="hidden" name="imagen" id="imagenData" value="${editData?.imagen||''}"><div><label class="text-xs font-bold">Imagen</label><input type="file" onchange="handleFile(this)" class="w-full text-xs"></div>`;
-    fields.innerHTML = html; modal.classList.remove('hidden'); modal.classList.add('flex'); lucide.createIcons();
-}
-
-async function handleFile(input) {
-    const file = input.files[0];
-    if(file) {
-        const r = new FileReader(); r.readAsDataURL(file);
-        r.onload = () => { document.getElementById('imagenData').value = r.result; };
+    if(active === 'reparaciones') {
+        html = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="form-section"><p class="text-[9px] font-black text-blue-500 uppercase mb-3 tracking-widest">Identificación SAT</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[9px] font-bold uppercase text-slate-400">OT *</label><input type="text" name="ot" required class="w-full border rounded-lg p-2 mt-1 text-xs font-bold" value="${editData?.ot||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Ubicación</label><input type="text" name="ubicacion_taller" class="w-full border rounded-lg p-2 mt-1 text-xs" value="${editData?.ubicacion_taller||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Marca *</label><input type="text" name="marca" required class="w-full border rounded-lg p-2 mt-1 text-xs" value="${editData?.marca||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded-lg p-2 mt-1 text-xs" value="${editData?.modelo||''}"></div><div class="col-span-2"><label class="text-[9px] font-bold uppercase text-slate-400">Nº Serie</label><input type="text" name="serie" class="w-full border rounded-lg p-2 mt-1 text-xs font-mono" value="${editData?.serie||''}"></div></div></div><div class="form-section"><p class="text-[9px] font-black text-amber-500 uppercase mb-3 tracking-widest">Cliente y Seguridad</p><div class="grid grid-cols-2 gap-3"><div class="col-span-2"><label class="text-[9px] font-bold uppercase text-slate-400">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-lg p-2 mt-1 text-xs font-bold" value="${editData?.cliente||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Teléfono</label><input type="tel" name="telefono" class="w-full border rounded-lg p-2 mt-1 text-xs" value="${editData?.telefono||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Email</label><input type="email" name="email" class="w-full border rounded-lg p-2 mt-1 text-xs" value="${editData?.email||''}"></div><div class="col-span-2"><label class="text-[9px] font-bold uppercase text-slate-400">Password</label><input type="text" name="password" class="w-full border rounded-lg p-2 mt-1 text-xs font-mono bg-amber-50 dark:bg-slate-900" value="${editData?.password||''}"></div></div></div></div><div class="form-section"><p class="text-[9px] font-black text-emerald-500 uppercase mb-3 tracking-widest">Estado y Finanzas</p><div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div><label class="text-[9px] font-bold uppercase text-slate-400">Estado</label><select name="estado" class="w-full border rounded-lg p-2 mt-1 text-xs font-bold"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='En Proceso'?'selected':''}>En Proceso</option><option ${editData?.estado==='Esperando Pieza'?'selected':''}>Esperando Pieza</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Prioridad</label><select name="prioridad" class="w-full border rounded-lg p-2 mt-1 text-xs"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option><option ${editData?.prioridad==='Crítica'?'selected':''}>Crítica</option></select></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Precio Final</label><input type="number" step="0.01" name="precio" class="w-full border rounded-lg p-2 mt-1 text-xs font-black text-emerald-600" value="${editData?.precio||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Coste Piezas</label><input type="number" step="0.01" name="coste_piezas" class="w-full border rounded-lg p-2 mt-1 text-xs" value="${editData?.coste_piezas||''}"></div></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="text-[9px] font-bold uppercase text-slate-400">Diagnóstico</label><textarea name="diagnostico" rows="3" class="w-full border rounded-lg p-2 mt-1 text-xs">${editData?.diagnostico||''}</textarea></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Accesorios</label><textarea name="accesorios" rows="3" class="w-full border rounded-lg p-2 mt-1 text-xs">${editData?.accesorios||''}</textarea></div></div><div class="form-section mt-4"><div class="grid grid-cols-2 gap-4"><div><label class="text-[9px] font-bold uppercase text-slate-400">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded-lg p-2 mt-1 text-xs" value="${editData?.garantia_meses||0}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Técnico</label><select name="usuario" class="w-full border rounded-lg p-2 mt-1 text-xs font-bold">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div><div class="mt-3"><label class="text-[9px] font-bold uppercase text-slate-400">Foto (Cámara)</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-[10px] mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div>`;
+    } else if(active === 'piezas') {
+        html = `<div class="form-section"><div class="grid grid-cols-2 gap-4"><div><label class="text-[9px] font-bold uppercase text-slate-400">Nombre *</label><input type="text" name="nombre" required class="w-full border rounded-lg p-2.5 mt-1 text-xs font-bold" value="${editData?.nombre||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Ref / SKU</label><input type="text" name="referencia" class="w-full border rounded-lg p-2.5 mt-1 text-xs font-mono" value="${editData?.referencia||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded-lg p-2.5 mt-1 text-xs" value="${editData?.proveedor||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Categoría</label><select name="categoria" class="w-full border rounded-lg p-2.5 mt-1 text-xs"><option>Pantallas</option><option>Baterías</option><option>Conectores</option><option>Placas</option><option>Accesorios</option></select></div></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4"><div><label class="text-[9px] font-bold uppercase text-slate-400">Stock</label><input type="number" name="stock_actual" class="w-full border rounded-lg p-2.5 mt-1 text-xs font-black" value="${editData?.stock_actual||0}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Mínimo</label><input type="number" name="stock_minimo" class="w-full border rounded-lg p-2.5 mt-1 text-xs" value="${editData?.stock_minimo||0}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-lg p-2.5 mt-1 text-xs" value="${editData?.precioCompra||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-lg p-2.5 mt-1 text-xs font-bold text-blue-600" value="${editData?.precioVenta||''}"></div></div><div class="mt-4"><label class="text-[9px] font-bold uppercase text-slate-400">Estado</label><select name="estado" class="w-full border rounded-lg p-2.5 mt-1 text-xs font-bold"><option ${editData?.estado==='En Stock'?'selected':''}>En Stock</option><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Agotado'?'selected':''}>Agotado</option></select></div>`;
+    } else if(active === 'pedidos') {
+        html = `<div class="form-section"><div class="grid grid-cols-2 gap-4"><div class="col-span-2"><label class="text-[9px] font-bold uppercase text-slate-400">Producto *</label><input type="text" name="producto" required class="w-full border rounded-lg p-2.5 mt-1 text-xs font-bold" value="${editData?.producto||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-lg p-2.5 mt-1 text-xs" value="${editData?.cliente||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Teléfono</label><input type="tel" name="telefono_cliente" class="w-full border rounded-lg p-2.5 mt-1 text-xs" value="${editData?.telefono_cliente||''}"></div></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4"><div><label class="text-[9px] font-bold uppercase text-slate-400">Cant.</label><input type="number" name="cantidad" class="w-full border rounded-lg p-2.5 mt-1 text-xs font-bold" value="${editData?.cantidad||1}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-lg p-2.5 mt-1 text-xs font-black text-emerald-600" value="${editData?.precioVenta||''}"></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Pago</label><select name="forma_pago" class="w-full border rounded-lg p-2.5 mt-1 text-xs"><option>Efectivo</option><option>Tarjeta</option><option>Bizum</option><option>Transferencia</option></select></div><div><label class="text-[9px] font-bold uppercase text-slate-400">Estado</label><select name="estado" class="w-full border rounded-lg p-2.5 mt-1 text-xs font-bold"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='Cobrado'?'selected':''}>Cobrado</option></select></div></div><div class="mt-4"><label class="text-[9px] font-bold uppercase text-slate-400">Notas Entrega</label><textarea name="notas_entrega" rows="2" class="w-full border rounded-lg p-2.5 mt-1 text-xs">${editData?.notas_entrega||''}</textarea></div>`;
     }
+    fields.innerHTML = html; modal.style.display = 'flex'; lucide.createIcons();
 }
 
-function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
+function closeModal() { $('modal').style.display = 'none'; }
+function closeDetailModal() { $('detail-modal').style.display = 'none'; }
+function closeAIModal() { $('ai-modal').style.display = 'none'; }
+function openReminderModal() { 
+    const select = $('reminder-user-select');
+    if(select) select.innerHTML = USUARIOS.map(u => `<option>${u}</option>`).join('');
+    $('reminder-modal').style.display = 'flex'; 
+    lucide.createIcons(); 
+}
+function closeReminderModal() { $('reminder-modal').style.display = 'none'; }
 
-document.getElementById('record-form').addEventListener('submit', async(e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target));
-    const id = document.getElementById('form-id').value, section = document.getElementById('form-section').value;
+async function handleFile(input) { const f = input.files[0]; if(f){ const r = new FileReader(); r.onload = (e) => { $('form-imagen').value = e.target.result; }; r.readAsDataURL(f); } }
+
+$('record-form').onsubmit = async (e) => {
+    e.preventDefault(); const data = Object.fromEntries(new FormData(e.target));
+    const id = $('form-id').value, section = $('form-section').value;
     try {
         if(section==='reparaciones' && data.garantia_meses>0 && (data.estado==='Entregado'||data.estado==='Completado')){
             let f = new Date(); f.setMonth(f.getMonth()+parseInt(data.garantia_meses)); data.garantia_fin = f.toISOString();
         }
         if(id) {
-            const old = await db[section].get(parseInt(id));
-            const merged = {...old, ...data}; merged.fecha = old.fecha;
+            const old = await db[section].get(parseInt(id)); const merged = {...old, ...data};
             if(!data.imagen && old.imagen) merged.imagen = old.imagen;
             await db[section].put(merged);
         } else {
-            data.fecha = new Date().toISOString();
-            await db[section].add(data);
+            data.fecha = new Date().toISOString(); await db[section].add(data);
         }
-        showToast('Guardado'); closeModal(); showSection(currentSection);
-    } catch(err) { showToast('Error', 'error'); }
-});
+        showToast('GUARDADO'); closeModal(); showSection(currentSection);
+    } catch(err) { showToast('ERROR', 'error'); }
+};
 
-async function editRecord(section, id) { const item = await db[section].get(id); if(item) openModal(item); }
-async function deleteRecord(section, id) { if(confirm('¿Eliminar?')){ await db[section].delete(id); showSection(currentSection); } }
+// Details & Document View
+function getDocumentTemplate(section, item, isPrint = false) {
+    const title = section === 'reparaciones' ? 'ORDEN DE TRABAJO SAT' : section === 'pedidos' ? 'ALBARÁN DE ENTREGA' : 'INFORME TÉCNICO';
+    const accentColor = section === 'reparaciones' ? '#2563eb' : section === 'pedidos' ? '#059669' : '#4b5563';
+    const bgStyle = isPrint ? 'background:white; color:black;' : 'background:transparent; color:inherit;';
+    const cardBg = isPrint ? '#f8fafc' : 'rgba(0,0,0,0.03)';
+    const borderStyle = isPrint ? 'border:1px solid #e2e8f0;' : 'border:1px solid rgba(0,0,0,0.1);';
+
+    return `
+        <div class="document-view" style="${bgStyle} font-family: 'Inter', sans-serif; padding: ${isPrint ? '40px' : '10px'};">
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; border-bottom:3px solid ${accentColor}; padding-bottom:15px; margin-bottom:20px">
+                <div>
+                    <div style="font-size:22px; font-weight:900; color:${accentColor}">TECNOGIRONA S.A.T.</div>
+                    <p style="font-size:9px; font-weight:bold; opacity:0.7">SISTEMAS PROFESIONALES V8.3</p>
+                </div>
+                <div style="text-align:right">
+                    <div style="font-weight:900; font-size:12px; text-transform:uppercase">${title}</div>
+                    <div style="font-size:14px; font-weight:bold">REF: ${item.ot || item.id}</div>
+                    <div style="font-size:10px; opacity:0.8">${new Date(item.fecha || Date.now()).toLocaleDateString()}</div>
+                </div>
+            </div>
+
+            <!-- Client & Device Info -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px">
+                <div style="background:${cardBg}; padding:12px; border-radius:10px; ${borderStyle}">
+                    <p style="font-size:8px; font-weight:bold; text-transform:uppercase; opacity:0.5">Cliente</p>
+                    <p style="font-size:13px; font-weight:bold; margin-top:4px">${escapeHtml(item.cliente || 'S/D')}</p>
+                    <p style="font-size:10px; margin-top:2px">${escapeHtml(item.telefono || item.telefono_cliente || '')}</p>
+                    <p style="font-size:10px; opacity:0.7">${escapeHtml(item.email || '')}</p>
+                </div>
+                <div style="background:${cardBg}; padding:12px; border-radius:10px; ${borderStyle}">
+                    <p style="font-size:8px; font-weight:bold; text-transform:uppercase; opacity:0.5">${section === 'reparaciones' ? 'Equipo' : 'Detalles'}</p>
+                    <p style="font-size:13px; font-weight:bold; margin-top:4px">${escapeHtml(item.marca || '')} ${escapeHtml(item.modelo || item.producto || item.nombre || '')}</p>
+                    <p style="font-size:10px; margin-top:2px">Serie: ${escapeHtml(item.serie || item.referencia || '-')}</p>
+                    ${item.password ? `<p style="font-size:10px; font-weight:bold; color:${accentColor}">PASS: ${escapeHtml(item.password)}</p>` : ''}
+                </div>
+            </div>
+
+            <!-- Technical Details -->
+            <div style="margin-bottom:20px">
+                <p style="font-size:8px; font-weight:bold; text-transform:uppercase; opacity:0.5">Descripción y Diagnóstico</p>
+                <div style="background:${cardBg}; border-radius:10px; padding:15px; min-height:100px; font-size:11px; margin-top:5px; line-height:1.5; ${borderStyle}">
+                    ${(item.diagnostico || item.notas_entrega || item.observaciones || 'Sin detalles registrados.').replace(/\n/g, '<br>')}
+                    ${item.accesorios ? `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc; font-style:italic">Accesorios: ${escapeHtml(item.accesorios)}</div>` : ''}
+                </div>
+            </div>
+
+            <!-- Financials & Status -->
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:20px">
+                <div style="border:1px solid #eee; padding:10px; border-radius:8px; text-align:center">
+                    <p style="font-size:7px; opacity:0.5; font-weight:bold; text-transform:uppercase">Estado</p>
+                    <p style="font-size:11px; font-weight:bold">${item.estado}</p>
+                </div>
+                <div style="border:1px solid #eee; padding:10px; border-radius:8px; text-align:center">
+                    <p style="font-size:7px; opacity:0.5; font-weight:bold; text-transform:uppercase">Técnico</p>
+                    <p style="font-size:11px; font-weight:bold">${item.usuario}</p>
+                </div>
+                <div style="border:1px solid #eee; padding:10px; border-radius:8px; text-align:center; background:${accentColor}10">
+                    <p style="font-size:7px; opacity:0.5; font-weight:bold; text-transform:uppercase">Total</p>
+                    <p style="font-size:13px; font-weight:900; color:${accentColor}">${(parseFloat(item.precio)||parseFloat(item.precioVenta)||0).toFixed(2)}€</p>
+                </div>
+            </div>
+
+            ${item.imagen && !isPrint ? `
+                <div style="margin-top:10px">
+                    <p style="font-size:8px; font-weight:bold; text-transform:uppercase; opacity:0.5; mb-2">Imagen Adjunta</p>
+                    <img src="${item.imagen}" style="width:100%; border-radius:10px; margin-top:5px; border:1px solid #ddd">
+                </div>
+            ` : ''}
+
+            ${isPrint ? `
+                <div style="margin-top:50px; display:flex; justify-content:space-between">
+                    <div style="width:45%; border-top:1px solid #000; text-align:center; padding-top:8px; font-size:9px; font-weight:bold">Firma Técnico</div>
+                    <div style="width:45%; border-top:1px solid #000; text-align:center; padding-top:8px; font-size:9px; font-weight:bold">Firma Cliente</div>
+                </div>
+                <p style="font-size:7px; margin-top:40px; text-align:center; opacity:0.5">De acuerdo con la LOPD, sus datos serán tratados para la gestión del servicio técnico. La recogida del equipo implica la aceptación del presupuesto.</p>
+            ` : ''}
+        </div>
+    `;
+}
 
 async function viewDetail(section, id) {
     const item = await db[section].get(id); if(!item) return;
-    let html = Object.entries(item).map(([k,v]) => k==='imagen'?`<div class="detail-row"><div class="detail-label">${k}</div><div class="detail-value"><img src="${v}" class="w-32 rounded"></div></div>`:`<div class="detail-row"><div class="detail-label">${k}</div><div class="detail-value">${escapeHtml(v)}</div></div>`).join('');
-    document.getElementById('detail-content').innerHTML = html;
-    document.getElementById('detail-modal').classList.remove('hidden'); document.getElementById('detail-modal').classList.add('flex');
+    $('detail-content').innerHTML = getDocumentTemplate(section, item, false);
+    $('detail-edit-btn').onclick = () => { closeDetailModal(); openModal(item); };
+    $('detail-print-btn').onclick = () => printItem(section, item);
+    $('detail-delete-btn').onclick = () => { if(confirm('¿ELIMINAR ESTE REGISTRO?')){ db[section].delete(item.id); closeDetailModal(); showSection(currentSection); } };
+    $('detail-modal').style.display = 'flex'; 
+    lucide.createIcons();
 }
-function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
 
-async function updateIntelligentAlerts() {
-    const rep = await db.reparaciones.toArray(), pie = await db.piezas.toArray(), rec = await db.recordatorios.toArray(), now = new Date();
-    const alerts = [];
-    rep.forEach(r => {
-        if(r.garantia_fin){ let d=Math.ceil((new Date(r.garantia_fin)-now)/(1000*60*60*24)); if(d>=0 && d<=15) alerts.push({ title:`Garantía por caducar: ${r.ot}`, desc:`${d} días para ${r.cliente}`, prio:'warning' }); }
-        if(r.prioridad==='Alta' && r.estado==='Pendiente') alerts.push({ title:`Urgente: ${r.ot}`, desc:`Reparación prioritaria pendiente`, prio:'critical' });
+function printItem(section, item) {
+    $('print-area').innerHTML = getDocumentTemplate(section, item, true);
+    window.print();
+}
+
+// AI Analysis
+async function generateAISuggestions(silent = false) {
+    const modal = $('ai-modal'), content = $('ai-content'), dashSummary = $('ai-dashboard-summary');
+    if(!silent) { modal.style.display = 'flex'; content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-white border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-white/70">AUDITANDO...</p></div>'; }
+    const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    
+    // Estadísticas expandidas 360°
+    const hoy = new Date();
+    const stats = { 
+        p: reps.filter(r=>r.estado==='Pendiente').length,
+        enProceso: reps.filter(r=>r.estado==='En Proceso').length,
+        completadas: reps.filter(r=>r.estado==='Completado'||r.estado==='Entregado').length,
+        u: reps.filter(r=>r.prioridad==='Crítica'||r.prioridad==='Alta').length, 
+        pi: pie.filter(p=>p.stock_actual <= p.stock_minimo).length,
+        sinStock: pie.filter(p=>p.stock_actual === 0).length,
+        pedidosPend: ped.filter(p=>p.estado==='Pendiente').length,
+        garantiasActivas: 0,
+        garantiasExpired: 0,
+        ben: 0,
+        ingresos: 0,
+        costos: 0
+    };
+    
+    reps.forEach(r=>{
+        if(r.precio) stats.ben+=(parseFloat(r.precio)||0)-(parseFloat(r.coste_piezas)||0);
+        stats.ingresos += parseFloat(r.precio) || 0;
+        stats.costos += parseFloat(r.coste_piezas) || 0;
+        if(r.garantia_fin) {
+            let dias = Math.ceil((new Date(r.garantia_fin) - hoy)/(1000*60*60*24));
+            if(dias >= 0) stats.garantiasActivas++;
+            else stats.garantiasExpired++;
+        }
     });
-    rec.forEach(r => { if(!r.completed) alerts.push({ title:r.title, desc:r.description, prio:r.priority }); });
-    const container = document.getElementById('alert-container');
-    if(container) container.innerHTML = alerts.map(a => `<div class="alert-card p-3 rounded-lg ${a.prio==='critical'?'alert-critical':a.prio==='warning'?'alert-warning':'alert-info'}"><p class="text-sm font-bold">${escapeHtml(a.title)}</p><p class="text-xs">${escapeHtml(a.desc)}</p></div>`).join('');
+    
+    ped.forEach(p=>{
+        stats.ben+=((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1);
+        stats.ingresos += (parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1);
+        stats.costos += (parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1);
+    });
+    
+    const margen = stats.ingresos > 0 ? ((stats.ben / stats.ingresos) * 100).toFixed(1) : 0;
+    
+    if(dashSummary) dashSummary.innerHTML = `<div class="w-full text-left"><p class="text-[10px] font-black text-purple-600 dark:text-purple-400 mb-2">📊 AUDITORÍA IA 360°:</p><p class="leading-tight text-[11px] mb-2"><strong>SAT:</strong> ${stats.p} pend. | ${stats.enProceso} proceso | ${stats.completadas} completadas</p><p class="leading-tight text-[11px] mb-2"><strong>Garantías:</strong> ${stats.garantiasActivas} activas | ${stats.garantiasExpired} expiradas</p><p class="leading-tight text-[11px] mb-2"><strong>Stock:</strong> ${stats.pi} bajo mínimo | ${stats.sinStock} sin stock</p><p class="leading-tight text-[11px] mb-2"><strong>Pedidos:</strong> ${stats.pedidosPend} pendientes</p><p class="leading-tight text-[11px]"><strong>Financiero:</strong> Ingresos: ${stats.ingresos.toFixed(2)}€ | Costos: ${stats.costos.toFixed(2)}€ | Beneficio: ${stats.ben.toFixed(2)}€ | Margen: ${margen}%</p></div>`;
+    
+    if(!silent) {
+        setTimeout(() => {
+            let sug = [];
+            if(stats.u>0) sug.push({t:'cr', i:'zap', h:'PRIORIDAD CRÍTICA', d:`${stats.u} órdenes críticas.`, a:'Atender hoy.'});
+            if(stats.pi>0) sug.push({t:'wa', i:'package-search', h:'ALERTA STOCK', d:`${stats.pi} piezas bajo mínimo.`, a:'Pedir stock.'});
+            if(stats.garantiasExpired>0) sug.push({t:'cr', i:'alert-circle', h:'GARANTÍAS EXPIRADAS', d:`${stats.garantiasExpired} garantías vencidas.`, a:'Revisar.'});
+            if(stats.pedidosPend>0) sug.push({t:'wa', i:'shopping-cart', h:'PEDIDOS PENDIENTES', d:`${stats.pedidosPend} pedidos sin entregar.`, a:'Seguimiento.'});
+            sug.push({t:'su', i:'trending-up', h:'FINANZAS', d:`Ingresos: ${stats.ingresos.toFixed(2)}€ | Beneficio: ${stats.ben.toFixed(2)}€ | Margen: ${margen}%`, a:'Rendimiento: '+margen+'%'});
+            content.innerHTML = `<div class="grid grid-cols-2 gap-3 mb-6"><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-blue-500"><p class="text-[8px] font-black text-slate-400 uppercase">Pendientes</p><p class="text-2xl font-black text-slate-800 dark:text-white">${stats.p}</p></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-red-500"><p class="text-[8px] font-black text-slate-400 uppercase">Alertas</p><p class="text-2xl font-black text-red-600">${stats.u + stats.pi + stats.garantiasExpired}</p></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-emerald-500"><p class="text-[8px] font-black text-slate-400 uppercase">Beneficio</p><p class="text-2xl font-black text-emerald-600">${stats.ben.toFixed(0)}€</p></div><div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-b-4 border-purple-500"><p class="text-[8px] font-black text-slate-400 uppercase">Margen</p><p class="text-2xl font-black text-purple-600">${margen}%</p></div></div><div class="space-y-3">${sug.map(s=>`<div class="suggestion-card ${s.t==='cr'?'critical':s.t==='wa'?'warning':'success'}"><div class="flex gap-4"><i data-lucide="${s.i}" class="w-5 h-5"></i><div><p class="text-[10px] font-black">${s.h}</p><p class="text-[10px] text-slate-600 dark:text-slate-400 mt-1">${s.d}</p><p class="text-[10px] font-black mt-2 text-blue-600 uppercase italic">→ ${s.a}</p></div></div></div>`).join('')}</div>`;
+            lucide.createIcons();
+        }, 600);
+    }
 }
 
-function openReminderModal() { document.getElementById('reminder-modal').classList.remove('hidden'); document.getElementById('reminder-modal').classList.add('flex'); }
-function closeReminderModal() { document.getElementById('reminder-modal').classList.add('hidden'); }
-document.getElementById('reminder-form').onsubmit = async(e) => {
-    e.preventDefault(); const data = Object.fromEntries(new FormData(e.target));
-    data.completed = false; await db.recordatorios.add(data); closeReminderModal(); updateIntelligentAlerts();
+function openReminderForm() {
+    const userSelect = $('reminder-user-select');
+    userSelect.innerHTML = '<option value="Daniel Farré">Daniel Farré</option><option value="José Ayala">José Ayala</option><option value="David Pérez">David Pérez</option>';
+    $('reminder-modal').style.display = 'flex';
+    $('foto-preview').style.display = 'none';
+    $('reminder-form').reset();
+}
+
+function closeReminderModal() {
+    $('reminder-modal').style.display = 'none';
+}
+
+$('reminder-form').onsubmit = async (e) => { 
+    e.preventDefault(); 
+    const formData = new FormData(e.target);
+    const d = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        dueDate: formData.get('dueDate'),
+        dueTime: formData.get('dueTime'),
+        priority: formData.get('priority'),
+        category: formData.get('category'),
+        usuario: formData.get('usuario'),
+        referencia: formData.get('referencia'),
+        observaciones: formData.get('observaciones'),
+        completed: false
+    };
+    
+    // Manejar foto
+    const fotoFile = formData.get('foto');
+    if(fotoFile && fotoFile.size > 0) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            d.foto = e.target.result;
+            await db.recordatorios.add(d);
+            closeReminderModal();
+            renderRecordatorios();
+            showToast('RECORDATORIO GUARDADO');
+        };
+        reader.readAsDataURL(fotoFile);
+    } else {
+        await db.recordatorios.add(d);
+        closeReminderModal();
+        renderRecordatorios();
+        showToast('RECORDATORIO GUARDADO');
+    }
 };
 
-async function generateAISuggestions() {
-    const modal = document.getElementById('ai-modal'), content = document.getElementById('ai-content');
-    if(!modal||!content) return;
-    modal.classList.remove('hidden'); modal.classList.add('flex');
-    content.innerHTML = '<div class="text-center py-8"><div class="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div><p class="text-sm mt-2 text-slate-500">Analizando datos del taller...</p></div>';
-    try {
-        const piezas = await db.piezas.toArray(), pedidos = await db.pedidos.toArray(), reparaciones = await db.reparaciones.toArray();
-        const stats = {
-            totalPiezas:piezas.length, piezasPendientes:piezas.filter(p=>p.estado==='Pedido').length,
-            totalPedidos:pedidos.length, pedidosPendientes:pedidos.filter(p=>p.estado!=='Entregado').length, pedidosEntregados:pedidos.filter(p=>p.estado==='Entregado').length,
-            totalReparaciones:reparaciones.length, reparacionesPendientes:reparaciones.filter(r=>r.estado!=='Completado' && r.estado!=='Entregado').length,
-            reparacionesCompletadas:reparaciones.filter(r=>r.estado==='Completado'||r.estado==='Entregado').length,
-            beneficioTotal:pedidos.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1),0)
-        };
-        const suggestions = [];
-        if(stats.piezasPendientes>3) suggestions.push({ type:'critical', icon:'alert-triangle', title:'Piezas críticas', description:`Tienes ${stats.piezasPendientes} piezas en espera prolongada.`, action:'Contactar con proveedores urgentemente.' });
-        else if(stats.piezasPendientes>0) suggestions.push({ type:'warning', icon:'clock', title:'Piezas en espera', description:`${stats.piezasPendientes} piezas pendientes de recibir.`, action:'Hacer seguimiento de los pedidos.' });
-        else suggestions.push({ type:'success', icon:'check-circle', title:'Stock al día', description:'No hay piezas pendientes.', action:'Buen control de inventario.' });
-
-        if(stats.pedidosPendientes>5) suggestions.push({ type:'critical', icon:'shopping-cart', title:'Saturación de pedidos', description:`${stats.pedidosPendientes} pedidos sin entregar.`, action:'Priorizar entregas pendientes.' });
-        else if(stats.pedidosPendientes>0) suggestions.push({ type:'warning', icon:'package', title:'Pedidos activos', description:`${stats.pedidosPendientes} pedidos en proceso.`, action:'Revisar plazos de entrega.' });
-        else suggestions.push({ type:'success', icon:'check-circle', title:'Pedidos completados', description:'Todos los pedidos entregados.', action:'Excelente ritmo de venta.' });
-
-        if(stats.reparacionesPendientes>3) suggestions.push({ type:'critical', icon:'wrench', title:'Cuello de botella en taller', description:`${stats.reparacionesPendientes} equipos esperando reparación.`, action:'Considerar redistribución de tareas.' });
-        else if(stats.reparacionesPendientes>0) suggestions.push({ type:'warning', icon:'clock', title:'Reparaciones en curso', description:`${stats.reparacionesPendientes} equipos en taller.`, action:'Mantener informados a los clientes.' });
-        else suggestions.push({ type:'success', icon:'check-circle', title:'Taller despejado', description:'No hay reparaciones pendientes.', action:'Taller listo para nuevos ingresos.' });
-
-        if(stats.beneficioTotal<1000) suggestions.push({ type:'warning', icon:'trending-down', title:'Rentabilidad a vigilar', description:`Beneficio acumulado: ${stats.beneficioTotal.toFixed(2)}€`, action:'Revisar márgenes de beneficio.' });
-        else suggestions.push({ type:'success', icon:'trending-up', title:'Buena rentabilidad', description:`Beneficio acumulado: ${stats.beneficioTotal.toFixed(2)}€`, action:'Mantener la estrategia actual.' });
-
-        const tasa = stats.totalReparaciones>0 ? (stats.reparacionesCompletadas/stats.totalReparaciones*100).toFixed(0) : 0;
-        if(tasa<60) suggestions.push({ type:'critical', icon:'activity', title:'Baja eficiencia técnica', description:`Tasa de finalización: ${tasa}%`, action:'Identificar causas de retraso.' });
-        else suggestions.push({ type:'success', icon:'thumbs-up', title:'Alta eficiencia técnica', description:`Tasa de finalización: ${tasa}%`, action:'Excelente rendimiento del equipo.' });
-
-        content.innerHTML = `<div class="grid grid-cols-3 gap-2 mb-4">
-            <div class="bg-blue-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">📦 Piezas</p><p class="text-sm font-bold">${stats.totalPiezas}</p><p class="text-[9px] ${stats.piezasPendientes>0?'text-amber-600':'text-green-600'}">${stats.piezasPendientes} pend.</p></div>
-            <div class="bg-green-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">🛒 Pedidos</p><p class="text-sm font-bold">${stats.totalPedidos}</p><p class="text-[9px] ${stats.pedidosPendientes>0?'text-amber-600':'text-green-600'}">${stats.pedidosEntregados} OK</p></div>
-            <div class="bg-purple-50 p-2 rounded-lg text-center"><p class="text-[10px] text-slate-500">🔧 Reparac.</p><p class="text-sm font-bold">${stats.totalReparaciones}</p><p class="text-[9px] ${stats.reparacionesPendientes>0?'text-amber-600':'text-green-600'}">${stats.reparacionesCompletadas} OK</p></div>
-        </div>
-        <h4 class="font-bold text-sm mb-2 flex items-center gap-2"><i data-lucide="lightbulb" class="w-4 h-4"></i> Recomendaciones IA</h4>
-        ${suggestions.map(s=>`<div class="suggestion-card ${s.type}"><div class="flex items-start gap-3"><i data-lucide="${s.icon}" class="w-5 h-5 mt-0.5 ${s.type==='critical'?'text-red-500':s.type==='warning'?'text-amber-500':s.type==='success'?'text-green-500':'text-blue-500'}"></i><div class="flex-1"><h4 class="font-bold text-sm">${escapeHtml(s.title)}</h4><p class="text-xs text-slate-600 mt-1">${escapeHtml(s.description)}</p><p class="text-xs font-medium mt-1 ${s.type==='critical'?'text-red-600':s.type==='warning'?'text-amber-600':'text-green-600'}">💡 ${escapeHtml(s.action)}</p></div></div></div>`).join('')}
-        <div class="mt-3 p-2 bg-slate-100 rounded-lg text-center text-[10px] text-slate-500">📊 Análisis generado el ${new Date().toLocaleString('es-ES')}</div>`;
-        lucide.createIcons();
-    } catch(e) { content.innerHTML = '<p class="text-red-500 text-sm text-center">Error al generar informe.</p>'; }
+async function deleteReminder(id) {
+    if(confirm('¿Eliminar este recordatorio?')) {
+        await db.recordatorios.delete(id);
+        showToast('RECORDATORIO ELIMINADO');
+        renderRecordatorios();
+    }
 }
 
-function showImageModal(src) { document.getElementById('modal-image').src = src; document.getElementById('image-modal').classList.remove('hidden'); document.getElementById('image-modal').classList.add('flex'); }
-function closeImageModal() { document.getElementById('image-modal').classList.add('hidden'); }
-
+// Data
 async function exportData() {
-    const d = { piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), reparaciones: await db.reparaciones.toArray(), recordatorios: await db.recordatorios.toArray() };
-    const blob = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup_sat.json'; a.click();
+    const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray() };
+    const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_V8_1_${new Date().toISOString().split('T')[0]}.json`; a.click();
 }
 async function importData(e) {
     const f = e.target.files[0]; if(!f) return;
-    const d = JSON.parse(await f.text());
-    for(let s in d) { for(let i of d[s]){ delete i.id; await db[s].add(i); } }
-    showSection(currentSection);
+    try {
+        const d = JSON.parse(await f.text());
+        for(let s in d) { for(let i of d[s]) { delete i.id; await db[s].add(i); } }
+        showToast('IMPORTADO'); showSection(currentSection);
+    } catch(err) { showToast('ERROR', 'error'); }
 }
 
 window.showSection = showSection; window.openModal = openModal; window.closeModal = closeModal;
-window.viewDetail = viewDetail; window.closeDetailModal = closeDetailModal; window.editRecord = editRecord;
-window.deleteRecord = deleteRecord; window.login = login; window.logout = logout;
-window.openReminderModal = openReminderModal; window.closeReminderModal = closeReminderModal;
-window.generateAISuggestions = generateAISuggestions; window.closeAIModal = closeAIModal;
-window.toggleDarkMode = toggleDarkMode; window.showImageModal = showImageModal;
-window.closeImageModal = closeImageModal; window.exportData = exportData;
-window.importData = importData; window.filterTable = filterTable;
+window.viewDetail = viewDetail; window.closeDetailModal = closeDetailModal; window.login = login;
+window.logout = logout; window.toggleDarkMode = toggleDarkMode; window.generateAISuggestions = generateAISuggestions;
+window.closeAIModal = closeAIModal; window.openReminderForm = openReminderForm; window.closeReminderModal = closeReminderModal;
+window.exportData = exportData; window.importData = importData; window.handleFile = handleFile; window.filterTable = filterTable; window.deleteReminder = deleteReminder; window.previewFoto = previewFoto; window.renderRecordatorios = renderRecordatorios;
 </script>
 </body>
 </html>
