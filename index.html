@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>S.A.T. Dashboard Ultimate V8.2</title>
+    <title>S.A.T. Dashboard Ultimate V8.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -59,6 +59,10 @@
         .chart-container { position: relative; height: 250px; width: 100%; }
         .range-btn { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; background: #f1f5f9; border: none; transition: all 0.2s; }
         .range-btn.active { background: #2563eb; color: white; }
+        .ai-metric { background: #f1f5f9; padding: 12px; border-radius: 8px; text-align: center; border-left: 3px solid #2563eb; }
+        .ai-metric.alert { border-left-color: #ef4444; background: #fef2f2; }
+        .ai-metric.warn { border-left-color: #f59e0b; background: #fffbeb; }
+        .ai-metric.good { border-left-color: #10b981; background: #ecfdf5; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -96,8 +100,11 @@
         <a href="#" onclick="showSection('recordatorios')" id="link-recordatorios" class="sidebar-link"><i data-lucide="bell" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Recordatorios</span></a>
         <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reportes</span></a>
     </nav>
-    <div class="p-4 border-t border-slate-100 dark:border-slate-700">
-        <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2">
+    <div class="p-4 border-t border-slate-100 dark:border-slate-700 space-y-2">
+        <button onclick="generateAISuggestions()" class="flex items-center gap-3 text-slate-500 hover:text-purple-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+            <i data-lucide="sparkles" class="w-5 h-5"></i><span class="sidebar-text text-sm font-medium">Auditoría IA</span>
+        </button>
+        <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
             <i data-lucide="log-out" class="w-5 h-5"></i><span class="sidebar-text text-sm font-medium">Salir</span>
         </button>
     </div>
@@ -130,8 +137,8 @@
 
             <div class="flat-card p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <div><h4 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente</h4><p id="ai-dashboard-summary" class="text-xs text-slate-500 mt-1">Pulsa para iniciar el análisis detallado del taller.</p></div>
-                    <button onclick="generateAISuggestions()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Analizar con IA</button>
+                    <div><h4 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente</h4><p id="ai-dashboard-summary" class="text-xs text-slate-500 mt-1">Pulsa el botón para iniciar el análisis profundo del taller.</p></div>
+                    <button onclick="generateAISuggestions()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Analizar</button>
                 </div>
                 <div id="ai-mini-view" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
@@ -205,12 +212,12 @@
 </div>
 
 <div id="ai-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col modal-content">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content" style="max-height: 90vh;">
         <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
-            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i> Análisis IA Detallado</h3>
+            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente Completa</h3>
             <button onclick="closeAIModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <div id="ai-content" class="p-6 overflow-y-auto flex-1"></div>
+        <div id="ai-content" class="p-6 overflow-y-auto flex-1 space-y-4"></div>
     </div>
 </div>
 
@@ -218,7 +225,7 @@
 
 <script>
 // Database
-const db = new Dexie("SAT_Database_V8_2");
+const db = new Dexie("SAT_Database_V8_3");
 db.version(1).stores({
     reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, imagen, observaciones, precio',
     piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta, imagen, observaciones, referencia',
@@ -254,14 +261,14 @@ function login() {
     const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
     if(found) {
         currentUser = found;
-        localStorage.setItem("sat_user_v8_2", JSON.stringify(found));
+        localStorage.setItem("sat_user_v8_3", JSON.stringify(found));
         $('login-screen').classList.add('hidden');
         initApp();
     } else {
         $('login-error').classList.remove('hidden');
     }
 }
-function logout() { localStorage.removeItem("sat_user_v8_2"); location.reload(); }
+function logout() { localStorage.removeItem("sat_user_v8_3"); location.reload(); }
 
 // Init
 function initApp() {
@@ -272,7 +279,7 @@ function initApp() {
 }
 
 window.onload = () => {
-    const saved = localStorage.getItem("sat_user_v8_2");
+    const saved = localStorage.getItem("sat_user_v8_3");
     if(saved) {
         currentUser = JSON.parse(saved);
         $('login-screen').classList.add('hidden');
@@ -617,34 +624,143 @@ function printItem(section, item) {
     window.print();
 }
 
-// AI Analysis
+// AI Analysis - PROFUNDA Y DETALLADA
 async function generateAISuggestions() {
     const modal = $('ai-modal'), content = $('ai-content');
     modal.classList.remove('hidden'); modal.classList.add('flex');
-    content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller...</p></div>';
+    content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller en profundidad...</p></div>';
     
     const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
-    const stats = {
-        p: reps.filter(r=>r.estado==='Pendiente').length,
-        u: reps.filter(r=>r.prioridad==='Alta' && r.estado!=='Entregado').length,
-        pi: pie.filter(p=>p.estado==='Pedido').length,
-        pe: ped.filter(p=>p.estado!=='Entregado').length,
-        ben: ped.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1),0) + pie.reduce((s,p)=>s+(parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0),0)
-    };
+    
+    // Análisis Financiero
+    let ingresosRep = reps.reduce((s,r) => s + (parseFloat(r.precio)||0), 0);
+    let ingresosPed = ped.reduce((s,p) => s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)), 0);
+    let ingresosPie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioVenta)||0), 0);
+    let costePed = ped.reduce((s,p) => s + ((parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1)), 0);
+    let costePie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioCompra)||0), 0);
+    let ingresoTotal = ingresosRep + ingresosPed + ingresosPie;
+    let costeTotal = costePed + costePie;
+    let beneficio = ingresoTotal - costeTotal;
+    let margenPromedio = ingresoTotal > 0 ? (beneficio / ingresoTotal * 100) : 0;
+    
+    // Análisis de Piezas Críticas
+    let piezasAntiguasPedido = pie.filter(p => p.estado === 'Pedido' && (new Date() - new Date(p.fecha)) > 7*24*60*60*1000);
+    let piezasRecibidas = pie.filter(p => p.estado === 'Recibido').length;
+    
+    // Análisis de Garantías
+    let now = new Date();
+    let garantiasProximas = reps.filter(r => r.garantia_fin && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) <= 15 && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) >= 0).length;
+    let garantiasExpiradas = reps.filter(r => r.garantia_fin && new Date(r.garantia_fin) < now).length;
+    
+    // Análisis de Carga de Trabajo
+    let cargaTecnicos = USUARIOS.map(u => {
+        let pendientes = reps.filter(r => r.usuario === u && r.estado === 'Pendiente').length;
+        let enProceso = reps.filter(r => r.usuario === u && r.estado === 'En Proceso').length;
+        let urgentes = reps.filter(r => r.usuario === u && r.prioridad === 'Alta' && r.estado !== 'Entregado').length;
+        return { usuario: u, pendientes, enProceso, urgentes, total: pendientes + enProceso };
+    });
+    
+    // Análisis de Pedidos
+    let pedidosPendientes = ped.filter(p => p.estado !== 'Entregado').length;
+    let pedidosAntiguos = ped.filter(p => p.estado === 'Pedido' && (new Date() - new Date(p.fecha)) > 14*24*60*60*1000).length;
     
     setTimeout(() => {
-        let sug = [];
-        if(stats.u>0) sug.push({t:'cr', i:'alert-circle', h:'Urgencias detectadas', d:`Hay ${stats.u} equipos prioritarios.`, a:'Priorizar estas OT hoy.'});
-        if(stats.pi>3) sug.push({t:'wa', i:'package', h:'Retraso en piezas', d:`${stats.pi} piezas en pedido.`, a:'Contactar proveedores.'});
-        if(stats.ben<1000) sug.push({t:'in', i:'trending-down', h:'Rentabilidad baja', d:`Beneficio: ${stats.ben.toFixed(2)}€`, a:'Revisar márgenes.'});
-        else sug.push({t:'su', i:'trending-up', h:'Buen rendimiento', d:`Beneficio: ${stats.ben.toFixed(2)}€`, a:'Seguir así.'});
-
-        content.innerHTML = `<div class="grid grid-cols-2 gap-3 mb-6"><div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl text-center"><p class="text-[9px] font-bold text-blue-500 uppercase">Pendientes</p><p class="text-xl font-black text-blue-700">${stats.p}</p></div><div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl text-center"><p class="text-[9px] font-bold text-red-500 uppercase">Urgentes</p><p class="text-xl font-black text-red-700">${stats.u}</p></div></div><h4 class="font-bold text-sm mb-3">Recomendaciones IA</h4><div class="space-y-3">${sug.map(s=>`<div class="suggestion-card ${s.t==='cr'?'critical':s.t==='wa'?'warning':s.t==='su'?'success':'info'}"><div class="flex gap-3"><i data-lucide="${s.i}" class="w-5 h-5"></i><div><p class="text-xs font-bold">${s.h}</p><p class="text-[10px] text-slate-600 dark:text-slate-400 mt-1">${s.d}</p><p class="text-[10px] font-bold mt-1 text-blue-600">💡 ${s.a}</p></div></div></div>`).join('')}</div>`;
+        let html = `
+            <div class="grid grid-cols-3 gap-3 mb-4">
+                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Ingresos Totales</p><p class="text-xl font-black text-blue-600">${ingresoTotal.toFixed(0)}€</p></div>
+                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Beneficio Neto</p><p class="text-xl font-black text-emerald-600">${beneficio.toFixed(0)}€</p></div>
+                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Margen Medio</p><p class="text-xl font-black text-purple-600">${margenPromedio.toFixed(1)}%</p></div>
+            </div>
+            
+            <div class="suggestion-card critical mb-4">
+                <div class="flex gap-3"><i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">📊 Análisis Financiero Detallado</p>
+                    <div class="mt-2 text-[10px] space-y-1">
+                        <p><strong>Reparaciones:</strong> ${ingresosRep.toFixed(2)}€ (${(ingresosRep/ingresoTotal*100).toFixed(1)}% del total)</p>
+                        <p><strong>Pedidos:</strong> ${ingresosPed.toFixed(2)}€ (${(ingresosPed/ingresoTotal*100).toFixed(1)}% del total)</p>
+                        <p><strong>Piezas Vendidas:</strong> ${ingresosPie.toFixed(2)}€ (${(ingresosPie/ingresoTotal*100).toFixed(1)}% del total)</p>
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${margenPromedio > 30 ? 'Márgenes saludables. Mantener estrategia.' : 'Revisar precios de compra con proveedores.'}</p>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div class="suggestion-card ${piezasAntiguasPedido.length > 0 ? 'warning' : 'success'} mb-4">
+                <div class="flex gap-3"><i data-lucide="package" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">📦 Control de Stock Crítico</p>
+                    <div class="mt-2 text-[10px] space-y-1">
+                        <p><strong>Piezas en Pedido:</strong> ${pie.filter(p => p.estado === 'Pedido').length} unidades</p>
+                        <p><strong>Piezas Recibidas (sin instalar):</strong> ${piezasRecibidas} unidades</p>
+                        ${piezasAntiguasPedido.length > 0 ? `<p class="text-red-600"><strong>⚠️ Piezas retrasadas:</strong> ${piezasAntiguasPedido.length} llevan más de 7 días</p>` : ''}
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${piezasAntiguasPedido.length > 0 ? 'Contactar proveedores urgentemente.' : 'Stock en orden. Seguir monitoreando.'}</p>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div class="suggestion-card ${garantiasProximas > 0 ? 'warning' : 'success'} mb-4">
+                <div class="flex gap-3"><i data-lucide="shield-check" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">🛡️ Gestión de Garantías</p>
+                    <div class="mt-2 text-[10px] space-y-1">
+                        <p><strong>Garantías Vigentes:</strong> ${reps.filter(r => r.garantia_fin && new Date(r.garantia_fin) > now).length} equipos</p>
+                        <p><strong>Próximas a Vencer (≤15 días):</strong> ${garantiasProximas} equipos</p>
+                        <p><strong>Garantías Expiradas:</strong> ${garantiasExpiradas} equipos</p>
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${garantiasProximas > 0 ? 'Contactar clientes para renovación o revisión.' : 'Garantías bajo control.'}</p>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div class="suggestion-card info mb-4">
+                <div class="flex gap-3"><i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">👥 Carga de Trabajo por Técnico</p>
+                    <div class="mt-2 text-[10px] space-y-2">
+                        ${cargaTecnicos.map(c => `
+                            <div class="bg-slate-50 dark:bg-slate-800 p-2 rounded">
+                                <p class="font-bold">${c.usuario}</p>
+                                <p class="text-[9px]">Pendientes: ${c.pendientes} | En Proceso: ${c.enProceso} | Urgentes: ${c.urgentes}</p>
+                                <p class="text-[9px] font-bold ${c.total > 5 ? 'text-red-600' : 'text-green-600'}">${c.total > 5 ? '⚠️ Saturado' : '✓ Normal'}</p>
+                            </div>
+                        `).join('')}
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${cargaTecnicos.some(c => c.total > 5) ? 'Redistribuir tareas urgentes.' : 'Carga equilibrada.'}</p>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div class="suggestion-card ${pedidosAntiguos > 0 ? 'critical' : 'success'}">
+                <div class="flex gap-3"><i data-lucide="shopping-cart" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">🛒 Estado de Pedidos</p>
+                    <div class="mt-2 text-[10px] space-y-1">
+                        <p><strong>Pedidos Activos:</strong> ${pedidosPendientes} en espera</p>
+                        <p><strong>Pedidos Completados:</strong> ${ped.filter(p => p.estado === 'Entregado').length}</p>
+                        ${pedidosAntiguos > 0 ? `<p class="text-red-600"><strong>⚠️ Pedidos retrasados:</strong> ${pedidosAntiguos} llevan más de 14 días</p>` : ''}
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${pedidosAntiguos > 0 ? 'Acelerar entregas o contactar clientes.' : 'Flujo de pedidos normal.'}</p>
+                    </div>
+                </div></div>
+            </div>
+        `;
         
-        $('ai-mini-view').innerHTML = sug.slice(0,3).map(s=>`<div class="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"><div class="flex items-center gap-2 mb-2"><i data-lucide="${s.i}" class="w-4 h-4 text-blue-500"></i><p class="text-[10px] font-bold uppercase text-slate-500">${s.h}</p></div><p class="text-[11px] leading-tight">${s.d}</p></div>`).join('');
-        $('ai-dashboard-summary').innerHTML = `Análisis completado: ${stats.p} pendientes, ${stats.u} urgencias. Beneficio actual: ${stats.ben.toFixed(2)}€`;
+        content.innerHTML = html;
+        
+        // Actualizar mini-view en dashboard
+        $('ai-mini-view').innerHTML = `
+            <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i><p class="text-[10px] font-bold uppercase text-slate-500">Rentabilidad</p></div>
+                <p class="text-sm font-black text-emerald-600">${beneficio.toFixed(0)}€</p>
+                <p class="text-[10px] text-slate-500 mt-1">Margen: ${margenPromedio.toFixed(1)}%</p>
+            </div>
+            <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <div class="flex items-center gap-2 mb-2"><i data-lucide="alert-circle" class="w-4 h-4 ${piezasAntiguasPedido.length > 0 ? 'text-red-500' : 'text-green-500'}"></i><p class="text-[10px] font-bold uppercase text-slate-500">Stock Crítico</p></div>
+                <p class="text-sm font-black">${piezasAntiguasPedido.length}</p>
+                <p class="text-[10px] text-slate-500 mt-1">Piezas retrasadas</p>
+            </div>
+            <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <div class="flex items-center gap-2 mb-2"><i data-lucide="shield-alert" class="w-4 h-4 ${garantiasProximas > 0 ? 'text-amber-500' : 'text-green-500'}"></i><p class="text-[10px] font-bold uppercase text-slate-500">Garantías</p></div>
+                <p class="text-sm font-black">${garantiasProximas}</p>
+                <p class="text-[10px] text-slate-500 mt-1">Próximas a vencer</p>
+            </div>
+        `;
+        
+        $('ai-dashboard-summary').innerHTML = `Análisis completado: ${beneficio.toFixed(0)}€ de beneficio, ${piezasAntiguasPedido.length} piezas retrasadas, ${garantiasProximas} garantías próximas.`;
         lucide.createIcons();
-    }, 800);
+    }, 1200);
 }
 
 function closeAIModal() { $('ai-modal').classList.add('hidden'); }
@@ -653,7 +769,7 @@ function closeAIModal() { $('ai-modal').classList.add('hidden'); }
 async function exportData() {
     const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray() };
     const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_2_${new Date().toISOString().split('T')[0]}.json`; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_3_${new Date().toISOString().split('T')[0]}.json`; a.click();
 }
 async function importData(e) {
     const f = e.target.files[0]; if(!f) return;
