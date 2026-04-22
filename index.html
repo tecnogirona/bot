@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="color-scheme" content="light">
-    <title>S.A.T. Dashboard Ultimate V8.7</title>
+    <title>S.A.T. Dashboard Ultimate V8.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -98,8 +98,13 @@
         <button onclick="generateAISuggestions()" class="flex items-center gap-3 text-slate-500 hover:text-purple-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm">
             <i data-lucide="sparkles" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Auditoría</span>
         </button>
-        <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm">
+        <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm hidden md:flex">
             <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Salir</span>
+        </button>
+    </div>
+    <div class="md:hidden p-3 border-t border-slate-100 flex-shrink-0">
+        <button onclick="logout()" class="flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 w-full p-3 rounded-lg text-sm font-bold bg-red-100">
+            <i data-lucide="log-out" class="w-4 h-4"></i>Cerrar Sesión
         </button>
     </div>
 </aside>
@@ -177,17 +182,17 @@
 
 <!-- Modals -->
 <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content" style="max-height: 90vh;">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
             <h3 id="modal-title" class="font-bold text-slate-800">Nueva Entrada</h3>
             <button onclick="closeModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <form id="record-form" class="p-6 overflow-y-auto flex-1">
+        <form id="record-form" class="p-6 overflow-y-auto flex-1" style="-webkit-overflow-scrolling: touch;">
             <input type="hidden" id="form-id">
             <input type="hidden" id="form-section">
             <div id="form-fields" class="space-y-4"></div>
-            <div class="mt-6 flex gap-3"><button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button><button type="submit" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all">Guardar Datos</button></div>
         </form>
+        <div class="px-6 py-4 border-t border-slate-100 flex gap-3 flex-shrink-0 bg-white"><button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button><button type="submit" form="record-form" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all">Guardar Datos</button></div>
     </div>
 </div>
 
@@ -218,7 +223,7 @@
 
 <script>
 // Database
-const db = new Dexie("SAT_Database_V8_7");
+const db = new Dexie("SAT_Database_V8_8");
 db.version(1).stores({
     reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, imagen, observaciones, precio',
     piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta, imagen, observaciones, referencia',
@@ -254,14 +259,14 @@ function login() {
     const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
     if(found) {
         currentUser = found;
-        localStorage.setItem("sat_user_v8_7", JSON.stringify(found));
+        localStorage.setItem("sat_user_v8_8", JSON.stringify(found));
         $('login-screen').classList.add('hidden');
         initApp();
     } else {
         $('login-error').classList.remove('hidden');
     }
 }
-function logout() { localStorage.removeItem("sat_user_v8_7"); location.reload(); }
+function logout() { localStorage.removeItem("sat_user_v8_8"); location.reload(); }
 
 // Init
 function initApp() {
@@ -271,7 +276,7 @@ function initApp() {
 }
 
 window.onload = () => {
-    const saved = localStorage.getItem("sat_user_v8_7");
+    const saved = localStorage.getItem("sat_user_v8_8");
     if(saved) {
         currentUser = JSON.parse(saved);
         $('login-screen').classList.add('hidden');
@@ -747,7 +752,7 @@ function closeAIModal() { $('ai-modal').classList.add('hidden'); }
 async function exportData() {
     const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray() };
     const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_7_${new Date().toISOString().split('T')[0]}.json`; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_8_${new Date().toISOString().split('T')[0]}.json`; a.click();
 }
 async function importData(e) {
     const f = e.target.files[0]; if(!f) return;
