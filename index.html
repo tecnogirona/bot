@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="color-scheme" content="light">
-    <title>S.A.T. Dashboard Ultimate V8.5</title>
+    <title>S.A.T. Dashboard Ultimate V8.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -12,13 +12,27 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; background-color: #f8fafc !important; color: #1f2937 !important; }
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow: hidden; }
-        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; }
-        .sidebar-link { display: flex; align-items: center; padding: 12px; color: #64748b; border-radius: 8px; margin-bottom: 4px; transition: all 0.2s; cursor: pointer; }
+        html, body { height: 100%; width: 100%; background-color: #f8fafc !important; color: #1f2937 !important; -webkit-font-smoothing: antialiased; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* Layout principal */
+        .layout-container { display: flex; height: 100vh; width: 100%; flex-direction: row; }
+        .sidebar { flex-shrink: 0; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { flex-shrink: 0; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 1rem; }
+        .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding: 1rem; }
+        
+        /* Sidebar */
+        .sidebar-nav { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0.75rem; }
+        .sidebar-footer { flex-shrink: 0; border-top: 1px solid #e2e8f0; padding: 0.75rem; }
+        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; color: #64748b; border-radius: 0.5rem; margin-bottom: 0.25rem; transition: all 0.2s; cursor: pointer; white-space: nowrap; }
         .sidebar-link.active { background-color: #f1f5f9; color: #2563eb; font-weight: 600; }
-        .form-section { background: #f8fafc; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
-        .suggestion-card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 12px; border-left: 4px solid; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .sidebar-link:hover { background-color: #f1f5f9; }
+        
+        /* Elementos generales */
+        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; }
+        .form-section { background: #f8fafc; padding: 1rem; border-radius: 0.625rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
+        .suggestion-card { background: white; border-radius: 0.75rem; padding: 0.875rem; margin-bottom: 0.75rem; border-left: 4px solid; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .suggestion-card.critical { border-left-color: #ef4444; background: #fef2f2; }
         .suggestion-card.warning { border-left-color: #f59e0b; background: #fffbeb; }
         .suggestion-card.success { border-left-color: #10b981; background: #ecfdf5; }
@@ -42,12 +56,13 @@
         .signature-box { margin-top: 50px; display: flex; justify-content: space-between; }
         .signature-field { width: 200px; border-top: 1px solid #000; text-align: center; padding-top: 5px; font-size: 11px; }
 
-        @media (max-width: 768px) {
-            .sidebar-text { display: none; }
-            aside { width: 64px !important; }
-            .main-content { padding: 12px !important; }
-            .modal-content { width: 95% !important; max-height: 95vh !important; }
-        }
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-center; z-index: 50; padding: 1rem; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: white; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-header { flex-shrink: 0; padding: 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 1.5rem; }
+        .modal-footer { flex-shrink: 0; padding: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; gap: 0.75rem; }
         
         #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
         .chart-container { position: relative; height: 250px; width: 100%; }
@@ -57,9 +72,41 @@
         .ai-metric.alert { border-left-color: #ef4444; background: #fef2f2; }
         .ai-metric.warn { border-left-color: #f59e0b; background: #fffbeb; }
         .ai-metric.good { border-left-color: #10b981; background: #ecfdf5; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar { width: 200px !important; }
+            .sidebar-text { display: inline; }
+        }
+        
+        @media (max-width: 768px) {
+            .layout-container { flex-direction: column; }
+            .sidebar { width: 100% !important; height: auto; border-right: none; border-bottom: 1px solid #e2e8f0; flex-direction: row; }
+            .sidebar-nav { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+            .sidebar-footer { display: flex; gap: 0.5rem; flex-wrap: wrap; border-top: none; border-left: 1px solid #e2e8f0; padding-left: 1rem; }
+            .sidebar-link { padding: 0.5rem 0.75rem; font-size: 0.75rem; }
+            .sidebar-text { display: inline; }
+            .header { padding: 0.75rem 0.5rem; }
+            .content-area { padding: 0.75rem; }
+            .modal-content { max-width: 95vw; max-height: 95vh; }
+            .modal-body { padding: 1rem; }
+            .modal-header { padding: 1rem; }
+            .modal-footer { padding: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .layout-container { flex-direction: column; }
+            .sidebar { width: 100% !important; }
+            .sidebar-link { padding: 0.5rem; font-size: 0.65rem; }
+            .header { flex-direction: column; gap: 0.5rem; padding: 0.5rem; }
+            .content-area { padding: 0.5rem; }
+            .modal-content { max-width: 100vw; max-height: 100vh; border-radius: 0.5rem; }
+            .flat-card { border-radius: 0.5rem; }
+            .form-section { padding: 0.75rem; margin-bottom: 0.75rem; }
+        }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden bg-slate-50">
+<body>
 
 <div id="toast-container"></div>
 
@@ -80,137 +127,145 @@
     </div>
 </div>
 
-<!-- Sidebar -->
-<aside class="w-16 md:w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col transition-all duration-300 z-30 h-screen overflow-y-auto">
-    <div class="p-4 border-b border-slate-100 flex items-center gap-3 flex-shrink-0">
-        <div class="bg-blue-600 p-2 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
-        <h1 class="text-xl font-bold text-slate-800 sidebar-text">SAT Pro</h1>
-    </div>
-    <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
-        <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Resumen</span></a>
-        <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="clipboard-list" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reparaciones</span></a>
-        <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Piezas</span></a>
-        <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Pedidos</span></a>
-        <a href="#" onclick="showSection('recordatorios')" id="link-recordatorios" class="sidebar-link"><i data-lucide="bell" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Recordatorios</span></a>
-        <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reportes</span></a>
-    </nav>
-    <div class="p-3 border-t border-slate-100 space-y-2 flex-shrink-0">
-        <button onclick="generateAISuggestions()" class="flex items-center gap-3 text-slate-500 hover:text-purple-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm">
-            <i data-lucide="sparkles" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Auditoría</span>
-        </button>
-        <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm">
-            <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Salir</span>
-        </button>
-    </div>
-</aside>
+<!-- Main Layout -->
+<div class="layout-container">
+    <!-- Sidebar -->
+    <aside class="sidebar w-64 md:w-64 sm:w-full">
+        <div class="p-4 border-b border-slate-100 flex items-center gap-3 flex-shrink-0">
+            <div class="bg-blue-600 p-2 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
+            <h1 class="text-xl font-bold text-slate-800 sidebar-text">SAT Pro</h1>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text">Resumen</span></a>
+            <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="clipboard-list" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text">Reparaciones</span></a>
+            <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text">Piezas</span></a>
+            <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text">Pedidos</span></a>
+            <a href="#" onclick="showSection('recordatorios')" id="link-recordatorios" class="sidebar-link"><i data-lucide="bell" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text">Recordatorios</span></a>
+            <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text">Reportes</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="generateAISuggestions()" class="flex items-center gap-2 text-slate-500 hover:text-purple-600 transition-colors flex-1 p-2 rounded-lg hover:bg-slate-100 text-xs font-medium">
+                <i data-lucide="sparkles" class="w-4 h-4 flex-shrink-0"></i><span class="sidebar-text">Auditoría</span>
+            </button>
+            <button onclick="logout()" class="flex items-center gap-2 text-slate-500 hover:text-red-600 transition-colors flex-1 p-2 rounded-lg hover:bg-slate-100 text-xs font-medium">
+                <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i><span class="sidebar-text">Salir</span>
+            </button>
+        </div>
+    </aside>
 
-<!-- Main Content -->
-<main class="flex-1 flex flex-col overflow-hidden bg-slate-50">
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 z-20 flex-shrink-0">
-        <h2 id="section-title" class="text-lg font-bold text-slate-800">Resumen</h2>
-        <div class="flex items-center gap-2 md:gap-4">
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <header class="header h-16">
+            <h2 id="section-title" class="text-lg font-bold text-slate-800">Resumen</h2>
             <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95"><i data-lucide="plus" class="w-4 h-4"></i><span class="hidden sm:inline">Nuevo</span></button>
-        </div>
-    </header>
+        </header>
 
-    <div class="flex-1 overflow-y-auto p-4 md:p-8 main-content" id="main-view">
-        <!-- Dashboard View -->
-        <div id="view-dashboard" class="space-y-6">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Piezas Pedidas</p><div class="flex items-end justify-between mt-2"><h3 id="stat-piezas" class="text-2xl font-black">0</h3><div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="package" class="w-5 h-5"></i></div></div></div>
-                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Pedidos Activos</p><div class="flex items-end justify-between mt-2"><h3 id="stat-pedidos" class="text-2xl font-black">0</h3><div class="p-2 bg-green-50 rounded-lg text-green-600"><i data-lucide="shopping-cart" class="w-5 h-5"></i></div></div></div>
-                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Reparaciones OK</p><div class="flex items-end justify-between mt-2"><h3 id="stat-reparaciones" class="text-2xl font-black">0</h3><div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="check-circle" class="w-5 h-5"></i></div></div></div>
-                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Beneficio Total</p><div class="flex items-end justify-between mt-2"><h3 id="stat-beneficio" class="text-xl font-black text-emerald-600">0€</h3><div class="p-2 bg-emerald-50 rounded-lg text-emerald-600"><i data-lucide="trending-up" class="w-5 h-5"></i></div></div></div>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="flat-card p-6"><h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-blue-500"></i> Actividad Reciente</h4><div id="recent-activity" class="space-y-3"></div></div>
-                <div class="flat-card p-6"><h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="bell" class="w-5 h-5 text-amber-500"></i> Alertas</h4><div id="alert-container" class="space-y-3"></div><button onclick="showSection('recordatorios')" class="w-full mt-4 py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-xs font-bold hover:border-blue-500 hover:text-blue-500 transition-all">Ver todos los recordatorios</button></div>
-            </div>
-
-            <div class="flat-card p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div><h4 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente</h4><p id="ai-dashboard-summary" class="text-xs text-slate-500 mt-1">Pulsa el botón para iniciar el análisis profundo del taller.</p></div>
-                    <button onclick="generateAISuggestions()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Analizar</button>
+        <div class="content-area" id="main-view">
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="space-y-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Piezas Pedidas</p><div class="flex items-end justify-between mt-2"><h3 id="stat-piezas" class="text-2xl font-black">0</h3><div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="package" class="w-5 h-5"></i></div></div></div>
+                    <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Pedidos Activos</p><div class="flex items-end justify-between mt-2"><h3 id="stat-pedidos" class="text-2xl font-black">0</h3><div class="p-2 bg-green-50 rounded-lg text-green-600"><i data-lucide="shopping-cart" class="w-5 h-5"></i></div></div></div>
+                    <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Reparaciones OK</p><div class="flex items-end justify-between mt-2"><h3 id="stat-reparaciones" class="text-2xl font-black">0</h3><div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="check-circle" class="w-5 h-5"></i></div></div></div>
+                    <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Beneficio Total</p><div class="flex items-end justify-between mt-2"><h3 id="stat-beneficio" class="text-xl font-black text-emerald-600">0€</h3><div class="p-2 bg-emerald-50 rounded-lg text-emerald-600"><i data-lucide="trending-up" class="w-5 h-5"></i></div></div></div>
                 </div>
-                <div id="ai-mini-view" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-            </div>
-        </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flat-card p-6"><h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-blue-500"></i> Actividad Reciente</h4><div id="recent-activity" class="space-y-3"></div></div>
+                    <div class="flat-card p-6"><h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="bell" class="w-5 h-5 text-amber-500"></i> Alertas</h4><div id="alert-container" class="space-y-3"></div><button onclick="showSection('recordatorios')" class="w-full mt-4 py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-xs font-bold hover:border-blue-500 hover:text-blue-500 transition-all">Ver todos los recordatorios</button></div>
+                </div>
 
-        <!-- List View -->
-        <div id="view-list" class="hidden space-y-4">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <div class="relative flex-1 max-w-md"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="search-input" type="text" placeholder="Buscar..." oninput="filterTable()" class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"></div>
-                <div class="flex gap-2 overflow-x-auto pb-1"><button onclick="exportData()" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Exportar</button><label class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer"><i data-lucide="upload" class="w-4 h-4"></i> Importar<input type="file" class="hidden" onchange="importData(event)"></label></div>
-            </div>
-            <div class="flat-card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead id="table-head" class="bg-slate-50"></thead><tbody id="table-body" class="divide-y divide-slate-100"></tbody></table></div></div>
-        </div>
-
-        <!-- Reports View -->
-        <div id="view-reportes" class="hidden space-y-6">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Ingresos Totales</p><h3 id="kpi-ingresos" class="text-xl font-black mt-1">0€</h3></div>
-                <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Costes Totales</p><h3 id="kpi-costes" class="text-xl font-black mt-1 text-red-500">0€</h3></div>
-                <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Beneficio Neto</p><h3 id="kpi-beneficio" class="text-xl font-black mt-1 text-emerald-600">0€</h3></div>
-                <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Margen Medio</p><h3 id="kpi-margen" class="text-xl font-black mt-1 text-blue-600">0%</h3></div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Evolución Ingresos</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
                 <div class="flat-card p-6">
-                    <div class="flex items-center justify-between mb-4"><h4 class="font-bold text-sm">Rendimiento por Técnico</h4><div class="flex gap-1"><button class="range-btn active" data-months="6">6M</button><button class="range-btn" data-months="12">12M</button></div></div>
-                    <div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div>
-                    <div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-[10px]"></div>
+                    <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+                        <div><h4 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente</h4><p id="ai-dashboard-summary" class="text-xs text-slate-500 mt-1">Pulsa el botón para iniciar el análisis profundo del taller.</p></div>
+                        <button onclick="generateAISuggestions()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Analizar</button>
+                    </div>
+                    <div id="ai-mini-view" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
                 </div>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Ranking Actividad</h4><div id="ranking-usuarios" class="space-y-3"></div></div>
-                <div class="flat-card p-6 lg:col-span-2"><h4 class="font-bold text-sm mb-4">Operaciones por Tipo</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div>
+
+            <!-- List View -->
+            <div id="view-list" class="hidden space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="relative flex-1 max-w-md"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="search-input" type="text" placeholder="Buscar..." oninput="filterTable()" class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"></div>
+                    <div class="flex gap-2 overflow-x-auto pb-1"><button onclick="exportData()" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold flex items-center gap-2 flex-shrink-0"><i data-lucide="download" class="w-4 h-4"></i> Exportar</button><label class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer flex-shrink-0"><i data-lucide="upload" class="w-4 h-4"></i> Importar<input type="file" class="hidden" onchange="importData(event)"></label></div>
+                </div>
+                <div class="flat-card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead id="table-head" class="bg-slate-50"></thead><tbody id="table-body" class="divide-y divide-slate-100"></tbody></table></div></div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Pedidos</h4><div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div></div>
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Reparaciones</h4><div class="chart-container"><canvas id="chart-reparaciones-estado"></canvas></div></div>
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Garantías</h4><div class="chart-container"><canvas id="chart-garantias-estado"></canvas></div></div>
+
+            <!-- Reports View -->
+            <div id="view-reportes" class="hidden space-y-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Ingresos Totales</p><h3 id="kpi-ingresos" class="text-xl font-black mt-1">0€</h3></div>
+                    <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Costes Totales</p><h3 id="kpi-costes" class="text-xl font-black mt-1 text-red-500">0€</h3></div>
+                    <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Beneficio Neto</p><h3 id="kpi-beneficio" class="text-xl font-black mt-1 text-emerald-600">0€</h3></div>
+                    <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Margen Medio</p><h3 id="kpi-margen" class="text-xl font-black mt-1 text-blue-600">0%</h3></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Evolución Ingresos</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
+                    <div class="flat-card p-6">
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2"><h4 class="font-bold text-sm">Rendimiento por Técnico</h4><div class="flex gap-1"><button class="range-btn active" data-months="6">6M</button><button class="range-btn" data-months="12">12M</button></div></div>
+                        <div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div>
+                        <div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-[10px]"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Ranking Actividad</h4><div id="ranking-usuarios" class="space-y-3"></div></div>
+                    <div class="flat-card p-6 lg:col-span-2"><h4 class="font-bold text-sm mb-4">Operaciones por Tipo</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Pedidos</h4><div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div></div>
+                    <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Reparaciones</h4><div class="chart-container"><canvas id="chart-reparaciones-estado"></canvas></div></div>
+                    <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Garantías</h4><div class="chart-container"><canvas id="chart-garantias-estado"></canvas></div></div>
+                </div>
             </div>
         </div>
     </div>
-</main>
+</div>
 
 <!-- Modals -->
-<div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+<div id="modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
             <h3 id="modal-title" class="font-bold text-slate-800">Nueva Entrada</h3>
             <button onclick="closeModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <form id="record-form" class="p-6 overflow-y-auto flex-1">
+        <form id="record-form" class="modal-body">
             <input type="hidden" id="form-id">
             <input type="hidden" id="form-section">
             <div id="form-fields" class="space-y-4"></div>
-            <div class="mt-6 flex gap-3"><button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button><button type="submit" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all">Guardar Datos</button></div>
         </form>
+        <div class="modal-footer">
+            <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button>
+            <button type="submit" form="record-form" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all">Guardar</button>
+        </div>
     </div>
 </div>
 
-<div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col modal-content">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+<div id="detail-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
             <h3 class="font-bold text-slate-800">Detalle de Registro</h3>
             <button onclick="closeDetailModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <div class="p-6 overflow-y-auto flex-1">
+        <div class="modal-body">
             <div id="detail-content"></div>
-            <div class="mt-6 flex gap-2"><button id="detail-print-btn" class="flex-1 py-3 bg-slate-100 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir</button><button id="detail-edit-btn" class="flex-1 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="edit" class="w-4 h-4"></i> Editar</button><button id="detail-delete-btn" class="flex-1 py-3 bg-red-100 text-red-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Borrar</button></div>
+        </div>
+        <div class="modal-footer">
+            <button id="detail-print-btn" class="flex-1 py-3 bg-slate-100 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir</button>
+            <button id="detail-edit-btn" class="flex-1 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="edit" class="w-4 h-4"></i> Editar</button>
+            <button id="detail-delete-btn" class="flex-1 py-3 bg-red-100 text-red-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Borrar</button>
         </div>
     </div>
 </div>
 
-<div id="ai-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content" style="max-height: 90vh;">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
-            <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente Completa</h3>
+<div id="ai-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente</h3>
             <button onclick="closeAIModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <div id="ai-content" class="p-6 overflow-y-auto flex-1 space-y-4"></div>
+        <div id="ai-content" class="modal-body space-y-4"></div>
     </div>
 </div>
 
@@ -218,7 +273,7 @@
 
 <script>
 // Database
-const db = new Dexie("SAT_Database_V8_5");
+const db = new Dexie("SAT_Database_V8_6");
 db.version(1).stores({
     reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, imagen, observaciones, precio',
     piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta, imagen, observaciones, referencia',
@@ -254,14 +309,14 @@ function login() {
     const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
     if(found) {
         currentUser = found;
-        localStorage.setItem("sat_user_v8_5", JSON.stringify(found));
+        localStorage.setItem("sat_user_v8_6", JSON.stringify(found));
         $('login-screen').classList.add('hidden');
         initApp();
     } else {
         $('login-error').classList.remove('hidden');
     }
 }
-function logout() { localStorage.removeItem("sat_user_v8_5"); location.reload(); }
+function logout() { localStorage.removeItem("sat_user_v8_6"); location.reload(); }
 
 // Init
 function initApp() {
@@ -271,7 +326,7 @@ function initApp() {
 }
 
 window.onload = () => {
-    const saved = localStorage.getItem("sat_user_v8_5");
+    const saved = localStorage.getItem("sat_user_v8_6");
     if(saved) {
         currentUser = JSON.parse(saved);
         $('login-screen').classList.add('hidden');
@@ -546,10 +601,10 @@ function openModal(editData = null) {
             <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Detalle y Referencia</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Título / Motivo *</label><input type="text" name="title" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.title||''}"></div><div><label class="text-[10px] font-bold">Referencia OT</label><input type="text" name="ref_ot" class="w-full border rounded-xl p-3 text-sm" placeholder="Ej: OT-1234" value="${editData?.ref_ot||''}"></div><div class="col-span-2"><label class="text-[10px] font-bold">Descripción / Notas</label><textarea name="desc" rows="2" class="w-full border rounded-xl p-3 text-sm">${editData?.desc||''}</textarea></div></div></div>
             <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Planificación y Multimedia</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Fecha Límite</label><input type="date" name="dueDate" class="w-full border rounded-xl p-3 text-sm" value="${editData?.dueDate||''}"></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="priority" class="w-full border rounded-xl p-3 text-sm"><option value="info" ${editData?.priority==='info'?'selected':''}>Normal</option><option value="warning" ${editData?.priority==='warning'?'selected':''}>Importante</option><option value="critical" ${editData?.priority==='critical'?'selected':''}>Urgente</option></select></div><div class="col-span-2"><label class="text-[10px] font-bold">Foto Adjunta</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div></div>`;
     }
-    fields.innerHTML = html; modal.classList.remove('hidden'); modal.classList.add('flex'); lucide.createIcons();
+    fields.innerHTML = html; modal.classList.add('active'); lucide.createIcons();
 }
 
-function closeModal() { $('modal').classList.add('hidden'); }
+function closeModal() { $('modal').classList.remove('active'); }
 async function handleFile(input) { const f = input.files[0]; if(f){ const r = new FileReader(); r.onload = (e) => { $('form-imagen').value = e.target.result; }; r.readAsDataURL(f); } }
 
 $('record-form').onsubmit = async (e) => {
@@ -570,7 +625,7 @@ $('record-form').onsubmit = async (e) => {
             await db[section].add(data);
         }
         showToast('Guardado'); closeModal(); showSection(currentSection);
-    } catch(err) { showToast('Error', 'error'); }
+    } catch(err) { showToast('Error al guardar', 'error'); }
 };
 
 // Details & Print
@@ -585,9 +640,9 @@ async function viewDetail(section, id) {
     $('detail-edit-btn').onclick = () => { closeDetailModal(); openModal(item); };
     $('detail-print-btn').onclick = () => printItem(section, item);
     $('detail-delete-btn').onclick = async () => { if(confirm('¿Seguro que quieres borrarlo?')) { await db[section].delete(id); closeDetailModal(); showSection(currentSection); showToast('Borrado', 'error'); } };
-    $('detail-modal').classList.remove('hidden'); $('detail-modal').classList.add('flex'); lucide.createIcons();
+    $('detail-modal').classList.add('active'); lucide.createIcons();
 }
-function closeDetailModal() { $('detail-modal').classList.add('hidden'); }
+function closeDetailModal() { $('detail-modal').classList.remove('active'); }
 
 function printItem(section, item) {
     let title = section === 'reparaciones' ? 'ORDEN DE TRABAJO' : section === 'pedidos' ? 'ALBARÁN DE PEDIDO' : 'DETALLE DE REGISTRO';
@@ -611,7 +666,7 @@ function printItem(section, item) {
 // AI Analysis
 async function generateAISuggestions() {
     const modal = $('ai-modal'), content = $('ai-content');
-    modal.classList.remove('hidden'); modal.classList.add('flex');
+    modal.classList.add('active');
     content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller en profundidad...</p></div>';
     
     const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
@@ -741,13 +796,13 @@ async function generateAISuggestions() {
     }, 1200);
 }
 
-function closeAIModal() { $('ai-modal').classList.add('hidden'); }
+function closeAIModal() { $('ai-modal').classList.remove('active'); }
 
 // Data Management
 async function exportData() {
     const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray() };
     const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_5_${new Date().toISOString().split('T')[0]}.json`; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_6_${new Date().toISOString().split('T')[0]}.json`; a.click();
 }
 async function importData(e) {
     const f = e.target.files[0]; if(!f) return;
