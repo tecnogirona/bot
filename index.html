@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>S.A.T. Dashboard Ultimate V8.3</title>
+    <title>S.A.T. Dashboard Ultimate V8.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; width: 100%; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         body.dark { background-color: #0f172a; color: #e2e8f0; }
         .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; transition: background-color 0.3s; }
         body.dark .flat-card { background-color: #1e293b; border-color: #334155; }
@@ -87,8 +89,8 @@
 </div>
 
 <!-- Sidebar -->
-<aside class="w-16 md:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col transition-all duration-300 z-30">
-    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+<aside class="w-16 md:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col transition-all duration-300 z-30 h-screen overflow-y-auto">
+    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3 flex-shrink-0">
         <div class="bg-blue-600 p-2 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
         <h1 class="text-xl font-bold text-slate-800 dark:text-white sidebar-text">SAT Pro</h1>
     </div>
@@ -100,19 +102,19 @@
         <a href="#" onclick="showSection('recordatorios')" id="link-recordatorios" class="sidebar-link"><i data-lucide="bell" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Recordatorios</span></a>
         <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reportes</span></a>
     </nav>
-    <div class="p-4 border-t border-slate-100 dark:border-slate-700 space-y-2">
-        <button onclick="generateAISuggestions()" class="flex items-center gap-3 text-slate-500 hover:text-purple-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
-            <i data-lucide="sparkles" class="w-5 h-5"></i><span class="sidebar-text text-sm font-medium">Auditoría IA</span>
+    <div class="p-3 border-t border-slate-100 dark:border-slate-700 space-y-2 flex-shrink-0">
+        <button onclick="generateAISuggestions()" class="flex items-center gap-3 text-slate-500 hover:text-purple-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-sm">
+            <i data-lucide="sparkles" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Auditoría</span>
         </button>
-        <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
-            <i data-lucide="log-out" class="w-5 h-5"></i><span class="sidebar-text text-sm font-medium">Salir</span>
+        <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-sm">
+            <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Salir</span>
         </button>
     </div>
 </aside>
 
 <!-- Main Content -->
 <main class="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900">
-    <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-8 z-20">
+    <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-8 z-20 flex-shrink-0">
         <h2 id="section-title" class="text-lg font-bold text-slate-800 dark:text-white">Resumen</h2>
         <div class="flex items-center gap-2 md:gap-4">
             <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"><i data-lucide="moon" id="dark-icon" class="w-5 h-5"></i></button>
@@ -213,7 +215,7 @@
 
 <div id="ai-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content" style="max-height: 90vh;">
-        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center flex-shrink-0">
             <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente Completa</h3>
             <button onclick="closeAIModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
@@ -225,7 +227,7 @@
 
 <script>
 // Database
-const db = new Dexie("SAT_Database_V8_3");
+const db = new Dexie("SAT_Database_V8_4");
 db.version(1).stores({
     reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, imagen, observaciones, precio',
     piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta, imagen, observaciones, referencia',
@@ -261,14 +263,14 @@ function login() {
     const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
     if(found) {
         currentUser = found;
-        localStorage.setItem("sat_user_v8_3", JSON.stringify(found));
+        localStorage.setItem("sat_user_v8_4", JSON.stringify(found));
         $('login-screen').classList.add('hidden');
         initApp();
     } else {
         $('login-error').classList.remove('hidden');
     }
 }
-function logout() { localStorage.removeItem("sat_user_v8_3"); location.reload(); }
+function logout() { localStorage.removeItem("sat_user_v8_4"); location.reload(); }
 
 // Init
 function initApp() {
@@ -279,7 +281,7 @@ function initApp() {
 }
 
 window.onload = () => {
-    const saved = localStorage.getItem("sat_user_v8_3");
+    const saved = localStorage.getItem("sat_user_v8_4");
     if(saved) {
         currentUser = JSON.parse(saved);
         $('login-screen').classList.add('hidden');
@@ -624,7 +626,7 @@ function printItem(section, item) {
     window.print();
 }
 
-// AI Analysis - PROFUNDA Y DETALLADA
+// AI Analysis
 async function generateAISuggestions() {
     const modal = $('ai-modal'), content = $('ai-content');
     modal.classList.remove('hidden'); modal.classList.add('flex');
@@ -632,7 +634,6 @@ async function generateAISuggestions() {
     
     const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
     
-    // Análisis Financiero
     let ingresosRep = reps.reduce((s,r) => s + (parseFloat(r.precio)||0), 0);
     let ingresosPed = ped.reduce((s,p) => s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)), 0);
     let ingresosPie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioVenta)||0), 0);
@@ -643,16 +644,13 @@ async function generateAISuggestions() {
     let beneficio = ingresoTotal - costeTotal;
     let margenPromedio = ingresoTotal > 0 ? (beneficio / ingresoTotal * 100) : 0;
     
-    // Análisis de Piezas Críticas
     let piezasAntiguasPedido = pie.filter(p => p.estado === 'Pedido' && (new Date() - new Date(p.fecha)) > 7*24*60*60*1000);
     let piezasRecibidas = pie.filter(p => p.estado === 'Recibido').length;
     
-    // Análisis de Garantías
     let now = new Date();
     let garantiasProximas = reps.filter(r => r.garantia_fin && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) <= 15 && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) >= 0).length;
     let garantiasExpiradas = reps.filter(r => r.garantia_fin && new Date(r.garantia_fin) < now).length;
     
-    // Análisis de Carga de Trabajo
     let cargaTecnicos = USUARIOS.map(u => {
         let pendientes = reps.filter(r => r.usuario === u && r.estado === 'Pendiente').length;
         let enProceso = reps.filter(r => r.usuario === u && r.estado === 'En Proceso').length;
@@ -660,7 +658,6 @@ async function generateAISuggestions() {
         return { usuario: u, pendientes, enProceso, urgentes, total: pendientes + enProceso };
     });
     
-    // Análisis de Pedidos
     let pedidosPendientes = ped.filter(p => p.estado !== 'Entregado').length;
     let pedidosAntiguos = ped.filter(p => p.estado === 'Pedido' && (new Date() - new Date(p.fecha)) > 14*24*60*60*1000).length;
     
@@ -739,7 +736,6 @@ async function generateAISuggestions() {
         
         content.innerHTML = html;
         
-        // Actualizar mini-view en dashboard
         $('ai-mini-view').innerHTML = `
             <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                 <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i><p class="text-[10px] font-bold uppercase text-slate-500">Rentabilidad</p></div>
@@ -769,7 +765,7 @@ function closeAIModal() { $('ai-modal').classList.add('hidden'); }
 async function exportData() {
     const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray() };
     const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_3_${new Date().toISOString().split('T')[0]}.json`; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_4_${new Date().toISOString().split('T')[0]}.json`; a.click();
 }
 async function importData(e) {
     const f = e.target.files[0]; if(!f) return;
