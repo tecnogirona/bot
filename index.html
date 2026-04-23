@@ -2,1423 +2,793 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERP Enterprise S.A.T. Pro - v10.0 (Veri*factu & Retail)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>S.A.T. Dashboard Ultimate V7.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar-active { background-color: rgba(255, 255, 255, 0.1); border-left: 4px solid #3b82f6; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; }
+        body.dark { background-color: #0f172a; color: #e2e8f0; }
+        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; transition: background-color 0.3s; }
+        body.dark .flat-card { background-color: #1e293b; border-color: #334155; }
+        .sidebar-link { display: flex; align-items: center; padding: 12px; color: #64748b; border-radius: 8px; margin-bottom: 4px; transition: all 0.2s; cursor: pointer; }
+        .sidebar-link.active { background-color: #f1f5f9; color: #2563eb; font-weight: 600; }
+        body.dark .sidebar-link.active { background-color: #334155; color: #3b82f6; }
+        .metric-box { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .form-section { background: #f8fafc; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
+        body.dark .form-section { background: #0f172a; border-color: #334155; }
+        .suggestion-card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 12px; border-left: 4px solid; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        body.dark .suggestion-card { background: #1e293b; }
+        .suggestion-card.critical { border-left-color: #ef4444; background: #fef2f2; }
+        .suggestion-card.warning { border-left-color: #f59e0b; background: #fffbeb; }
+        .suggestion-card.success { border-left-color: #10b981; background: #ecfdf5; }
+        .suggestion-card.info { border-left-color: #3b82f6; background: #eff6ff; }
+        body.dark .suggestion-card.critical { background: #450a0a; }
+        body.dark .suggestion-card.warning { background: #451a03; }
+        body.dark .suggestion-card.success { background: #064e3b; }
+        body.dark .suggestion-card.info { background: #172554; }
         
+        .user-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+        .user-badge.daniel { background-color: #dbeafe; color: #1e40af; }
+        .user-badge.jose { background-color: #fce7f3; color: #be185d; }
+        .user-badge.david { background-color: #d1fae5; color: #065f46; }
+
         @media print {
-            @page { margin: 0; size: auto; }
-            body { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; }
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            .print-container { width: 100%; padding: 1.5cm; margin: 0; }
-            header, footer, aside, .swal2-container { display: none !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; top: 0; left: 0; width: 100%; padding: 0; margin: 0; background: white; }
         }
-        .print-only { display: none; }
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         
-        .invoice-box { max-width: 850px; margin: auto; padding: 30px; border: 1px solid #eee; font-size: 14px; line-height: 22px; color: #333; background: white; }
-        .invoice-table { width: 100%; text-align: left; border-collapse: collapse; margin-top: 20px; }
-        .invoice-table th { background: #f1f5f9; border-bottom: 2px solid #cbd5e1; padding: 10px; font-weight: 800; color: #0f172a; text-transform: uppercase; font-size: 11px; }
-        .invoice-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+        .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 30px; background: white; color: black; }
+        .print-header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+        .print-label { font-size: 10px; color: #666; text-transform: uppercase; font-weight: bold; }
+        .print-value { font-size: 14px; font-weight: 500; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        .signature-box { margin-top: 50px; display: flex; justify-content: space-between; }
+        .signature-field { width: 200px; border-top: 1px solid #000; text-align: center; padding-top: 5px; font-size: 11px; }
+
+        @media (max-width: 768px) {
+            .sidebar-text { display: none; }
+            aside { width: 64px !important; }
+            .main-content { padding: 12px !important; }
+            .modal-content { width: 95% !important; max-height: 95vh !important; }
+        }
         
-        .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .status-recibido { background: #f1f5f9; color: #64748b; }
-        .status-taller { background: #eff6ff; color: #3b82f6; }
-        .status-piezas { background: #fffbeb; color: #d97706; }
-        .status-reparado { background: #ecfdf5; color: #10b981; }
-        .status-entregado { background: #fdf2f8; color: #db2777; }
+        #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+        .chart-container { position: relative; height: 250px; width: 100%; }
+        .range-btn { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; background: #f1f5f9; border: none; transition: all 0.2s; }
+        .range-btn.active { background: #2563eb; color: white; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-    <div id="app" class="flex h-screen overflow-hidden no-print">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
-            <div class="p-6 flex items-center space-x-3">
-                <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
-                <span class="text-xl font-black tracking-tighter">S.A.T. PRO</span>
-            </div>
-            <nav class="flex-1 px-4 space-y-1 mt-2 overflow-y-auto">
-                <a href="#" onclick="showSection('dashboard')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all sidebar-active" id="nav-dashboard">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span>
-                </a>
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mt-6 mb-2">Servicio Técnico</div>
-                <a href="#" onclick="showSection('sat')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-sat">
-                    <i data-lucide="wrench" class="w-4 h-4"></i><span>Órdenes S.A.T.</span>
-                </a>
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mt-6 mb-2">Ventas y Clientes</div>
-                <a href="#" onclick="showSection('clientes')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-clientes">
-                    <i data-lucide="users" class="w-4 h-4"></i><span>Clientes</span>
-                </a>
-                <a href="#" onclick="showSection('presupuestos')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-presupuestos">
-                    <i data-lucide="file-text" class="w-4 h-4"></i><span>Presupuestos</span>
-                </a>
-                <a href="#" onclick="showSection('albaranes')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-albaranes">
-                    <i data-lucide="truck" class="w-4 h-4"></i><span>Albaranes</span>
-                </a>
-                <a href="#" onclick="showSection('facturas')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-facturas">
-                    <i data-lucide="receipt" class="w-4 h-4"></i><span>Facturas</span>
-                </a>
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mt-6 mb-2">Compras y Almacén</div>
-                <a href="#" onclick="showSection('proveedores')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-proveedores">
-                    <i data-lucide="building-2" class="w-4 h-4"></i><span>Proveedores</span>
-                </a>
-                <a href="#" onclick="showSection('compras')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-compras">
-                    <i data-lucide="shopping-cart" class="w-4 h-4"></i><span>Pedidos Compra</span>
-                </a>
-                <a href="#" onclick="showSection('articulos')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-articulos">
-                    <i data-lucide="package" class="w-4 h-4"></i><span>Artículos / Stock</span>
-                </a>
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mt-6 mb-2">Tesorería y Caja</div>
-                <a href="#" onclick="showSection('caja')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-caja">
-                    <i data-lucide="banknote" class="w-4 h-4"></i><span>Movimientos Caja</span>
-                </a>
-                <a href="#" onclick="showSection('cierres')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-cierres">
-                    <i data-lucide="lock" class="w-4 h-4"></i><span>Cierres de Caja</span>
-                </a>
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mt-6 mb-2">Sistema</div>
-                <a href="#" onclick="showSection('reportes')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-reportes">
-                    <i data-lucide="bar-chart-horizontal" class="w-4 h-4"></i><span>Reportes Pro</span>
-                </a>
-                <a href="#" onclick="showSection('ajustes')" class="nav-link flex items-center space-x-3 p-2.5 rounded-lg hover:bg-slate-800 transition-all" id="nav-ajustes">
-                    <i data-lucide="settings" class="w-4 h-4"></i><span>Ajustes Empresa</span>
-                </a>
-            </nav>
-            <div class="p-4 border-t border-slate-800 space-y-2">
-                <button onclick="exportBackup()" class="w-full flex items-center justify-center space-x-2 p-2 bg-slate-800 rounded-lg hover:bg-slate-700 text-xs transition-colors">
-                    <i data-lucide="download" class="w-3 h-3"></i><span>Backup JSON</span>
-                </button>
-                <button onclick="importBackup()" class="w-full flex items-center justify-center space-x-2 p-2 bg-slate-800 rounded-lg hover:bg-slate-700 text-xs transition-colors">
-                    <i data-lucide="upload" class="w-3 h-3"></i><span>Restaurar</span>
-                </button>
-            </div>
-        </aside>
+<body class="h-screen flex overflow-hidden">
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col overflow-hidden">
-            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0">
-                <div class="flex items-center space-x-4">
-                    <h2 id="section-title" class="text-xl font-extrabold text-slate-800 tracking-tight">Dashboard</h2>
-                </div>
-                <div class="flex items-center space-x-6">
-                    <div id="current-date" class="text-xs font-medium text-slate-400"></div>
-                    <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"><i data-lucide="user" class="w-4 h-4"></i></div>
-                </div>
-            </header>
+<div id="toast-container"></div>
 
-            <div id="content-container" class="flex-1 overflow-y-auto p-8">
-                <!-- Dashboard -->
-                <section id="section-dashboard" class="space-y-8">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="wrench" class="w-6 h-6"></i></div>
-                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">S.A.T. Activos</span>
-                            </div>
-                            <h3 id="stat-sat-activos" class="text-2xl font-black text-slate-900">0</h3>
-                            <p class="text-xs text-slate-400 mt-1">Equipos en taller</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
-                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ventas Hoy</span>
-                            </div>
-                            <h3 id="stat-ventas-hoy" class="text-2xl font-black text-slate-900">0.00 €</h3>
-                            <p class="text-xs text-slate-400 mt-1">Total facturado hoy</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="clock" class="w-6 h-6"></i></div>
-                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pendientes</span>
-                            </div>
-                            <h3 id="stat-pendientes" class="text-2xl font-black text-slate-900">0</h3>
-                            <p class="text-xs text-slate-400 mt-1">Presupuestos sin convertir</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="p-3 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
-                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Stock Crítico</span>
-                            </div>
-                            <h3 id="stat-stock-critico" class="text-2xl font-black text-slate-900">0</h3>
-                            <p class="text-xs text-slate-400 mt-1">Artículos bajo stock mínimo</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div class="lg:col-span-2 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-                            <div class="flex justify-between items-center mb-6">
-                                <h4 class="text-sm font-black uppercase text-slate-500 tracking-widest">Evolución de Ventas Semanal</h4>
-                            </div>
-                            <canvas id="chart-main" height="200"></canvas>
-                        </div>
-                        <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-                            <h4 class="text-sm font-black uppercase text-slate-500 tracking-widest mb-6">Últimas Operaciones</h4>
-                            <div id="recent-ops" class="space-y-4"></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Listados Genéricos -->
-                <section id="section-listado" class="hidden space-y-6">
-                    <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                        <div class="flex items-center space-x-4 flex-1">
-                            <div class="relative w-full max-w-md">
-                                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="search-input" oninput="loadListado()" placeholder="Buscar en el listado..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-xl w-full text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                            </div>
-                        </div>
-                        <button id="btn-new-item" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl flex items-center space-x-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 font-bold text-sm">
-                            <i data-lucide="plus" class="w-4 h-4"></i><span id="btn-new-item-text">Nuevo</span>
-                        </button>
-                    </div>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left text-sm">
-                            <thead id="listado-thead" class="bg-slate-50 border-b border-slate-200"></thead>
-                            <tbody id="listado-tbody" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- Reportes Pro -->
-                <section id="section-reportes" class="hidden space-y-8">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-                            <h4 class="text-sm font-black uppercase text-slate-500 tracking-widest mb-6">Ventas por Método de Pago</h4>
-                            <canvas id="chart-pagos" height="250"></canvas>
-                        </div>
-                        <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-                            <h4 class="text-sm font-black uppercase text-slate-500 tracking-widest mb-6">Rentabilidad por Categoría</h4>
-                            <canvas id="chart-categorias" height="250"></canvas>
-                        </div>
-                    </div>
-                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-                        <h4 class="text-sm font-black uppercase text-slate-500 tracking-widest mb-6">Resumen de IVA y Márgenes</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">IVA Repercutido (Ventas)</div>
-                                <div id="rep-iva-ventas" class="text-2xl font-black text-blue-600">0.00 €</div>
-                            </div>
-                            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">IVA Soportado (Compras)</div>
-                                <div id="rep-iva-compras" class="text-2xl font-black text-rose-600">0.00 €</div>
-                            </div>
-                            <div class="p-6 bg-blue-600 rounded-2xl text-white shadow-xl shadow-blue-500/20">
-                                <div class="text-[10px] font-bold opacity-70 uppercase mb-1">Beneficio Bruto Estimado</div>
-                                <div id="rep-beneficio" class="text-2xl font-black">0.00 €</div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Ajustes Empresa -->
-                <section id="section-ajustes" class="hidden space-y-8">
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                        <h4 class="text-sm font-black uppercase text-slate-500 tracking-widest mb-8">Configuración de Empresa y Sistema</h4>
-                        <form onsubmit="saveAjustes(event)" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="space-y-6">
-                                <h5 class="text-xs font-black text-blue-600 uppercase tracking-widest">Datos Fiscales</h5>
-                                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Nombre Comercial</label><input type="text" name="empresa_nombre" id="adj-nombre" class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-2">CIF / NIF</label><input type="text" name="empresa_cif" id="adj-cif" class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Dirección Completa</label><input type="text" name="empresa_direccion" id="adj-direccion" class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-2">URL Logotipo (Link)</label><input type="text" name="empresa_logo" id="adj-logo" placeholder="https://ejemplo.com/logo.png" class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                            </div>
-                            <div class="space-y-6">
-                                <h5 class="text-xs font-black text-emerald-600 uppercase tracking-widest">Tesorería y Veri*factu</h5>
-                                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-2">IBAN para Cobros</label><input type="text" name="empresa_iban" id="adj-iban" class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                                <div><label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Certificado Digital (ID)</label><input type="text" name="verifactu_cert" id="adj-cert" placeholder="ID del certificado digital" class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                                <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100">
-                                    <div class="flex items-center space-x-3 mb-3">
-                                        <i data-lucide="shield-check" class="text-blue-600 w-5 h-5"></i>
-                                        <span class="font-black text-blue-800 text-xs uppercase tracking-widest">Estado Veri*factu</span>
-                                    </div>
-                                    <p class="text-[10px] text-blue-600 leading-relaxed">El sistema está configurado para generar registros inalterables y códigos QR de verificación según la normativa vigente de la AEAT.</p>
-                                </div>
-                            </div>
-                            <div class="md:col-span-2 flex justify-end pt-6 border-t border-slate-100">
-                                <button type="submit" class="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black shadow-xl shadow-slate-900/20 hover:scale-105 transition-transform">Guardar Configuración</button>
-                            </div>
-                        </form>
-                    </div>
-                </section>
-            </div>
-        </main>
+<!-- Login Screen -->
+<div id="login-screen" class="fixed inset-0 bg-slate-100 flex items-center justify-center z-50 p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm border border-slate-200">
+        <div class="flex justify-center mb-6">
+            <div class="bg-blue-600 p-4 rounded-2xl text-white shadow-lg shadow-blue-200"><i data-lucide="wrench" class="w-10 h-10"></i></div>
+        </div>
+        <h2 class="text-2xl font-bold mb-1 text-center text-slate-800">SAT Pro</h2>
+        <p class="text-slate-500 text-sm text-center mb-8">Gestión de Taller Inteligente</p>
+        <div class="space-y-4">
+            <input id="login-user" type="text" placeholder="Usuario" class="w-full px-4 py-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+            <input id="login-pass" type="password" placeholder="Contraseña" class="w-full px-4 py-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-bold shadow-lg transition-all active:scale-95">Entrar</button>
+        </div>
+        <p id="login-error" class="text-red-500 text-xs mt-4 hidden text-center font-medium">Credenciales incorrectas</p>
     </div>
+</div>
 
-    <!-- Modal Container -->
-    <div id="modal-container" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                <h3 id="modal-title" class="text-xl font-black text-slate-800 tracking-tight">Título</h3>
-                <button onclick="closeModal()" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><i data-lucide="x" class="w-6 h-6"></i></button>
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 bottom-0 w-16 md:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all duration-300 z-40">
+    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+        <div class="bg-blue-600 p-2 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
+        <h1 class="text-xl font-bold text-slate-800 dark:text-white sidebar-text">SAT Pro</h1>
+    </div>
+    <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+        <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Resumen</span></a>
+        <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="clipboard-list" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reparaciones</span></a>
+        <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Piezas</span></a>
+        <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Pedidos</span></a>
+        <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reportes</span></a>
+        <a href="#" onclick="showSection('agenda')" id="link-agenda" class="sidebar-link"><i data-lucide="calendar" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Agenda</span></a>
+    </nav>
+    <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+        <button onclick="logout()" class="flex items-center gap-3 text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition-colors w-full p-2 font-bold rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20">
+            <i data-lucide="log-out" class="w-5 h-5"></i><span class="sidebar-text text-sm font-bold">Salir</span>
+        </button>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-8 z-20">
+        <h2 id="section-title" class="text-lg font-bold text-slate-800 dark:text-white">Resumen</h2>
+        <div class="flex items-center gap-2 md:gap-4">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"><i data-lucide="moon" id="dark-icon" class="w-5 h-5"></i></button>
+            <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95"><i data-lucide="plus" class="w-4 h-4"></i><span class="hidden sm:inline">Nuevo</span></button>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-4 md:p-8 main-content" id="main-view">
+        <!-- Dashboard View -->
+        <div id="view-dashboard" class="space-y-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Piezas Pedidas</p><div class="flex items-end justify-between mt-2"><h3 id="stat-piezas" class="text-2xl font-black">0</h3><div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="package" class="w-5 h-5"></i></div></div></div>
+                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Pedidos Activos</p><div class="flex items-end justify-between mt-2"><h3 id="stat-pedidos" class="text-2xl font-black">0</h3><div class="p-2 bg-green-50 rounded-lg text-green-600"><i data-lucide="shopping-cart" class="w-5 h-5"></i></div></div></div>
+                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Reparaciones OK</p><div class="flex items-end justify-between mt-2"><h3 id="stat-reparaciones" class="text-2xl font-black">0</h3><div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="check-circle" class="w-5 h-5"></i></div></div></div>
+                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Beneficio Total</p><div class="flex items-end justify-between mt-2"><h3 id="stat-beneficio" class="text-xl font-black text-emerald-600">0€</h3><div class="p-2 bg-emerald-50 rounded-lg text-emerald-600"><i data-lucide="trending-up" class="w-5 h-5"></i></div></div></div>
             </div>
-            <div id="modal-content" class="p-8 overflow-y-auto flex-1 bg-slate-50/30"></div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="flat-card p-6"><h4 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-blue-500"></i> Actividad Reciente</h4><div id="recent-activity" class="space-y-3"></div></div>
+                <div class="flat-card p-6"><h4 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="bell" class="w-5 h-5 text-amber-500"></i> Recordatorios</h4><div id="alert-container" class="space-y-3"></div><button onclick="openReminderModal()" class="w-full mt-4 py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-blue-400 hover:text-blue-500 transition-all">+ Añadir Recordatorio</button></div>
+            </div>
+            
+            <div class="flat-card p-6"><h4 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="bot" class="w-5 h-5 text-purple-500"></i> Sugerencias con IA</h4><div id="ai-dashboard-summary" class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-sm text-slate-600 dark:text-slate-400 italic mb-4">Pulsa para analizar el estado del taller...</div><button onclick="generateAISuggestions()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="sparkles" class="w-4 h-4"></i> Generar Análisis Exhaustivo</button></div>
+        </div>
+
+        <!-- List View -->
+        <div id="view-list" class="hidden space-y-4">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:max-w-xs"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="search-input" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none" oninput="filterTable()"></div>
+                <div class="flex gap-2 w-full md:w-auto"><button onclick="exportData()" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Exportar</button><label class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 cursor-pointer"><i data-lucide="upload" class="w-4 h-4"></i> Importar<input type="file" id="import-file" class="hidden" onchange="importData(event)"></label></div>
+            </div>
+            <div class="flat-card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700"><tr id="table-head"></tr></thead><tbody id="table-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody></table></div></div>
+        </div>
+
+        <!-- Reports View -->
+        <div id="view-reportes" class="hidden space-y-6 pb-20">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="metric-box">Ingresos<h3 id="kpi-ingresos" class="text-xl font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);">Costes<h3 id="kpi-costes" class="text-xl font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Beneficio<h3 id="kpi-beneficio" class="text-xl font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">Margen<h3 id="kpi-margen" class="text-xl font-black mt-1">0%</h3></div>
+            </div>
+            <div class="flat-card p-6"><h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="line-chart" class="w-5 h-5"></i> Evolución Mensual de Ingresos</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
+            <div class="flat-card p-6"><div class="flex justify-between items-center mb-4"><h4 class="font-bold flex items-center gap-2"><i data-lucide="users" class="w-5 h-5"></i> Evolución por Técnico</h4><div class="flex gap-2" id="range-selector"><button class="range-btn" data-months="3">3m</button><button class="range-btn active" data-months="6">6m</button><button class="range-btn" data-months="12">12m</button></div></div><div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div><div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-center text-[10px]"></div></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="flat-card p-6"><h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i> Ranking por Técnico (Inc. Garantías)</h4><div id="ranking-usuarios" class="space-y-3"></div></div>
+                <div class="flat-card p-6"><h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5"></i> Operaciones por Técnico</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flat-card p-4"><h4 class="text-xs font-bold mb-3 uppercase">Pedidos</h4><div class="chart-container" style="height:200px"><canvas id="chart-pedidos-estado"></canvas></div></div>
+                <div class="flat-card p-4"><h4 class="text-xs font-bold mb-3 uppercase">Reparaciones</h4><div class="chart-container" style="height:200px"><canvas id="chart-reparaciones-estado"></canvas></div></div>
+                <div class="flat-card p-4"><h4 class="text-xs font-bold mb-3 uppercase">Garantías</h4><div class="chart-container" style="height:200px"><canvas id="chart-garantias-estado"></canvas></div></div>
+            </div>
+            <div class="flat-card overflow-hidden"><div class="px-4 py-3 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 font-bold text-sm">Detalle de Ventas y Rentabilidad</div><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="px-4 py-2">Producto</th><th class="px-4 py-2">Tipo</th><th class="px-4 py-2">Venta</th><th class="px-4 py-2">Beneficio</th><th class="px-4 py-2">Margen</th><th class="px-4 py-2">Estado</th></tr></thead><tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody></table></div></div>
+        </div>
+        
+        <!-- Agenda View -->
+        <div id="view-agenda" class="hidden space-y-6">
+            <div class="flat-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold">Recordatorios</h3>
+                    <button onclick="openReminderForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>NUEVO</button>
+                </div>
+                <div id="agenda-list" class="space-y-3"></div>
+            </div>
         </div>
     </div>
+</main>
 
-    <!-- Print View -->
-    <div id="print-view" class="print-only print-container"></div>
+<!-- Modals -->
+<div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 id="modal-title" class="font-bold text-slate-800 dark:text-white">Nuevo Registro</h3>
+            <button onclick="closeModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <form id="record-form" class="p-6 overflow-y-auto flex-1 space-y-4">
+            <input type="hidden" id="form-id">
+            <input type="hidden" id="form-section">
+            <div id="form-fields" class="space-y-4"></div>
+        </form>
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex gap-3">
+            <button type="button" onclick="closeModal()" class="flex-1 py-3 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all">Cancelar</button>
+            <button type="submit" form="record-form" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-all">Guardar</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        // --- DB CONFIG ---
-        const db = new Dexie("ERP_SAT_PRO_V10_DB");
-        db.version(1).stores({
-            clientes: '++id, nombre, cif, email',
-            proveedores: '++id, nombre, cif, email',
-            categorias: '++id, nombre',
-            articulos: '++id, nombre, referencia, categoriaId, controlarStock',
-            presupuestos: '++id, numero, clienteId, fecha, estado',
-            albaranes: '++id, numero, clienteId, fecha, estado',
-            facturas: '++id, numero, clienteId, fecha, estado, metodoPago, hash',
-            compras: '++id, numero, proveedorId, fecha, estado',
-            sat: '++id, numero, clienteId, fecha, estado, marca, modelo, serie',
-            lineas_presupuesto: '++id, presupuestoId, articuloId',
-            lineas_albaran: '++id, albaranId, articuloId',
-            lineas_factura: '++id, facturaId, articuloId',
-            lineas_compra: '++id, compraId, articuloId',
-            lineas_sat: '++id, satId, articuloId',
-            caja_movimientos: '++id, fecha, tipo, concepto, importe, metodoPago',
-            cierres_caja: '++id, fecha, totalVentas, totalEfectivo, totalTarjeta, descuadre',
-            ajustes: 'id, valor'
+<div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col modal-content">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-slate-800 dark:text-white">Detalles</h3>
+            <button onclick="closeDetailModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div id="detail-content" class="p-6 overflow-y-auto flex-1 space-y-4"></div>
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+            <button id="detail-print-btn" class="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir</button>
+            <button id="detail-edit-btn" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="edit-3" class="w-4 h-4"></i> Editar</button>
+        </div>
+    </div>
+</div>
+
+<div id="ai-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col modal-content">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i> Análisis IA Detallado</h3>
+            <button onclick="closeAIModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div id="ai-content" class="p-6 overflow-y-auto flex-1"></div>
+    </div>
+</div>
+
+<div id="reminder-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-slate-800 dark:text-white">Nuevo Recordatorio</h3>
+            <button onclick="closeReminderModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <form id="reminder-form" class="p-6 space-y-4 max-h-96 overflow-y-auto">
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase">Título *</label><input type="text" name="title" required class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase">Descripción</label><textarea name="description" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></textarea></div>
+            <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] font-bold text-slate-500 uppercase">Fecha</label><input type="date" name="dueDate" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></div><div><label class="text-[10px] font-bold text-slate-500 uppercase">Hora</label><input type="time" name="dueTime" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></div></div>
+            <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] font-bold text-slate-500 uppercase">Prioridad</label><select name="priority" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"><option value="info">Normal</option><option value="warning">Importante</option><option value="critical">Urgente</option></select></div><div><label class="text-[10px] font-bold text-slate-500 uppercase">Categoría</label><select name="category" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"><option>Taller</option><option>Cliente</option><option>Pagos</option></select></div></div>
+            <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] font-bold text-slate-500 uppercase">Responsable</label><select name="usuario" id="reminder-user-select" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></select></div><div><label class="text-[10px] font-bold text-slate-500 uppercase">Referencia</label><input type="text" name="referencia" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none" placeholder="OT, Pedido..."></div></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></textarea></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase">Foto (Opcional)</label><input type="file" name="foto" accept="image/*" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none" onchange="previewFoto(event)"><img id="foto-preview" style="display:none; margin-top:8px; max-width:100%; border-radius:6px; max-height:120px;"></div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold active:scale-95 transition-all mt-2">Guardar</button>
+        </form>
+    </div>
+</div>
+
+<div id="print-area" class="hidden"></div>
+
+<script>
+// Database
+const db = new Dexie("SAT_Database_V7");
+db.version(1).stores({
+    reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario',
+    piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta',
+    pedidos: '++id, cliente, producto, estado, fecha, usuario, precioCompra, precioVenta, cantidad',
+    recordatorios: '++id, title, dueDate, priority, completed, category, usuario, referencia'
+});
+
+const USERS = [
+    { user: "daniel", pass: "1234", nombre: "Daniel Farré" },
+    { user: "jose", pass: "1234", nombre: "José Ayala" },
+    { user: "david", pass: "1234", nombre: "David Varillas" }
+];
+const USUARIOS = USERS.map(u => u.nombre);
+let showSection_orig = showSection;
+let currentUser = null, currentSection = 'dashboard', charts = {}, currentRange = 6;
+
+// Helpers
+const $ = id => document.getElementById(id);
+const normalize = t => t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const escapeHtml = str => str ? String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : '';
+
+function showToast(msg, type='success') {
+    const c = $('toast-container');
+    const t = document.createElement('div');
+    t.className = `px-6 py-3 rounded-xl text-white font-bold text-sm mb-2 shadow-lg transition-all ${type==='success'?'bg-emerald-500':'bg-red-500'}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// Auth
+function login() {
+    const user = $('login-user').value.trim(), pass = $('login-pass').value;
+    const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
+    if(found) {
+        currentUser = found;
+        localStorage.setItem("sat_user_v7", JSON.stringify(found));
+        $('login-screen').classList.add('hidden');
+        initApp();
+    } else {
+        $('login-error').classList.remove('hidden');
+    }
+}
+function logout() { localStorage.removeItem("sat_user_v7"); location.reload(); }
+
+// Init
+async function loadDemoData() {
+    const count = await db.reparaciones.count();
+    if(count > 0) return; // Ya hay datos
+    
+    const hoy = new Date();
+    const hace30 = new Date(hoy.getTime() - 30*24*60*60*1000);
+    const hace60 = new Date(hoy.getTime() - 60*24*60*60*1000);
+    
+    // Reparaciones
+    await db.reparaciones.bulkAdd([
+        { ot:'OT-001', cliente:'Empresa A', marca:'Dell', modelo:'Latitude', serie:'SN123', password:'pwd123', estado:'Completado', prioridad:'Normal', fecha:hace60.toISOString(), garantia_fin:new Date(hoy.getTime() + 90*24*60*60*1000).toISOString(), usuario:'Daniel Farré', precio:150 },
+        { ot:'OT-002', cliente:'Empresa B', marca:'HP', modelo:'ProBook', serie:'SN124', password:'pwd124', estado:'Completado', prioridad:'Alta', fecha:hace30.toISOString(), garantia_fin:new Date(hoy.getTime() + 60*24*60*60*1000).toISOString(), usuario:'José Ayala', precio:200 },
+        { ot:'OT-003', cliente:'Empresa C', marca:'Lenovo', modelo:'ThinkPad', serie:'SN125', password:'pwd125', estado:'Entregado', prioridad:'Normal', fecha:hace60.toISOString(), garantia_fin:new Date(hoy.getTime() - 10*24*60*60*1000).toISOString(), usuario:'David Varillas', precio:180 },
+        { ot:'OT-004', cliente:'Empresa A', marca:'Asus', modelo:'VivoBook', serie:'SN126', password:'pwd126', estado:'Pendiente', prioridad:'Alta', fecha:hoy.toISOString(), garantia_fin:new Date(hoy.getTime() + 30*24*60*60*1000).toISOString(), usuario:'Daniel Farré', precio:120 }
+    ]);
+    
+    // Piezas
+    await db.piezas.bulkAdd([
+        { nombre:'SSD 256GB', proveedor:'Kingston', estado:'Instalado', fecha:hace60.toISOString(), usuario:'Daniel Farré', precioCompra:40, precioVenta:80 },
+        { nombre:'RAM 8GB DDR4', proveedor:'Corsair', estado:'Pedido', fecha:hace30.toISOString(), usuario:'José Ayala', precioCompra:35, precioVenta:70 },
+        { nombre:'Batería Laptop', proveedor:'Dell', estado:'Vendido', fecha:hace60.toISOString(), usuario:'David Varillas', precioCompra:50, precioVenta:100 }
+    ]);
+    
+    // Pedidos
+    await db.pedidos.bulkAdd([
+        { cliente:'Cliente X', producto:'Monitor 24"', estado:'Entregado', fecha:hace60.toISOString(), usuario:'Daniel Farré', precioCompra:150, precioVenta:250, cantidad:2 },
+        { cliente:'Cliente Y', producto:'Teclado Mecánico', estado:'Pendiente', fecha:hace30.toISOString(), usuario:'José Ayala', precioCompra:60, precioVenta:120, cantidad:5 },
+        { cliente:'Cliente Z', producto:'Mouse Inalámbrico', estado:'Entregado', fecha:hace60.toISOString(), usuario:'David Varillas', precioCompra:15, precioVenta:35, cantidad:10 }
+    ]);
+}
+
+function initApp() {
+    lucide.createIcons();
+    loadDemoData();
+    showSection('dashboard');
+    initRangeSelector();
+    if(localStorage.getItem('darkMode') === 'true') toggleDarkMode(true);
+}
+
+window.onload = () => {
+    const saved = localStorage.getItem("sat_user_v7");
+    if(saved) {
+        currentUser = JSON.parse(saved);
+        $('login-screen').classList.add('hidden');
+        initApp();
+    }
+};
+
+function toggleDarkMode(force) {
+    const isDark = force !== undefined ? force : !document.body.classList.contains('dark');
+    document.body.classList.toggle('dark', isDark);
+    localStorage.setItem('darkMode', isDark);
+    $('dark-icon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+    lucide.createIcons();
+}
+
+// Navigation
+function showSection(section) {
+    currentSection = section;
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    const link = $(`link-${section}`);
+    if(link) link.classList.add('active');
+    
+    const titles = { dashboard:'Resumen', reparaciones:'Reparaciones', piezas:'Piezas', pedidos:'Pedidos', reportes:'Reportes', agenda:'Agenda' };
+    $('section-title').textContent = titles[section];
+    $('btn-new').style.display = section === 'reportes' || section === 'agenda' ? 'none' : 'flex';
+
+    $('view-dashboard').classList.toggle('hidden', section !== 'dashboard');
+    $('view-list').classList.toggle('hidden', !['reparaciones','piezas','pedidos'].includes(section));
+    $('view-reportes').classList.toggle('hidden', section !== 'reportes');
+    $('view-agenda').classList.toggle('hidden', section !== 'agenda');
+
+    if(section === 'dashboard') updateDashboard();
+    else if(section === 'reportes') updateReports();
+    else if(section === 'agenda') renderAgenda();
+    else renderTable(section);
+    
+    lucide.createIcons();
+}
+
+// Stats & Dashboard
+async function updateDashboard() {
+    const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    $('stat-reparaciones').textContent = reps.filter(r => r.estado === 'Completado' || r.estado === 'Entregado').length;
+    $('stat-piezas').textContent = pie.filter(p => p.estado === 'Pedido').length;
+    $('stat-pedidos').textContent = ped.filter(p => p.estado !== 'Entregado').length;
+    
+    let totalBeneficio = ped.reduce((s, p) => s + ((parseFloat(p.precioVenta)||0) - (parseFloat(p.precioCompra)||0)) * (parseInt(p.cantidad)||1), 0);
+    pie.forEach(p => { if(p.estado==='Instalado'||p.estado==='Vendido') totalBeneficio += (parseFloat(p.precioVenta)||0) - (parseFloat(p.precioCompra)||0); });
+    $('stat-beneficio').textContent = totalBeneficio.toFixed(2) + '€';
+    
+    updateRecentActivity(reps, pie, ped);
+    updateAlerts(reps);
+}
+
+function updateRecentActivity(reps, pie, ped) {
+    const activity = [];
+    reps.slice(-3).forEach(r => activity.push({ text: `Reparación OT: ${r.ot}`, date: new Date(r.fecha), icon: 'clipboard-list', user: r.usuario }));
+    pie.slice(-3).forEach(p => activity.push({ text: `Pieza: ${p.nombre}`, date: new Date(p.fecha), icon: 'package', user: p.usuario }));
+    ped.slice(-3).forEach(p => activity.push({ text: `Pedido: ${p.producto}`, date: new Date(p.fecha), icon: 'shopping-cart', user: p.usuario }));
+    
+    activity.sort((a,b) => b.date - a.date);
+    const container = $('recent-activity');
+    container.innerHTML = activity.length ? activity.slice(0,5).map(a => {
+        let uClass = a.user === 'Daniel Farré' ? 'daniel' : a.user === 'José Ayala' ? 'jose' : 'david';
+        return `<div class="flex items-center gap-3"><div class="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><i data-lucide="${a.icon}" class="w-4 h-4"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(a.text)}</p><p class="text-[9px] text-slate-400">${a.date.toLocaleString()} · <span class="user-badge ${uClass}">${a.user}</span></p></div></div>`;
+    }).join('') : '<p class="text-xs text-slate-400 italic">Sin actividad reciente.</p>';
+    lucide.createIcons();
+}
+
+async function updateAlerts(reps) {
+    const recs = await db.recordatorios.toArray();
+    const alerts = [];
+    const now = new Date();
+
+    reps.forEach(r => {
+        if(r.garantia_fin) {
+            const diff = Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24));
+            if(diff >= 0 && diff <= 15) alerts.push({ title: `Garantía por caducar: ${r.ot}`, desc: `${diff} días para ${r.cliente}`, prio: 'warning' });
+        }
+        if(r.prioridad === 'Alta' && r.estado === 'Pendiente') alerts.push({ title: `URGENTE OT:${r.ot}`, desc: `Equipo esperando revisión`, prio: 'critical' });
+    });
+    recs.forEach(r => { if(!r.completed) alerts.push({ title: r.title, desc: r.dueDate || 'Sin fecha', prio: r.priority }); });
+    
+    const container = $('alert-container');
+    container.innerHTML = alerts.length ? alerts.map(a => `
+        <div class="suggestion-card ${a.prio} flex items-center justify-between">
+            <div><p class="text-xs font-bold">${escapeHtml(a.title)}</p><p class="text-[10px] text-slate-500">${escapeHtml(a.desc)}</p></div>
+            <div class="w-2 h-2 rounded-full ${a.prio==='critical'?'bg-red-500':a.prio==='warning'?'bg-amber-500':'bg-blue-500'}"></div>
+        </div>
+    `).join('') : '<p class="text-center text-slate-400 text-xs py-4 italic">No hay alertas pendientes.</p>';
+}
+
+// Reports & Charts
+async function updateReports() {
+    const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    let ingresos=0, costes=0;
+    ped.forEach(p => { ingresos += (parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1); costes += (parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1); });
+    pie.forEach(p => { if(p.estado==='Instalado'||p.estado==='Vendido'){ ingresos += parseFloat(p.precioVenta)||0; costes += parseFloat(p.precioCompra)||0; } });
+    ingresos += reps.reduce((s,r) => s + (parseFloat(r.precio)||0), 0);
+
+    $('kpi-ingresos').textContent = ingresos.toFixed(2) + '€';
+    $('kpi-costes').textContent = costes.toFixed(2) + '€';
+    $('kpi-beneficio').textContent = (ingresos - costes).toFixed(2) + '€';
+    $('kpi-margen').textContent = ingresos > 0 ? ((ingresos-costes)/ingresos*100).toFixed(1) + '%' : '0%';
+
+    updateEvolucionMensual(reps, ped);
+    updateEvolucionPorUsuario(reps, ped, currentRange);
+    updateRankingUsuarios(reps, pie, ped);
+    updateChartOperaciones(reps, pie, ped);
+    updateSmallCharts(reps, ped);
+    updateDetalleVentas(pie, ped);
+}
+
+async function updateEvolucionMensual(reps, ped) {
+    const hoy = new Date();
+    const meses = [], data = [];
+    for(let i=5; i>=0; i--) {
+        let f = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+        meses.push(f.toLocaleDateString('es-ES',{month:'short',year:'numeric'}));
+        let ini = new Date(f.getFullYear(), f.getMonth(), 1);
+        let fin = new Date(f.getFullYear(), f.getMonth()+1, 0, 23, 59, 59);
+        let total = ped.reduce((s,p) => {
+            let d = new Date(p.fecha);
+            return (d>=ini && d<=fin) ? s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)) : s;
+        }, 0);
+        total += reps.reduce((s,r) => {
+            let d = new Date(r.fecha);
+            return (d>=ini && d<=fin) ? s + (parseFloat(r.precio)||0) : s;
+        }, 0);
+        data.push(total);
+    }
+    const ctx = $('chart-evolucion-mensual')?.getContext('2d');
+    if(ctx) { if(charts.ev) charts.ev.destroy(); charts.ev = new Chart(ctx, { type:'line', data:{ labels:meses, datasets:[{ label:'Ingresos (€)', data, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.1)', fill:true, tension:0.3 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } } }); }
+}
+
+async function updateEvolucionPorUsuario(reps, ped, months) {
+    const hoy = new Date();
+    const meses = [];
+    for(let i=months-1; i>=0; i--) {
+        let f = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+        meses.push(f.toLocaleDateString('es-ES',{month:'short'}));
+    }
+    const colores = { "Daniel Farré":"#3b82f6", "José Ayala":"#ef4444", "David Varillas":"#10b981" };
+    const datasets = USUARIOS.map(u => {
+        let vals = [];
+        for(let i=months-1; i>=0; i--) {
+            let ini = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+            let fin = new Date(hoy.getFullYear(), hoy.getMonth()-i+1, 0, 23, 59, 59);
+            let total = ped.reduce((s,p) => (p.usuario===u && new Date(p.fecha)>=ini && new Date(p.fecha)<=fin) ? s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)) : s, 0);
+            total += reps.reduce((s,r) => (r.usuario===u && new Date(r.fecha)>=ini && new Date(r.fecha)<=fin) ? s + (parseFloat(r.precio)||0) : s, 0);
+            vals.push(total);
+        }
+        return { label:u, data:vals, borderColor:colores[u], backgroundColor:'transparent', tension:0.3, pointRadius:2 };
+    });
+    const ctx = $('chart-evolucion-usuarios')?.getContext('2d');
+    if(ctx) { if(charts.evU) charts.evU.destroy(); charts.evU = new Chart(ctx, { type:'line', data:{ labels:meses, datasets }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:10} } } } } }); }
+    $('user-summary').innerHTML = datasets.map(d => `<div style="border-left:3px solid ${d.borderColor}" class="bg-slate-50 dark:bg-slate-800 p-2 rounded"><strong>${d.label}</strong><br>${d.data.reduce((a,b)=>a+b,0).toFixed(2)}€</div>`).join('');
+}
+
+async function updateRankingUsuarios(reps, pie, ped) {
+    const ranking = USUARIOS.map(u => {
+        const p = ped.filter(x=>x.usuario===u).length, pi = pie.filter(x=>x.usuario===u).length, r = reps.filter(x=>x.usuario===u).length;
+        const g = reps.filter(x=>x.usuario===u && x.garantia_fin && new Date(x.garantia_fin)>new Date()).length;
+        return { user:u, total:p+pi+r, p, pi, r, g };
+    }).sort((a,b)=>b.total-a.total);
+    $('ranking-usuarios').innerHTML = ranking.map(r => {
+        let avatar = r.user === 'Daniel Farré' ? 'bg-blue-100 text-blue-700' : r.user === 'José Ayala' ? 'bg-pink-100 text-pink-700' : 'bg-emerald-100 text-emerald-700';
+        return `<div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full ${avatar} flex items-center justify-center font-bold text-xs">${r.user[0]}</div><div><p class="font-bold text-xs">${r.user}</p><p class="text-[10px] text-slate-500">${r.total} op. totales</p></div></div><div class="flex gap-2 text-center"><div><p class="text-[10px] font-bold text-blue-600">${r.p}</p><p class="text-[8px] text-slate-400">Ped</p></div><div><p class="text-[10px] font-bold text-purple-600">${r.pi}</p><p class="text-[8px] text-slate-400">Piez</p></div><div><p class="text-[10px] font-bold text-pink-600">${r.r}</p><p class="text-[8px] text-slate-400">Rep</p></div><div><p class="text-[10px] font-bold text-green-600">${r.g}</p><p class="text-[8px] text-slate-400">Gar</p></div></div></div>`;
+    }).join('');
+}
+
+async function updateChartOperaciones(reps, pie, ped) {
+    const ctx = $('chart-operaciones-usuario')?.getContext('2d');
+    if(ctx) { if(charts.op) charts.op.destroy(); charts.op = new Chart(ctx, { type:'bar', data:{ labels:USUARIOS, datasets:[{ label:'Pedidos', data:USUARIOS.map(u=>ped.filter(x=>x.usuario===u).length), backgroundColor:'#3b82f6' },{ label:'Piezas', data:USUARIOS.map(u=>pie.filter(x=>x.usuario===u).length), backgroundColor:'#8b5cf6' },{ label:'Reparaciones', data:USUARIOS.map(u=>reps.filter(x=>x.usuario===u).length), backgroundColor:'#ec4899' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:10} } } } } }); }
+}
+
+function updateSmallCharts(reps, ped) {
+    const config = (ctx, labels, data, colors) => new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:8} } } } } });
+    
+    const pedE = {}; ped.forEach(x=>pedE[x.estado]=(pedE[x.estado]||0)+1);
+    if($('chart-pedidos-estado')) config($('chart-pedidos-estado').getContext('2d'), Object.keys(pedE), Object.values(pedE), ['#6366f1','#8b5cf6','#d8b4fe']);
+    
+    const repE = {}; reps.forEach(x=>repE[x.estado]=(repE[x.estado]||0)+1);
+    if($('chart-reparaciones-estado')) config($('chart-reparaciones-estado').getContext('2d'), Object.keys(repE), Object.values(repE), ['#3b82f6','#0ea5e9','#22d3ee','#a5f3fc']);
+    
+    const hoy = new Date(); const gS = { Vigente:0, Expirada:0, Proxima:0 };
+    reps.forEach(r => { if(r.garantia_fin){ let d=Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24)); if(d<0) gS.Expirada++; else if(d<=15) gS.Proxima++; else gS.Vigente++; } });
+    if($('chart-garantias-estado')) config($('chart-garantias-estado').getContext('2d'), Object.keys(gS), Object.values(gS), ['#10b981','#ef4444','#f59e0b']);
+}
+
+function updateDetalleVentas(pie, ped) {
+    const items = [];
+    ped.forEach(p => { let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0, cant=parseInt(p.cantidad)||1; items.push({ n:p.producto, t:'Pedido', v:v*cant, b:(v-c)*cant, m:v>0?((v-c)/v*100).toFixed(1):0, e:p.estado }); });
+    pie.forEach(p => { if(p.precioVenta){ let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0; items.push({ n:p.nombre, t:'Pieza', v, b:v-c, m:v>0?((v-c)/v*100).toFixed(1):0, e:p.estado }); } });
+    items.sort((a,b)=>b.b-a.b);
+    $('detalle-ventas-tbody').innerHTML = items.slice(0,10).map(i => `<tr><td class="px-4 py-2 font-bold">${escapeHtml(i.n)}</td><td class="px-4 py-2">${i.t}</td><td class="px-4 py-2">${i.v.toFixed(2)}€</td><td class="px-4 py-2 font-bold ${i.b>=0?'text-emerald-600':'text-red-600'}">${i.b.toFixed(2)}€</td><td class="px-4 py-2">${i.m}%</td><td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${getStatusClass(i.e)}">${i.e}</span></td></tr>`).join('');
+}
+
+function initRangeSelector() {
+    document.querySelectorAll('.range-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRange = parseInt(btn.dataset.months);
+            const [reps, ped] = await Promise.all([db.reparaciones.toArray(), db.pedidos.toArray()]);
+            updateEvolucionPorUsuario(reps, ped, currentRange);
         });
+    });
+}
 
-        // --- STATE ---
-        let currentSection = 'dashboard';
-        let charts = {};
-        let activeType = ''; 
+// Table Rendering
+async function renderTable(section) {
+    const data = await db[section].toArray();
+    const head = $('table-head'), body = $('table-body');
+    let headers = section === 'reparaciones' ? ['OT', 'Cliente', 'Equipo', 'Garantía', 'Estado'] : section === 'piezas' ? ['Pieza', 'Proveedor', 'Estado', 'Técnico'] : ['Producto', 'Cliente', 'Estado', 'Fecha'];
+    head.innerHTML = headers.map(h => `<th class="px-6 py-4 font-bold text-slate-500 uppercase text-[10px]">${h}</th>`).join('') + '<th class="px-6 py-4"></th>';
+    body.innerHTML = data.length ? '' : '<tr><td colspan="6" class="p-10 text-center text-slate-400 italic">Sin datos.</td></tr>';
+    data.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach(item => {
+        let content = '';
+        if(section === 'reparaciones') {
+            const isG = item.garantia_fin && new Date(item.garantia_fin) > new Date();
+            content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.ot)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.cliente)}</td><td class="px-6 py-4 text-[10px]">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${isG?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-500'}">${isG?'Vigente':'Expirada'}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td>`;
+        } else if(section === 'piezas') {
+            content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.nombre)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.proveedor)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-[10px] font-medium text-blue-600">${item.usuario}</td>`;
+        } else {
+            content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.producto)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.cliente)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-[10px]">${new Date(item.fecha).toLocaleDateString()}</td>`;
+        }
+        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer";
+        tr.innerHTML = `${content}<td class="px-6 py-4 text-right"><button onclick="viewDetail('${section}', ${item.id})" class="p-2 text-slate-400 hover:text-blue-600"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></td>`;
+        tr.onclick = (e) => { if(!e.target.closest('button')) viewDetail(section, item.id); };
+        body.appendChild(tr);
+    });
+    lucide.createIcons();
+}
 
-        // --- UTILS ---
-        const parsePrice = (val) => {
-            if (typeof val === 'string') val = val.replace(',', '.');
-            return parseFloat(val) || 0;
+function getStatusClass(s) {
+    s = (s||'').toLowerCase();
+    if(['entregado','completado','recibido','instalado','vendido'].some(x => s.includes(x))) return 'bg-emerald-100 text-emerald-700';
+    if(['pendiente','pedido','espera'].some(x => s.includes(x))) return 'bg-amber-100 text-amber-700';
+    return 'bg-blue-100 text-blue-700';
+}
+
+function filterTable() {
+    const q = normalize($('search-input').value);
+    const rows = $('table-body').querySelectorAll('tr');
+    rows.forEach(r => { r.style.display = normalize(r.textContent).includes(q) ? '' : 'none'; });
+}
+
+// Modals & Forms
+function openModal(editData = null) {
+    const modal = $('modal'), fields = $('form-fields'), idIn = $('form-id'), secIn = $('form-section');
+    let active = ['dashboard','reportes'].includes(currentSection) ? 'reparaciones' : currentSection;
+    idIn.value = editData ? editData.id : ''; secIn.value = active;
+    $('modal-title').textContent = editData ? `Editar ${active}` : `Nueva ${active}`;
+    
+    let html = '';
+    if(active === 'reparaciones') {
+        html = `<div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Equipo</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">OT *</label><input type="text" name="ot" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.ot||''}"></div><div><label class="text-[10px] font-bold">Nº Serie</label><input type="text" name="serie" class="w-full border rounded-xl p-3 text-sm" value="${editData?.serie||''}"></div><div><label class="text-[10px] font-bold">Marca *</label><input type="text" name="marca" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.marca||''}"></div><div><label class="text-[10px] font-bold">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.modelo||''}"></div></div></div><div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Seguridad y Cliente</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">PIN / Password</label><input type="text" name="password" class="w-full border rounded-xl p-3 text-sm" value="${editData?.password||''}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div></div></div><div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Técnico</p><div class="grid grid-cols-3 gap-3"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='En Proceso'?'selected':''}>En Proceso</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="prioridad" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div><div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Garantía y Foto</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded-xl p-3 text-sm" value="${editData?.garantia_meses||0}"></div><div><label class="text-[10px] font-bold">Precio Reparación</label><input type="number" step="0.01" name="precio" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precio||''}"></div></div><div class="mt-3"><label class="text-[10px] font-bold">Foto (Cámara)</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div><div><label class="text-[10px] font-bold">Observaciones / Notas Cliente</label><textarea name="observaciones" rows="3" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div>`;
+    } else if(active === 'piezas') {
+        html = `<div class="form-section"><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.nombre||''}"></div><div><label class="text-[10px] font-bold">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded-xl p-3 text-sm" value="${editData?.proveedor||''}"></div><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Instalado'?'selected':''}>Instalado</option></select></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div>`;
+    } else if(active === 'pedidos') {
+        html = `<div class="form-section"><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Producto *</label><input type="text" name="producto" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.producto||''}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='En Espera'?'selected':''}>En Espera</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">Cantidad</label><input type="number" name="cantidad" class="w-full border rounded-xl p-3 text-sm" value="${editData?.cantidad||1}"></div></div></div><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">P. Compra Unit.</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta Unit.</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div>`;
+    }
+    fields.innerHTML = html; modal.classList.remove('hidden'); modal.classList.add('flex'); lucide.createIcons();
+}
+
+function closeModal() { $('modal').classList.add('hidden'); }
+async function handleFile(input) { const f = input.files[0]; if(f){ const r = new FileReader(); r.onload = (e) => { $('form-imagen').value = e.target.result; }; r.readAsDataURL(f); } }
+
+$('record-form').onsubmit = async (e) => {
+    e.preventDefault(); const data = Object.fromEntries(new FormData(e.target));
+    const id = $('form-id').value, section = $('form-section').value;
+    try {
+        if(section==='reparaciones' && data.garantia_meses>0 && (data.estado==='Entregado'||data.estado==='Completado')){
+            let f = new Date(); f.setMonth(f.getMonth()+parseInt(data.garantia_meses)); data.garantia_fin = f.toISOString();
+        }
+        if(id) {
+            const old = await db[section].get(parseInt(id));
+            const merged = {...old, ...data};
+            if(!data.imagen && old.imagen) merged.imagen = old.imagen;
+            await db[section].put(merged);
+        } else {
+            data.fecha = new Date().toISOString();
+            await db[section].add(data);
+        }
+        showToast('Guardado'); closeModal(); showSection(currentSection);
+    } catch(err) { showToast('Error', 'error'); }
+};
+
+// Details & Print
+async function viewDetail(section, id) {
+    const item = await db[section].get(id); if(!item) return;
+    let html = `<div class="grid grid-cols-2 gap-4 text-xs">${Object.entries(item).map(([k,v]) => {
+        if(['id','imagen','garantia_fin'].includes(k)) return '';
+        return `<div><p class="text-[9px] font-bold text-slate-400 uppercase">${k.replace('_',' ')}</p><p class="text-slate-700 dark:text-slate-200">${escapeHtml(v)}</p></div>`;
+    }).join('')}</div>${item.imagen ? `<div class="mt-4"><p class="text-[9px] font-bold text-slate-400 uppercase mb-2">Foto Adjunta</p><img src="${item.imagen}" class="w-full rounded-xl border border-slate-200"></div>` : ''}`;
+    $('detail-content').innerHTML = html;
+    $('detail-edit-btn').onclick = () => { closeDetailModal(); openModal(item); };
+    $('detail-print-btn').onclick = () => printItem(section, item);
+    $('detail-modal').classList.remove('hidden'); $('detail-modal').classList.add('flex'); lucide.createIcons();
+}
+function closeDetailModal() { $('detail-modal').classList.add('hidden'); }
+
+function printItem(section, item) {
+    let title = section === 'reparaciones' ? 'ORDEN DE TRABAJO' : section === 'pedidos' ? 'ALBARÁN DE PEDIDO' : 'DETALLE DE PIEZA';
+    $('print-area').innerHTML = `
+        <div class="print-container">
+            <div class="print-header">
+                <div><div style="font-size:20px; font-weight:bold; color:#2563eb">TECNOGIRONA S.A.T.</div><p style="font-size:10px; color:#666">Servicio Técnico Especializado</p></div>
+                <div style="text-align:right"><div style="font-weight:bold">${title}</div><div style="font-size:12px">Nº: ${item.ot || item.id}</div><div style="font-size:10px">${new Date().toLocaleDateString()}</div></div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px; margin-bottom:30px">
+                <div><p class="print-label">Cliente</p><p class="print-value">${item.cliente || 'S/D'}</p><p class="print-label" style="margin-top:10px">Equipo / Producto</p><p class="print-value">${item.marca || ''} ${item.modelo || item.producto || ''}</p></div>
+                <div><p class="print-label">Técnico Asignado</p><p class="print-value">${item.usuario || 'General'}</p><p class="print-label" style="margin-top:10px">Estado Actual</p><p class="print-value">${item.estado}</p></div>
+            </div>
+            <div style="margin-bottom:30px"><p class="print-label">Descripción / Observaciones</p><div style="border:1px solid #eee; padding:15px; min-height:100px; font-size:12px; margin-top:5px">${item.observaciones || 'Sin observaciones adicionales.'}</div></div>
+            ${section === 'reparaciones' ? `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px"><div><p class="print-label">Nº Serie</p><p class="print-value">${item.serie || '-'}</p></div><div><p class="print-label">Contraseña</p><p class="print-value">${item.password || '-'}</p></div></div>` : ''}
+            <div class="signature-box"><div class="signature-field">Firma Técnico</div><div class="signature-field">Firma Cliente</div></div>
+            <div style="margin-top:40px; font-size:9px; color:#999; text-align:center">Este documento es un justificante de servicio. Gracias por su confianza.</div>
+        </div>`;
+    window.print();
+}
+
+// AI Analysis
+async function generateAISuggestions() {
+    const modal = $("ai-modal"), content = $("ai-content");
+    modal.classList.remove("hidden"); modal.classList.add("flex");
+    content.innerHTML = "<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller...</p></div>";
+    const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    const hoy = new Date();
+    const stats = {
+        p: reps.filter(r=>r.estado==="Pendiente").length,
+        u: reps.filter(r=>r.prioridad==="Alta" && r.estado!==="Entregado").length,
+        c: reps.filter(r=>r.estado==="Completado" || r.estado==="Entregado").length,
+        garVigente: reps.filter(r=>r.garantia_fin && new Date(r.garantia_fin)>hoy).length,
+        garExpirada: reps.filter(r=>r.garantia_fin && new Date(r.garantia_fin)<=hoy).length,
+        garProxima: reps.filter(r=>r.garantia_fin && Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24))<=15 && Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24))>0).length,
+        pi: pie.filter(p=>p.estado==="Pedido").length,
+        piSinStock: pie.filter(p=>p.estado==="Pedido" || p.estado==="Agotado").length,
+        piVendidas: pie.filter(p=>p.estado==="Vendido" || p.estado==="Instalado").length,
+        pe: ped.filter(p=>p.estado!==="Entregado").length,
+        peEntregados: ped.filter(p=>p.estado==="Entregado").length,
+        ingresos: ped.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)),0) + pie.filter(p=>p.estado==="Vendido"||p.estado==="Instalado").reduce((s,p)=>s+(parseFloat(p.precioVenta)||0),0) + reps.reduce((s,r)=>s+(parseFloat(r.precio)||0),0),
+        costes: ped.reduce((s,p)=>s+((parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1)),0) + pie.filter(p=>p.estado==="Vendido"||p.estado==="Instalado").reduce((s,p)=>s+(parseFloat(p.precioCompra)||0),0),
+        ben: ped.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1),0) + pie.filter(p=>p.estado==="Vendido"||p.estado==="Instalado").reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0)),0)
+    };
+    stats.margen = stats.ingresos > 0 ? ((stats.ben/stats.ingresos)*100).toFixed(1) : 0;
+    setTimeout(() => {
+        let sug = [];
+        if(stats.u>0) sug.push({t:"cr", i:"alert-circle", h:"Urgencias detectadas", d:`${stats.u} equipos prioritarios sin entregar.`, a:"Priorizar estas OT hoy."});
+        if(stats.garExpirada>0) sug.push({t:"wa", i:"alert-triangle", h:"Garantías expiradas", d:`${stats.garExpirada} reparaciones sin cobertura.`, a:"Revisar y documentar."});
+        if(stats.pi>2) sug.push({t:"wa", i:"package", h:"Stock crítico", d:`${stats.pi} piezas en pedido, ${stats.piSinStock} sin stock.`, a:"Contactar proveedores urgente."});
+        if(stats.pe>3) sug.push({t:"wa", i:"truck", h:"Entregas pendientes", d:`${stats.pe} pedidos sin entregar.`, a:"Acelerar logística."});
+        if(stats.ben<500) sug.push({t:"in", i:"trending-down", h:"Rentabilidad baja", d:`Beneficio: ${stats.ben.toFixed(2)}€ (Margen: ${stats.margen}%)`, a:"Revisar márgenes."});
+        else sug.push({t:"su", i:"trending-up", h:"Buen rendimiento", d:`Beneficio: ${stats.ben.toFixed(2)}€ (Margen: ${stats.margen}%)`, a:"Mantener estrategia."});
+        content.innerHTML = `<div class="space-y-3 max-h-96 overflow-y-auto"><div class="grid grid-cols-2 gap-2"><div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg text-center"><p class="text-[8px] font-bold text-blue-500 uppercase">Pendientes</p><p class="text-lg font-black text-blue-700">${stats.p}</p></div><div class="bg-red-50 dark:bg-red-900/20 p-2 rounded-lg text-center"><p class="text-[8px] font-bold text-red-500 uppercase">Urgentes</p><p class="text-lg font-black text-red-700">${stats.u}</p></div><div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg text-center"><p class="text-[8px] font-bold text-emerald-500 uppercase">Completadas</p><p class="text-lg font-black text-emerald-700">${stats.c}</p></div><div class="bg-purple-50 dark:bg-purple-900/20 p-2 rounded-lg text-center"><p class="text-[8px] font-bold text-purple-500 uppercase">Entregas</p><p class="text-lg font-black text-purple-700">${stats.peEntregados}</p></div></div><div class="border-t border-slate-200 dark:border-slate-700 pt-2"><h5 class="text-xs font-bold mb-2 uppercase text-slate-600">Garantías</h5><div class="grid grid-cols-3 gap-2 text-center text-[10px]"><div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded"><p class="font-bold text-emerald-700">${stats.garVigente}</p><p class="text-[8px] text-slate-600">Vigentes</p></div><div class="bg-amber-100 dark:bg-amber-900/30 p-2 rounded"><p class="font-bold text-amber-700">${stats.garProxima}</p><p class="text-[8px] text-slate-600">Próximas</p></div><div class="bg-red-100 dark:bg-red-900/30 p-2 rounded"><p class="font-bold text-red-700">${stats.garExpirada}</p><p class="text-[8px] text-slate-600">Expiradas</p></div></div></div><div class="border-t border-slate-200 dark:border-slate-700 pt-2"><h5 class="text-xs font-bold mb-2 uppercase text-slate-600">Inventario</h5><div class="grid grid-cols-3 gap-2 text-center text-[10px]"><div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded"><p class="font-bold text-blue-700">${stats.piSinStock}</p><p class="text-[8px] text-slate-600">Sin Stock</p></div><div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded"><p class="font-bold text-purple-700">${stats.pi}</p><p class="text-[8px] text-slate-600">En Pedido</p></div><div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded"><p class="font-bold text-emerald-700">${stats.piVendidas}</p><p class="text-[8px] text-slate-600">Vendidas</p></div></div></div><div class="border-t border-slate-200 dark:border-slate-700 pt-2"><h5 class="text-xs font-bold mb-2 uppercase text-slate-600">Financiero</h5><div class="grid grid-cols-3 gap-2 text-[10px]"><div class="bg-slate-100 dark:bg-slate-900/30 p-2 rounded"><p class="text-[8px] font-bold text-slate-600 uppercase">Ingresos</p><p class="font-bold text-slate-800 dark:text-slate-200">${stats.ingresos.toFixed(0)}€</p></div><div class="bg-slate-100 dark:bg-slate-900/30 p-2 rounded"><p class="text-[8px] font-bold text-slate-600 uppercase">Costes</p><p class="font-bold text-slate-800 dark:text-slate-200">${stats.costes.toFixed(0)}€</p></div><div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded"><p class="text-[8px] font-bold text-emerald-600 uppercase">Beneficio</p><p class="font-bold text-emerald-700">${stats.ben.toFixed(0)}€</p></div></div><p class="text-[9px] text-slate-500 mt-2 text-center">Margen: <span class="font-bold text-slate-700">${stats.margen}%</span></p></div><div class="border-t border-slate-200 dark:border-slate-700 pt-2"><h4 class="font-bold text-xs mb-2 uppercase">Recomendaciones IA</h4><div class="space-y-2">${sug.map(s=>`<div class="suggestion-card ${s.t==="cr"?"critical":s.t==="wa"?"warning":s.t==="su"?"success":"info"}"><div class="flex gap-2"><i data-lucide="${s.i}" class="w-4 h-4 flex-shrink-0"></i><div><p class="text-[9px] font-bold">${s.h}</p><p class="text-[8px] text-slate-600 dark:text-slate-400 mt-0.5">${s.d}</p><p class="text-[8px] font-bold mt-1 text-blue-600">💡 ${s.a}</p></div></div></div>`).join("")}</div></div></div>`;
+        $("ai-dashboard-summary").innerHTML = `✓ Análisis 360°: ${stats.p} pendientes, ${stats.u} urgencias, ${stats.garExpirada} garantías expiradas. Beneficio: ${stats.ben.toFixed(2)}€ (${stats.margen}% margen).`;
+        lucide.createIcons();
+    }, 800);
+}
+
+function closeAIModal() { $('ai-modal').classList.add('hidden'); }
+function openReminderModal() { $('reminder-modal').classList.remove('hidden'); $('reminder-modal').classList.add('flex'); }
+function closeReminderModal() { $('reminder-modal').classList.add('hidden'); }
+$('reminder-form').onsubmit = async (e) => { e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); d.completed = false; await db.recordatorios.add(d); closeReminderModal(); updateAlerts(await db.reparaciones.toArray()); showToast('Añadido'); };
+
+// Data Management
+async function exportData() {
+    const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray() };
+    const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
+}
+async function importData(e) {
+    const f = e.target.files[0]; if(!f) return;
+    try {
+        const d = JSON.parse(await f.text());
+        for(let s in d) { for(let i of d[s]) { delete i.id; await db[s].add(i); } }
+        showToast('Importado'); showSection(currentSection);
+    } catch(err) { showToast('Error', 'error'); }
+}
+
+window.showSection = showSection; window.openModal = openModal; window.closeModal = closeModal;
+window.viewDetail = viewDetail; window.closeDetailModal = closeDetailModal; window.login = login;
+window.logout = logout; window.toggleDarkMode = toggleDarkMode; window.generateAISuggestions = generateAISuggestions;
+window.closeAIModal = closeAIModal; window.openReminderModal = openReminderModal; window.closeReminderModal = closeReminderModal;
+window.exportData = exportData; window.importData = importData; window.handleFile = handleFile; window.filterTable = filterTable;
+
+// Agenda
+function openReminderForm() {
+    const userSelect = $('reminder-user-select');
+    userSelect.innerHTML = USUARIOS.map(u => `<option>${u}</option>`).join('');
+    $('reminder-modal').style.display = 'flex';
+    $('foto-preview').style.display = 'none';
+    $('reminder-form').reset();
+}
+function closeReminderModal() {
+    $('reminder-modal').style.display = 'none';
+}
+function previewFoto(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = $('foto-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+async function renderAgenda() {
+    const recs = await db.recordatorios.toArray();
+    const container = $('agenda-list');
+    if(!recs.length) { container.innerHTML = '<p class="text-center text-slate-400 text-sm py-6 italic">Sin recordatorios</p>'; return; }
+    container.innerHTML = recs.map(r => `<div class="flat-card p-4 border-l-4 ${r.priority === 'critical' ? 'border-red-500' : r.priority === 'warning' ? 'border-amber-500' : 'border-blue-500'}"><div class="flex justify-between items-start"><div class="flex-1"><p class="font-bold text-sm">${escapeHtml(r.title)}</p><p class="text-xs text-slate-500 mt-1">${r.dueDate ? new Date(r.dueDate).toLocaleDateString() : ''} ${r.dueTime ? r.dueTime : ''}</p></div><button onclick="deleteReminder(${r.id})" class="text-red-500 hover:text-red-700 font-bold">✕</button></div>${r.description ? `<p class="text-xs text-slate-600 mt-2">${escapeHtml(r.description)}</p>` : ''}${r.referencia ? `<p class="text-xs text-blue-600 mt-1">Ref: ${escapeHtml(r.referencia)}</p>` : ''}${r.observaciones ? `<p class="text-xs text-slate-500 mt-1 italic">${escapeHtml(r.observaciones)}</p>` : ''}${r.foto ? `<img src="${r.foto}" style="margin-top:8px; max-width:100%; border-radius:6px; max-height:150px;">` : ''}</div>`).join('');
+}
+$('reminder-form').onsubmit = async (e) => { 
+    e.preventDefault(); 
+    const formData = new FormData(e.target);
+    const d = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        dueDate: formData.get('dueDate'),
+        dueTime: formData.get('dueTime'),
+        priority: formData.get('priority'),
+        category: formData.get('category'),
+        usuario: formData.get('usuario'),
+        referencia: formData.get('referencia'),
+        observaciones: formData.get('observaciones'),
+        completed: false
+    };
+    const fotoFile = formData.get('foto');
+    if(fotoFile && fotoFile.size > 0) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            d.foto = e.target.result;
+            await db.recordatorios.add(d);
+            closeReminderModal();
+            renderAgenda();
+            showToast('RECORDATORIO GUARDADO');
         };
-        const formatEuro = (val) => val.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
-
-        // --- INIT ---
-        window.onload = async () => {
-            lucide.createIcons();
-            updateDate();
-            await initAjustes();
-            showSection('dashboard');
-        };
-
-        async function initAjustes() {
-            const defaults = {
-                empresa_nombre: 'MI EMPRESA S.L.',
-                empresa_cif: 'B12345678',
-                empresa_direccion: 'Calle Principal 123, 28001 Madrid',
-                empresa_logo: '',
-                empresa_iban: 'ES00 0000 0000 0000 0000 0000',
-                verifactu_cert: 'CERT-999999'
-            };
-            for (const key in defaults) {
-                const exist = await db.ajustes.get(key);
-                if (!exist) await db.ajustes.add({ id: key, valor: defaults[key] });
-            }
-        }
-
-        function updateDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', options);
-        }
-
-        // --- NAVIGATION ---
-        function showSection(sectionId) {
-            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('sidebar-active'));
-            
-            const titles = { 
-                dashboard: 'Dashboard', sat: 'Órdenes S.A.T.', clientes: 'Clientes', proveedores: 'Proveedores', articulos: 'Artículos y Stock',
-                presupuestos: 'Presupuestos', albaranes: 'Albaranes de Venta', facturas: 'Facturas Emitidas',
-                compras: 'Pedidos de Compra', caja: 'Movimientos de Caja', cierres: 'Cierres de Caja', reportes: 'Reportes Pro', ajustes: 'Ajustes Empresa'
-            };
-
-            activeType = sectionId;
-            if (['sat', 'clientes', 'proveedores', 'articulos', 'presupuestos', 'albaranes', 'facturas', 'compras', 'caja', 'cierres'].includes(sectionId)) {
-                document.getElementById('section-listado').classList.remove('hidden');
-                
-                const btnText = {
-                    sat: 'Nueva Orden S.A.T.', clientes: 'Nuevo Cliente', proveedores: 'Nuevo Proveedor', articulos: 'Nuevo Artículo',
-                    presupuestos: 'Nuevo Presupuesto', albaranes: 'Nuevo Albarán', facturas: 'Nueva Factura',
-                    compras: 'Nuevo Pedido Compra', caja: 'Nuevo Movimiento', cierres: 'Nuevo Cierre Caja'
-                };
-                
-                const btn = document.getElementById('btn-new-item');
-                document.getElementById('btn-new-item-text').innerText = btnText[sectionId];
-                
-                if (sectionId === 'sat') btn.onclick = () => openModal('sat');
-                else if (sectionId === 'clientes') btn.onclick = () => openModal('cliente');
-                else if (sectionId === 'proveedores') btn.onclick = () => openModal('proveedor');
-                else if (sectionId === 'articulos') btn.onclick = () => openModal('articulo');
-                else if (sectionId === 'presupuestos') btn.onclick = () => openModal('presupuesto');
-                else if (sectionId === 'albaranes') btn.onclick = () => openModal('albaran');
-                else if (sectionId === 'facturas') btn.onclick = () => openModal('factura');
-                else if (sectionId === 'compras') btn.onclick = () => openModal('compra');
-                else if (sectionId === 'caja') btn.onclick = () => openModal('caja');
-                else if (sectionId === 'cierres') btn.onclick = () => openModal('cierre');
-
-                loadListado();
-            } else {
-                document.getElementById(`section-${sectionId}`).classList.remove('hidden');
-            }
-
-            document.getElementById(`nav-${sectionId}`).classList.add('sidebar-active');
-            document.getElementById('section-title').innerText = titles[sectionId];
-            
-            if (sectionId === 'dashboard') updateDashboard();
-            if (sectionId === 'reportes') loadReportes();
-            if (sectionId === 'ajustes') loadAjustes();
-            lucide.createIcons();
-        }
-
-        async function loadAjustes() {
-            const items = await db.ajustes.toArray();
-            items.forEach(i => {
-                const el = document.getElementById(`adj-${i.id.split('_')[1]}`);
-                if (el) el.value = i.valor;
-            });
-        }
-
-        async function saveAjustes(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            for (const [key, value] of formData.entries()) {
-                await db.ajustes.put({ id: key, valor: value });
-            }
-            Swal.fire('Ajustes Guardados', 'La configuración de la empresa se ha actualizado', 'success');
-        }
-
-        // --- DASHBOARD ---
-        async function updateDashboard() {
-            const hoy = new Date().toISOString().split('T')[0];
-            const facturasHoy = await db.facturas.where('fecha').equals(hoy).toArray();
-            const totalVentasHoy = facturasHoy.reduce((acc, f) => acc + f.total, 0);
-            
-            const movsCaja = await db.caja_movimientos.toArray();
-            const efectivo = movsCaja.filter(m => m.metodoPago === 'Efectivo').reduce((acc, m) => acc + (m.tipo === 'Entrada' ? m.importe : -m.importe), 0);
-            
-            const presPendientes = await db.presupuestos.where('estado').equals('Pendiente').count();
-            const stockCritico = await db.articulos.filter(a => a.controlarStock && a.stock <= 5).count();
-            const satActivos = await db.sat.where('estado').anyOf(['Recibido', 'En Taller', 'Esperando Piezas']).count();
-
-            document.getElementById('stat-ventas-hoy').innerText = formatEuro(totalVentasHoy);
-            document.getElementById('stat-caja-efectivo').innerText = formatEuro(efectivo);
-            document.getElementById('stat-pendientes').innerText = presPendientes;
-            document.getElementById('stat-stock-critico').innerText = stockCritico;
-            document.getElementById('stat-sat-activos').innerText = satActivos;
-
-            const recent = await db.facturas.orderBy('id').reverse().limit(5).toArray();
-            const container = document.getElementById('recent-ops');
-            container.innerHTML = '';
-            for (const f of recent) {
-                const cliente = await db.clientes.get(parseInt(f.clienteId));
-                container.innerHTML += `
-                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-2 bg-white rounded-lg text-blue-600 border border-slate-200"><i data-lucide="receipt" class="w-4 h-4"></i></div>
-                            <div>
-                                <div class="text-xs font-black text-slate-800">${f.numero}</div>
-                                <div class="text-[10px] text-slate-400">${cliente?.nombre || 'Cliente Final'}</div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm font-black text-slate-800">${formatEuro(f.total)}</div>
-                            <div class="text-[9px] font-bold text-blue-500 uppercase">${f.metodoPago}</div>
-                        </div>
-                    </div>
-                `;
-            }
-            renderMainChart();
-            lucide.createIcons();
-        }
-
-        function renderMainChart() {
-            const ctx = document.getElementById('chart-main').getContext('2d');
-            if (charts.main) charts.main.destroy();
-            charts.main = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                    datasets: [{ 
-                        label: 'Ventas', 
-                        data: [120, 190, 300, 250, 400, 550, 480], 
-                        borderColor: '#3b82f6', 
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 4,
-                        pointRadius: 0
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
-                }
-            });
-        }
-
-        // --- LISTADOS ---
-        async function loadListado() {
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const table = activeType;
-            let items = await db[table].toArray();
-            
-            const thead = document.getElementById('listado-thead');
-            const tbody = document.getElementById('listado-tbody');
-            tbody.innerHTML = '';
-
-            if (activeType === 'clientes' || activeType === 'proveedores') {
-                thead.innerHTML = `<tr><th class="px-6 py-4">Nombre / CIF</th><th class="px-6 py-4">Contacto</th><th class="px-6 py-4 text-right">Acciones</th></tr>`;
-                items.filter(i => i.nombre.toLowerCase().includes(search) || i.cif.toLowerCase().includes(search)).forEach(i => {
-                    tbody.innerHTML += `<tr>
-                        <td class="px-6 py-4"><div class="font-black text-slate-800">${i.nombre}</div><div class="text-[10px] text-slate-400">${i.cif}</div></td>
-                        <td class="px-6 py-4 text-xs text-slate-500">${i.email || '-'}<br>${i.telefono || '-'}</td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <button onclick="viewFicha('${activeType.slice(0,-1)}', ${i.id})" class="text-blue-600 font-bold hover:underline">Ficha</button>
-                            <button onclick="openModal('${activeType.slice(0,-1)}', ${i.id})" class="text-slate-400 hover:text-slate-800"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <button onclick="deleteItem('${table}', ${i.id}, loadListado)" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </td>
-                    </tr>`;
-                });
-            } else if (activeType === 'articulos') {
-                thead.innerHTML = `<tr><th class="px-6 py-4">Ref / Nombre</th><th class="px-6 py-4">Stock</th><th class="px-6 py-4">Precio / IVA</th><th class="px-6 py-4 text-right">Acciones</th></tr>`;
-                items.filter(i => i.nombre.toLowerCase().includes(search) || i.referencia.toLowerCase().includes(search)).forEach(i => {
-                    const stockClass = i.controlarStock && i.stock <= 5 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600';
-                    tbody.innerHTML += `<tr>
-                        <td class="px-6 py-4"><div class="font-mono text-[10px] text-blue-600">${i.referencia}</div><div class="font-black text-slate-800">${i.nombre}</div></td>
-                        <td class="px-6 py-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${stockClass}">${i.controlarStock ? i.stock : '∞'}</span></td>
-                        <td class="px-6 py-4 text-xs font-bold">${formatEuro(i.precio)} <span class="text-[10px] text-slate-400">(${i.iva}%)</span></td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <button onclick="viewFicha('articulo', ${i.id})" class="text-blue-600 font-bold hover:underline">Ficha</button>
-                            <button onclick="openModal('articulo', ${i.id})" class="text-slate-400 hover:text-slate-800"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <button onclick="deleteItem('articulos', ${i.id}, loadListado)" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </td>
-                    </tr>`;
-                });
-            } else if (activeType === 'sat') {
-                thead.innerHTML = `<tr><th class="px-6 py-4">Nº Orden</th><th class="px-6 py-4">Cliente / Equipo</th><th class="px-6 py-4">Estado</th><th class="px-6 py-4 text-right">Acciones</th></tr>`;
-                for (const i of items) {
-                    const cliente = await db.clientes.get(parseInt(i.clienteId));
-                    if (search && !i.numero.toLowerCase().includes(search) && !cliente?.nombre.toLowerCase().includes(search)) continue;
-                    tbody.innerHTML += `<tr>
-                        <td class="px-6 py-4 font-black text-blue-600">${i.numero}</td>
-                        <td class="px-6 py-4"><div class="font-bold text-slate-800">${cliente?.nombre || 'Desconocido'}</div><div class="text-[10px] text-slate-400">${i.marca} ${i.modelo}</div></td>
-                        <td class="px-6 py-4"><span class="status-badge status-${i.estado.toLowerCase().replace(' ', '')}">${i.estado}</span></td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <button onclick="viewFicha('sat', ${i.id})" class="text-blue-600 font-bold hover:underline">Ficha S.A.T.</button>
-                            <button onclick="openModal('sat', ${i.id})" class="text-slate-400 hover:text-slate-800"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <button onclick="deleteItem('sat', ${i.id}, loadListado)" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </td>
-                    </tr>`;
-                }
-            } else if (['presupuestos', 'albaranes', 'facturas', 'compras'].includes(activeType)) {
-                thead.innerHTML = `<tr><th class="px-6 py-4">Número</th><th class="px-6 py-4">Entidad</th><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Total</th><th class="px-6 py-4 text-right">Acciones</th></tr>`;
-                for (const i of items) {
-                    let entity = null;
-                    if (activeType === 'compras') entity = await db.proveedores.get(parseInt(i.proveedorId));
-                    else entity = await db.clientes.get(parseInt(i.clienteId));
-                    
-                    if (search && !i.numero.toLowerCase().includes(search) && !entity?.nombre.toLowerCase().includes(search)) continue;
-
-                    tbody.innerHTML += `<tr>
-                        <td class="px-6 py-4 font-black text-blue-600">${i.numero}</td>
-                        <td class="px-6 py-4 text-xs font-bold text-slate-700">${entity?.nombre || 'Desconocido'}</td>
-                        <td class="px-6 py-4 text-xs text-slate-400">${i.fecha}</td>
-                        <td class="px-6 py-4 font-black text-slate-800">${formatEuro(i.total)}</td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <button onclick="viewDocument('${activeType.slice(0,-1)}', ${i.id})" class="text-slate-400 hover:text-slate-800"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                            <button onclick="printDocument('${activeType.slice(0,-1)}', ${i.id})" class="text-slate-400 hover:text-slate-800"><i data-lucide="printer" class="w-4 h-4"></i></button>
-                            ${activeType === 'presupuestos' ? `<button onclick="convertDoc(${i.id}, 'albaran')" class="text-emerald-600 hover:text-emerald-800" title="Convertir a Albarán"><i data-lucide="truck" class="w-4 h-4"></i></button>` : ''}
-                            ${(activeType === 'presupuestos' || activeType === 'albaranes') ? `<button onclick="convertDoc(${i.id}, 'factura')" class="text-blue-600 hover:text-blue-800" title="Convertir a Factura"><i data-lucide="receipt" class="w-4 h-4"></i></button>` : ''}
-                            <button onclick="deleteItem('${table}', ${i.id}, loadListado)" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </td>
-                    </tr>`;
-                }
-            } else if (activeType === 'caja') {
-                thead.innerHTML = `<tr><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Concepto</th><th class="px-6 py-4">Importe</th><th class="px-6 py-4 text-right">Acciones</th></tr>`;
-                items.reverse().forEach(i => {
-                    const color = i.tipo === 'Entrada' ? 'text-emerald-600' : 'text-rose-600';
-                    tbody.innerHTML += `<tr>
-                        <td class="px-6 py-4 text-xs text-slate-400">${i.fecha}</td>
-                        <td class="px-6 py-4"><div class="font-bold text-slate-800">${i.concepto}</div><div class="text-[10px] text-slate-400 uppercase">${i.metodoPago}</div></td>
-                        <td class="px-6 py-4 font-black ${color}">${i.tipo === 'Entrada' ? '+' : '-'}${formatEuro(i.importe)}</td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="deleteItem('caja_movimientos', ${i.id}, loadListado)" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </td>
-                    </tr>`;
-                });
-            } else if (activeType === 'cierres') {
-                thead.innerHTML = `<tr><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Ventas Totales</th><th class="px-6 py-4">Efectivo Real</th><th class="px-6 py-4">Descuadre</th><th class="px-6 py-4 text-right">Acciones</th></tr>`;
-                items.reverse().forEach(i => {
-                    const descColor = i.descuadre === 0 ? 'text-emerald-600' : 'text-rose-600';
-                    tbody.innerHTML += `<tr>
-                        <td class="px-6 py-4 font-bold">${i.fecha}</td>
-                        <td class="px-6 py-4">${formatEuro(i.totalVentas)}</td>
-                        <td class="px-6 py-4 font-black">${formatEuro(i.totalEfectivo)}</td>
-                        <td class="px-6 py-4 font-bold ${descColor}">${formatEuro(i.descuadre)}</td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="deleteItem('cierres_caja', ${i.id}, loadListado)" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </td>
-                    </tr>`;
-                });
-            }
-            lucide.createIcons();
-        }
-
-        // --- MODALS ---
-        async function openModal(type, id = null) {
-            const container = document.getElementById('modal-container');
-            const title = document.getElementById('modal-title');
-            const content = document.getElementById('modal-content');
-            container.classList.remove('hidden');
-            
-            let data = id ? await db[type === 'cliente' ? 'clientes' : type === 'proveedor' ? 'proveedores' : type].get(id) : null;
-
-            if (type === 'cliente' || type === 'proveedor') {
-                title.innerText = id ? `Editar ${type.toUpperCase()}` : `Nuevo ${type.toUpperCase()}`;
-                content.innerHTML = `
-                    <form onsubmit="saveEntidad(event, '${type}', ${id})" class="grid grid-cols-2 gap-6">
-                        <div class="col-span-2"><label class="block text-xs font-black text-slate-400 uppercase mb-2">Nombre / Razón Social</label><input type="text" name="nombre" value="${data?.nombre || ''}" required class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">CIF / NIF</label><input type="text" name="cif" value="${data?.cif || ''}" required class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Email</label><input type="email" name="email" value="${data?.email || ''}" class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Teléfono</label><input type="text" name="telefono" value="${data?.telefono || ''}" class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                        <div class="col-span-2"><label class="block text-xs font-black text-slate-400 uppercase mb-2">Dirección Fiscal</label><input type="text" name="direccion" value="${data?.direccion || ''}" class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">CP</label><input type="text" name="cp" value="${data?.cp || ''}" class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Ciudad</label><input type="text" name="ciudad" value="${data?.ciudad || ''}" class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                        <div class="col-span-2 flex justify-end space-x-3 mt-6"><button type="button" onclick="closeModal()" class="px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-400 hover:bg-slate-50">Cancelar</button><button type="submit" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-black shadow-lg shadow-blue-500/20">Guardar Registro</button></div>
-                    </form>
-                `;
-            } else if (type === 'articulo') {
-                const cats = await db.categorias.toArray();
-                title.innerText = id ? 'Editar Artículo' : 'Nuevo Artículo';
-                content.innerHTML = `
-                    <form onsubmit="saveArticulo(event, ${id})" class="grid grid-cols-2 gap-6">
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Referencia</label><input type="text" name="referencia" value="${data?.referencia || ''}" required class="w-full border border-slate-200 p-3 rounded-xl font-mono text-blue-600"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Nombre Comercial</label><input type="text" name="nombre" value="${data?.nombre || ''}" required class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                        <div class="col-span-2"><label class="block text-xs font-black text-slate-400 uppercase mb-2">Descripción Detallada</label><textarea name="descripcion" class="w-full border border-slate-200 p-3 rounded-xl h-24">${data?.descripcion || ''}</textarea></div>
-                        <div class="col-span-2"><label class="block text-xs font-black text-slate-400 uppercase mb-2">URL Foto Externa (Link)</label><input type="text" name="fotoUrl" value="${data?.fotoUrl || ''}" placeholder="https://ejemplo.com/foto.jpg" class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Categoría</label>
-                            <select name="categoriaId" class="w-full border border-slate-200 p-3 rounded-xl">
-                                <option value="">Sin categoría</option>
-                                ${cats.map(c => `<option value="${c.id}" ${data?.categoriaId == c.id ? 'selected' : ''}>${c.nombre}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">IVA Aplicable (%)</label>
-                            <select name="iva" class="w-full border border-slate-200 p-3 rounded-xl">
-                                <option value="21" ${data?.iva == 21 ? 'selected' : ''}>21% (General)</option>
-                                <option value="10" ${data?.iva == 10 ? 'selected' : ''}>10% (Reducido)</option>
-                                <option value="4" ${data?.iva == 4 ? 'selected' : ''}>4% (Superreducido)</option>
-                                <option value="0" ${data?.iva == 0 ? 'selected' : ''}>0% (Exento)</option>
-                            </select>
-                        </div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Precio Base (€)</label><input type="text" name="precio" value="${data?.precio || 0}" required class="w-full border border-slate-200 p-3 rounded-xl font-bold"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Stock Inicial</label><input type="text" name="stock" value="${data?.stock || 0}" required class="w-full border border-slate-200 p-3 rounded-xl font-bold"></div>
-                        <div class="col-span-2 flex items-center space-x-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                            <input type="checkbox" name="controlarStock" id="controlarStock" ${data?.controlarStock !== false ? 'checked' : ''} class="w-5 h-5 text-blue-600 rounded">
-                            <label for="controlarStock" class="font-black text-blue-800 text-sm">Activar control de inventario para este artículo</label>
-                        </div>
-                        <div class="col-span-2 flex justify-end space-x-3 mt-6"><button type="button" onclick="closeModal()" class="px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-400">Cancelar</button><button type="submit" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-black shadow-lg shadow-blue-500/20">Guardar Artículo</button></div>
-                    </form>
-                `;
-            } else if (type === 'sat') {
-                const clientes = await db.clientes.toArray();
-                const num = data?.numero || `SAT-${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}-${Math.floor(Math.random()*10000)}`;
-                title.innerText = id ? 'Editar Orden S.A.T.' : 'Nueva Orden S.A.T.';
-                content.innerHTML = `
-                    <form onsubmit="saveSAT(event, ${id})" class="space-y-8">
-                        <div class="grid grid-cols-3 gap-6">
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Nº Orden</label><input type="text" name="numero" value="${num}" readonly class="w-full border border-slate-200 p-3 rounded-xl bg-slate-50 font-mono text-blue-600 font-bold"></div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Cliente</label>
-                                <select name="clienteId" required class="w-full border border-slate-200 p-3 rounded-xl">
-                                    <option value="">Seleccionar...</option>
-                                    ${clientes.map(c => `<option value="${c.id}" ${data?.clienteId == c.id ? 'selected' : ''}>${c.nombre}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Estado</label>
-                                <select name="estado" class="w-full border border-slate-200 p-3 rounded-xl font-bold">
-                                    <option value="Recibido" ${data?.estado === 'Recibido' ? 'selected' : ''}>Recibido</option>
-                                    <option value="En Taller" ${data?.estado === 'En Taller' ? 'selected' : ''}>En Taller</option>
-                                    <option value="Esperando Piezas" ${data?.estado === 'Esperando Piezas' ? 'selected' : ''}>Esperando Piezas</option>
-                                    <option value="Reparado" ${data?.estado === 'Reparado' ? 'selected' : ''}>Reparado</option>
-                                    <option value="Entregado" ${data?.estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-6">
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Marca</label><input type="text" name="marca" value="${data?.marca || ''}" required class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Modelo</label><input type="text" name="modelo" value="${data?.modelo || ''}" required class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Nº Serie</label><input type="text" name="serie" value="${data?.serie || ''}" class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-6">
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Avería Reportada</label><textarea name="averia" required class="w-full border border-slate-200 p-3 rounded-xl h-24">${data?.averia || ''}</textarea></div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Accesorios / Notas</label><textarea name="accesorios" class="w-full border border-slate-200 p-3 rounded-xl h-24">${data?.averia || ''}</textarea></div>
-                        </div>
-                        <div class="flex justify-end space-x-3"><button type="button" onclick="closeModal()" class="px-8 py-3 border border-slate-200 rounded-xl font-bold text-slate-400">Cancelar</button><button type="submit" class="px-10 py-3 bg-blue-600 text-white rounded-xl font-black shadow-lg shadow-blue-500/20">Guardar Orden S.A.T.</button></div>
-                    </form>
-                `;
-            } else if (['presupuesto', 'albaran', 'factura', 'compra'].includes(type)) {
-                const clientes = await db.clientes.toArray();
-                const proveedores = await db.proveedores.toArray();
-                const prefix = { presupuesto: 'PRE', albaran: 'ALB', factura: 'FAC', compra: 'COM' }[type];
-                const num = data?.numero || `${prefix}-${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}-${Math.floor(Math.random()*10000)}`;
-                
-                title.innerText = id ? `Editar ${type.toUpperCase()}` : `Nuevo ${type.toUpperCase()}`;
-                content.innerHTML = `
-                    <form onsubmit="saveDocument(event, '${type}', ${id})" class="space-y-8">
-                        <div class="grid grid-cols-3 gap-6">
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Nº Documento</label><input type="text" name="numero" value="${num}" readonly class="w-full border border-slate-200 p-3 rounded-xl bg-slate-50 font-mono text-blue-600 font-bold"></div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">${type === 'compra' ? 'Proveedor' : 'Cliente'}</label>
-                                <select name="${type === 'compra' ? 'proveedorId' : 'clienteId'}" required class="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                                    <option value="">Seleccionar...</option>
-                                    ${type === 'compra' 
-                                        ? proveedores.map(p => `<option value="${p.id}" ${data?.proveedorId == p.id ? 'selected' : ''}>${p.nombre}</option>`).join('')
-                                        : clientes.map(c => `<option value="${c.id}" ${data?.clienteId == c.id ? 'selected' : ''}>${c.nombre}</option>`).join('')
-                                    }
-                                </select>
-                            </div>
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Fecha Emisión</label><input type="date" name="fecha" value="${data?.fecha || new Date().toISOString().split('T')[0]}" required class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                        </div>
-                        
-                        ${type === 'factura' ? `
-                        <div class="grid grid-cols-3 gap-6">
-                            <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Método de Pago</label>
-                                <select name="metodoPago" class="w-full border border-slate-200 p-3 rounded-xl">
-                                    <option value="Efectivo" ${data?.metodoPago === 'Efectivo' ? 'selected' : ''}>Efectivo</option>
-                                    <option value="Tarjeta" ${data?.metodoPago === 'Tarjeta' ? 'selected' : ''}>Tarjeta</option>
-                                    <option value="Transferencia" ${data?.metodoPago === 'Transferencia' ? 'selected' : ''}>Transferencia</option>
-                                    <option value="Bizum" ${data?.metodoPago === 'Bizum' ? 'selected' : ''}>Bizum</option>
-                                </select>
-                            </div>
-                        </div>` : ''}
-
-                        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                            <table class="w-full text-left">
-                                <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest">
-                                    <tr><th class="p-4">Artículo</th><th class="p-4 w-24">Cant.</th><th class="p-4 w-32">Precio</th><th class="p-4 w-24">IVA %</th><th class="p-4 w-32 text-right">Total</th><th class="p-4 w-12"></th></tr>
-                                </thead>
-                                <tbody id="lineas-body"></tbody>
-                            </table>
-                            <button type="button" onclick="addLinea()" class="p-4 text-blue-600 hover:bg-blue-50 w-full text-center border-t border-slate-100 font-black text-xs uppercase tracking-widest transition-colors">+ Añadir Concepto</button>
-                        </div>
-
-                        <div class="flex justify-end">
-                            <div class="w-80 bg-slate-900 text-white p-8 rounded-3xl space-y-3 shadow-xl shadow-slate-900/20">
-                                <div class="flex justify-between text-xs text-slate-400 font-bold uppercase tracking-widest"><span>Subtotal:</span><span id="doc-subtotal">0.00 €</span></div>
-                                <div class="flex justify-between text-xs text-slate-400 font-bold uppercase tracking-widest"><span>IVA:</span><span id="doc-iva">0.00 €</span></div>
-                                <div class="flex justify-between font-black text-2xl border-t border-slate-800 pt-4 mt-2 text-blue-400"><span>TOTAL:</span><span id="doc-total">0.00 €</span></div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end space-x-3"><button type="button" onclick="closeModal()" class="px-8 py-3 border border-slate-200 rounded-xl font-bold text-slate-400">Cancelar</button><button type="submit" class="px-10 py-3 bg-blue-600 text-white rounded-xl font-black shadow-lg shadow-blue-500/20">Guardar Documento</button></div>
-                    </form>
-                `;
-                
-                if (id) {
-                    const lineas = await db[`lineas_${type}`].where(`${type}Id`).equals(id).toArray();
-                    for (const l of lineas) addLinea(l);
-                } else {
-                    addLinea();
-                }
-            } else if (type === 'caja') {
-                title.innerText = 'Nuevo Movimiento de Caja';
-                content.innerHTML = `
-                    <form onsubmit="saveCajaMov(event)" class="grid grid-cols-2 gap-6">
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Tipo de Movimiento</label>
-                            <select name="tipo" class="w-full border border-slate-200 p-3 rounded-xl">
-                                <option value="Entrada">Entrada (Ingreso)</option>
-                                <option value="Salida">Salida (Gasto)</option>
-                            </select>
-                        </div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Método</label>
-                            <select name="metodoPago" class="w-full border border-slate-200 p-3 rounded-xl">
-                                <option value="Efectivo">Efectivo</option>
-                                <option value="Tarjeta">Tarjeta</option>
-                                <option value="Transferencia">Transferencia</option>
-                            </select>
-                        </div>
-                        <div class="col-span-2"><label class="block text-xs font-black text-slate-400 uppercase mb-2">Concepto / Descripción</label><input type="text" name="concepto" required class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Importe (€)</label><input type="text" name="importe" required class="w-full border border-slate-200 p-3 rounded-xl font-black text-lg"></div>
-                        <div><label class="block text-xs font-black text-slate-400 uppercase mb-2">Fecha</label><input type="date" name="fecha" value="${new Date().toISOString().split('T')[0]}" required class="w-full border border-slate-200 p-3 rounded-xl"></div>
-                        <div class="col-span-2 flex justify-end space-x-3 mt-6"><button type="button" onclick="closeModal()" class="px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-400">Cancelar</button><button type="submit" class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-black shadow-lg shadow-emerald-500/20">Registrar Movimiento</button></div>
-                    </form>
-                `;
-            } else if (type === 'cierre') {
-                title.innerText = 'Cierre de Caja Profesional';
-                const hoy = new Date().toISOString().split('T')[0];
-                const movs = await db.caja_movimientos.where('fecha').equals(hoy).toArray();
-                const efectivoEsperado = movs.filter(m => m.metodoPago === 'Efectivo').reduce((acc, m) => acc + (m.tipo === 'Entrada' ? m.importe : -m.importe), 0);
-                const tarjetaEsperado = movs.filter(m => m.metodoPago === 'Tarjeta').reduce((acc, m) => acc + m.importe, 0);
-                
-                content.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="space-y-6">
-                            <h4 class="text-sm font-black uppercase text-slate-500 tracking-widest">Contador de Efectivo (Euros)</h4>
-                            <div class="grid grid-cols-2 gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                ${[500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01].map(v => `
-                                    <div class="flex items-center justify-between space-x-2">
-                                        <span class="text-xs font-bold w-12">${v >= 5 ? v + ' €' : (v*100).toFixed(0) + ' cts'}</span>
-                                        <input type="number" data-valor="${v}" oninput="updateCierreTotal()" class="coin-input w-20 border border-slate-200 p-1.5 rounded-lg text-center text-xs font-bold" value="0" min="0">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        <div class="space-y-6">
-                            <h4 class="text-sm font-black uppercase text-slate-500 tracking-widest">Resumen del Cierre</h4>
-                            <div class="bg-slate-900 text-white p-8 rounded-3xl space-y-4 shadow-xl">
-                                <div class="flex justify-between text-xs opacity-60 font-bold uppercase tracking-widest"><span>Efectivo Esperado:</span><span id="cierre-efectivo-esperado">${formatEuro(efectivoEsperado)}</span></div>
-                                <div class="flex justify-between text-xs opacity-60 font-bold uppercase tracking-widest"><span>Tarjeta Esperado:</span><span>${formatEuro(tarjetaEsperado)}</span></div>
-                                <div class="flex justify-between font-black text-xl border-t border-slate-800 pt-4 mt-2 text-emerald-400"><span>Efectivo Contado:</span><span id="cierre-efectivo-contado">0.00 €</span></div>
-                                <div class="flex justify-between font-black text-xl border-t border-slate-800 pt-4 mt-2 text-rose-400"><span>Descuadre:</span><span id="cierre-descuadre">${formatEuro(-efectivoEsperado)}</span></div>
-                            </div>
-                            <form onsubmit="saveCierre(event, ${efectivoEsperado}, ${tarjetaEsperado})" class="space-y-4">
-                                <input type="hidden" name="fecha" value="${hoy}">
-                                <div class="flex justify-end space-x-3"><button type="button" onclick="closeModal()" class="px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-400">Cancelar</button><button type="submit" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-black shadow-lg shadow-blue-500/20">Finalizar Cierre</button></div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        function updateCierreTotal() {
-            let total = 0;
-            document.querySelectorAll('.coin-input').forEach(input => {
-                total += parseInt(input.value || 0) * parseFloat(input.dataset.valor);
-            });
-            const esperado = parsePrice(document.getElementById('cierre-efectivo-esperado').innerText.replace(/[^\d,.-]/g, '').replace(',', '.'));
-            document.getElementById('cierre-efectivo-contado').innerText = formatEuro(total);
-            document.getElementById('cierre-descuadre').innerText = formatEuro(total - esperado);
-        }
-
-        async function saveCierre(e, esperado, tarjeta) {
-            e.preventDefault();
-            const contado = parsePrice(document.getElementById('cierre-efectivo-contado').innerText.replace(/[^\d,.-]/g, '').replace(',', '.'));
-            const data = {
-                fecha: new FormData(e.target).get('fecha'),
-                totalVentas: esperado + tarjeta,
-                totalEfectivo: contado,
-                totalTarjeta: tarjeta,
-                descuadre: contado - esperado
-            };
-            await db.cierres_caja.add(data);
-            Swal.fire('Cierre Completado', 'El cierre de caja se ha registrado correctamente', 'success');
-            closeModal(); loadListado();
-        }
-
-        function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
-
-        // --- CRUD ACTIONS ---
-        async function saveEntidad(e, type, id) {
-            e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
-            id ? await db[type + 's'].update(id, data) : await db[type + 's'].add(data);
-            closeModal(); loadListado();
-        }
-
-        async function saveArticulo(e, id) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = {
-                referencia: formData.get('referencia'),
-                nombre: formData.get('nombre'),
-                descripcion: formData.get('descripcion'),
-                fotoUrl: formData.get('fotoUrl'),
-                categoriaId: formData.get('categoriaId'),
-                iva: parseInt(formData.get('iva')),
-                precio: parsePrice(formData.get('precio')),
-                stock: parsePrice(formData.get('stock')),
-                stockMinimo: 5,
-                controlarStock: formData.get('controlarStock') === 'on'
-            };
-            id ? await db.articulos.update(id, data) : await db.articulos.add(data);
-            Swal.fire({ title: 'Éxito', text: 'Artículo guardado', icon: 'success', timer: 1000, showConfirmButton: false });
-            closeModal(); loadListado();
-        }
-
-        async function saveSAT(e, id) {
-            e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
-            id ? await db.sat.update(id, data) : await db.sat.add(data);
-            Swal.fire('Éxito', 'Orden S.A.T. guardada', 'success');
-            closeModal(); loadListado(); updateDashboard();
-        }
-
-        async function saveCajaMov(e) {
-            e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
-            data.importe = parsePrice(data.importe);
-            await db.caja_movimientos.add(data);
-            closeModal(); loadListado(); updateDashboard();
-        }
-
-        async function deleteItem(table, id, callback) {
-            const result = await Swal.fire({ title: '¿Eliminar registro?', text: 'Esta acción no se puede deshacer', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', confirmButtonColor: '#e11d48' });
-            if (result.isConfirmed) {
-                await db[table].delete(id);
-                callback();
-            }
-        }
-
-        // --- DOCUMENT LOGIC ---
-        async function addLinea(data = null) {
-            const tbody = document.getElementById('lineas-body');
-            const articulos = await db.articulos.toArray();
-            const tr = document.createElement('tr');
-            tr.className = 'border-t border-slate-50';
-            tr.innerHTML = `
-                <td class="p-3">
-                    <select name="articuloId" onchange="updateLineaPrecio(this)" class="w-full border border-slate-200 p-2 rounded-lg text-xs">
-                        <option value="">Seleccionar artículo...</option>
-                        ${articulos.map(a => `<option value="${a.id}" data-precio="${a.precio}" data-iva="${a.iva}" ${data?.articuloId == a.id ? 'selected' : ''}>${a.nombre}</option>`).join('')}
-                    </select>
-                </td>
-                <td class="p-3"><input type="text" name="cantidad" value="${data?.cantidad || 1}" oninput="calculateDocTotal()" class="w-full border border-slate-200 p-2 rounded-lg text-xs text-center font-bold"></td>
-                <td class="p-3"><input type="text" name="precio" value="${data?.precio || 0}" oninput="calculateDocTotal()" class="w-full border border-slate-200 p-2 rounded-lg text-xs font-bold"></td>
-                <td class="p-3"><input type="text" name="iva" value="${data?.iva || 21}" oninput="calculateDocTotal()" class="w-full border border-slate-200 p-2 rounded-lg text-xs bg-slate-50 text-slate-400 text-center"></td>
-                <td class="p-3 font-black text-right text-slate-800 linea-total">0.00 €</td>
-                <td class="p-3 text-center"><button type="button" onclick="this.closest('tr').remove(); calculateDocTotal()" class="text-rose-400 hover:text-rose-600 transition-colors">×</button></td>
-            `;
-            tbody.appendChild(tr);
-            calculateDocTotal();
-        }
-
-        function updateLineaPrecio(select) {
-            const opt = select.options[select.selectedIndex];
-            const tr = select.closest('tr');
-            tr.querySelector('input[name="precio"]').value = opt.dataset.precio || 0;
-            tr.querySelector('input[name="iva"]').value = opt.dataset.iva || 21;
-            calculateDocTotal();
-        }
-
-        function calculateDocTotal() {
-            let subtotal = 0;
-            let totalIva = 0;
-            document.querySelectorAll('#lineas-body tr').forEach(tr => {
-                const cant = parsePrice(tr.querySelector('input[name="cantidad"]').value);
-                const precio = parsePrice(tr.querySelector('input[name="precio"]').value);
-                const ivaPerc = parsePrice(tr.querySelector('input[name="iva"]').value);
-                const sub = cant * precio;
-                const iva = sub * (ivaPerc / 100);
-                tr.querySelector('.linea-total').innerText = formatEuro(sub + iva);
-                subtotal += sub;
-                totalIva += iva;
-            });
-            document.getElementById('doc-subtotal').innerText = formatEuro(subtotal);
-            document.getElementById('doc-iva').innerText = formatEuro(totalIva);
-            document.getElementById('doc-total').innerText = formatEuro(subtotal + totalIva);
-        }
-
-        async function saveDocument(e, type, id) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const total = parsePrice(document.getElementById('doc-total').innerText.replace(/[^\d,.-]/g, '').replace(',', '.'));
-            
-            const docData = {
-                numero: formData.get('numero'),
-                fecha: formData.get('fecha'),
-                estado: 'Pendiente',
-                total: total
-            };
-
-            if (type === 'compra') docData.proveedorId = formData.get('proveedorId');
-            else docData.clienteId = formData.get('clienteId');
-            
-            if (type === 'factura') {
-                docData.metodoPago = formData.get('metodoPago');
-                docData.estado = 'Pagada';
-                docData.hash = btoa(docData.numero + docData.total + docData.fecha);
-            }
-
-            const table = type + 's';
-            const docId = id ? id : await db[table].add(docData);
-            if (id) await db[table].update(id, docData);
-
-            const lineTable = `lineas_${type}`;
-            await db[lineTable].where(`${type}Id`).equals(docId).delete();
-
-            const rows = e.target.querySelectorAll('#lineas-body tr');
-            for (const row of rows) {
-                const artId = row.querySelector('select[name="articuloId"]').value;
-                if (!artId) continue;
-                const cant = parsePrice(row.querySelector('input[name="cantidad"]').value);
-                const precio = parsePrice(row.querySelector('input[name="precio"]').value);
-                const iva = parsePrice(row.querySelector('input[name="iva"]').value);
-                
-                await db[lineTable].add({
-                    [`${type}Id`]: docId,
-                    articuloId: parseInt(artId),
-                    cantidad: cant,
-                    precio: precio,
-                    iva: iva
-                });
-
-                if (type === 'factura' || type === 'albaran' || type === 'compra') {
-                    const art = await db.articulos.get(parseInt(artId));
-                    if (art && art.controlarStock) {
-                        const newStock = type === 'compra' ? art.stock + cant : art.stock - cant;
-                        await db.articulos.update(art.id, { stock: newStock });
-                    }
-                }
-            }
-
-            if (!id && (type === 'factura' || type === 'compra')) {
-                await db.caja_movimientos.add({
-                    fecha: docData.fecha,
-                    tipo: type === 'factura' ? 'Entrada' : 'Salida',
-                    concepto: `${type.toUpperCase()} ${docData.numero}`,
-                    importe: docData.total,
-                    metodoPago: docData.metodoPago || 'Efectivo'
-                });
-            }
-
-            Swal.fire({ title: 'Éxito', text: 'Documento procesado', icon: 'success', timer: 1000, showConfirmButton: false });
-            closeModal();
-            showSection(type + 's');
-        }
-
-        // --- CONVERSION ---
-        async function convertDoc(id, targetType) {
-            const sourceDoc = await db[activeType].get(id);
-            const lines = await db[`lineas_${activeType.slice(0,-1)}`].where(`${activeType.slice(0,-1)}Id`).equals(id).toArray();
-
-            const prefix = targetType === 'albaran' ? 'ALB' : 'FAC';
-            const newNum = `${prefix}-${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}-${Math.floor(Math.random()*10000)}`;
-
-            const newDoc = {
-                numero: newNum,
-                clienteId: sourceDoc.clienteId,
-                fecha: new Date().toISOString().split('T')[0],
-                estado: 'Pendiente',
-                total: sourceDoc.total
-            };
-
-            if (targetType === 'factura') {
-                const { value: metodo } = await Swal.fire({
-                    title: 'Método de Pago',
-                    input: 'select',
-                    inputOptions: { 'Efectivo': 'Efectivo', 'Tarjeta': 'Tarjeta', 'Transferencia': 'Transferencia', 'Bizum': 'Bizum' },
-                    inputPlaceholder: 'Selecciona método',
-                    showCancelButton: true
-                });
-                if (!metodo) return;
-                newDoc.metodoPago = metodo;
-                newDoc.estado = 'Pagada';
-                newDoc.hash = btoa(newDoc.numero + newDoc.total);
-            }
-
-            const targetId = await db[targetType + 's'].add(newDoc);
-            for (const l of lines) {
-                await db[`lineas_${targetType}`].add({
-                    [`${targetType}Id`]: targetId,
-                    articuloId: l.articuloId,
-                    cantidad: l.cantidad,
-                    precio: l.precio,
-                    iva: l.iva
-                });
-                if (targetType === 'factura' || targetType === 'albaran') {
-                    const art = await db.articulos.get(l.articuloId);
-                    if (art && art.controlarStock) await db.articulos.update(l.articuloId, { stock: art.stock - l.cantidad });
-                }
-            }
-
-            if (targetType === 'factura') {
-                await db.caja_movimientos.add({
-                    fecha: newDoc.fecha,
-                    tipo: 'Entrada',
-                    concepto: `FACTURA ${newDoc.numero} (Desde ${activeType.slice(0,-1).toUpperCase()})`,
-                    importe: newDoc.total,
-                    metodoPago: newDoc.metodoPago
-                });
-            }
-
-            await db[activeType].update(id, { estado: 'Convertido' });
-            Swal.fire('Éxito', `Convertido a ${targetType.toUpperCase()}`, 'success');
-            showSection(targetType + 's');
-        }
-
-        // --- VIEW & PRINT ---
-        async function viewDocument(type, id) {
-            const doc = await db[type + 's'].get(id);
-            const entity = type === 'compra' ? await db.proveedores.get(parseInt(doc.proveedorId)) : await db.clientes.get(parseInt(doc.clienteId));
-            const lineas = await db[`lineas_${type}`].where(`${type}Id`).equals(id).toArray();
-            const ajustes = await db.ajustes.toArray();
-            const config = Object.fromEntries(ajustes.map(a => [a.id, a.valor]));
-            
-            const container = document.getElementById('modal-container');
-            const title = document.getElementById('modal-title');
-            const content = document.getElementById('modal-content');
-            
-            title.innerText = `${type.toUpperCase()} ${doc.numero}`;
-            
-            let html = `
-                <div class="invoice-box shadow-none border-none">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 50px;">
-                        <div>
-                            ${config.empresa_logo ? `<img src="${config.empresa_logo}" style="max-height: 60px; margin-bottom: 15px;">` : ''}
-                            <h1 style="font-size: 28px; font-weight: 900; color: #1e293b; margin: 0; letter-spacing: -1px;">${config.empresa_nombre}</h1>
-                            <p style="font-size: 12px; color: #64748b; margin-top: 5px; font-weight: 500;">CIF: ${config.empresa_cif}<br>${config.empresa_direccion}</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <h2 style="font-size: 20px; font-weight: 800; color: #2563eb; margin: 0; text-transform: uppercase; letter-spacing: 1px;">${type.toUpperCase()}</h2>
-                            <p style="font-size: 14px; color: #1e293b; margin-top: 8px; font-weight: 700;">Nº: ${doc.numero}</p>
-                            <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Fecha: ${doc.fecha}</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-bottom: 50px;">
-                        <div style="background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0;">
-                            <h3 style="font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px;">DATOS FISCALES RECEPTOR</h3>
-                            <p style="font-weight: 800; font-size: 16px; color: #0f172a; margin: 0;">${entity?.nombre || 'Cliente Final'}</p>
-                            <p style="font-size: 13px; color: #475569; margin-top: 8px; line-height: 1.6;">CIF: ${entity?.cif || '-'}<br>${entity?.direccion || ''}<br>${entity?.cp || ''} ${entity?.ciudad || ''}</p>
-                        </div>
-                        <div style="padding: 25px;">
-                            <h3 style="font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px;">DETALLES DEL PAGO</h3>
-                            <p style="font-size: 13px; color: #475569; margin: 0;">Estado: <strong style="color: #2563eb;">${doc.estado}</strong><br>${doc.metodoPago ? 'Método: <strong>' + doc.metodoPago + '</strong>' : ''}<br>IBAN: <strong>${config.empresa_iban}</strong></p>
-                        </div>
-                    </div>
-
-                    <table class="invoice-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 50%;">Descripción del Concepto</th>
-                                <th style="text-align: center;">Cant.</th>
-                                <th style="text-align: right;">Precio Un.</th>
-                                <th style="text-align: right;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-            
-            let subtotal = 0;
-            let totalIva = 0;
-            for (const l of lineas) {
-                const art = await db.articulos.get(l.articuloId);
-                const sub = l.cantidad * l.precio;
-                const iva = sub * (l.iva / 100);
-                subtotal += sub;
-                totalIva += iva;
-                html += `
-                    <tr>
-                        <td><div style="font-weight: 700; color: #1e293b; font-size: 13px;">${art?.nombre}</div><div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Ref: ${art?.referencia}</div></td>
-                        <td style="text-align: center; font-weight: 600;">${l.cantidad}</td>
-                        <td style="text-align: right;">${formatEuro(l.precio)}</td>
-                        <td style="text-align: right; font-weight: 800; color: #0f172a;">${formatEuro(sub + iva)}</td>
-                    </tr>`;
-            }
-
-            html += `</tbody></table>
-                    <div style="margin-top: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
-                        <div id="qr-container" style="width: 120px; height: 120px;"></div>
-                        <div style="width: 300px; background: #0f172a; color: white; padding: 30px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; opacity: 0.6; margin-bottom: 8px; font-weight: 600; text-transform: uppercase;"><span>Base Imponible:</span><span>${formatEuro(subtotal)}</span></div>
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; opacity: 0.6; margin-bottom: 15px; font-weight: 600; text-transform: uppercase;"><span>Impuestos (IVA):</span><span>${formatEuro(totalIva)}</span></div>
-                            <div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; color: #60a5fa; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;"><span>TOTAL:</span><span>${formatEuro(doc.total)}</span></div>
-                        </div>
-                    </div>
-                    
-                    ${doc.hash ? `
-                    <div style="margin-top: 50px; padding: 20px; border: 1px dashed #cbd5e1; border-radius: 12px; display: flex; align-items: center; gap: 20px;">
-                        <div style="background: #f1f5f9; padding: 10px; border-radius: 8px;"><i data-lucide="shield-check" style="color: #2563eb; width: 24px; height: 24px;"></i></div>
-                        <div>
-                            <p style="font-size: 10px; font-weight: 800; color: #1e293b; margin: 0; text-transform: uppercase;">Documento Verificado (Sistema Veri*factu)</p>
-                            <p style="font-size: 9px; color: #64748b; margin: 2px 0 0 0;">Este documento cumple con la normativa de integridad, conservación y legibilidad de registros de facturación. Huella digital: <span style="font-family: monospace; font-weight: bold;">${doc.hash}</span></p>
-                        </div>
-                    </div>` : ''}
-                </div>
-                <div class="mt-10 flex justify-center space-x-4 no-print">
-                    <button onclick="printDocument('${type}', ${id})" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-xl shadow-blue-500/20 hover:scale-105 transition-transform">Imprimir Documento</button>
-                    <button onclick="closeModal()" class="bg-white border border-slate-200 px-10 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50">Cerrar Vista</button>
-                </div>
-            `;
-            content.innerHTML = html;
-            
-            if (type === 'factura') {
-                const qr = qrcode(0, 'M');
-                qr.addData(`https://www2.agenciatributaria.gob.es/wlpl/SIVA-ITCO/Verifactu?nif=${config.empresa_cif}&num=${doc.numero}&fec=${doc.fecha}&imp=${doc.total}`);
-                qr.make();
-                document.getElementById('qr-container').innerHTML = qr.createImgTag(4);
-            }
-            
-            container.classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        async function printDocument(type, id) {
-            await viewDocument(type, id);
-            const content = document.getElementById('modal-content').querySelector('.invoice-box').outerHTML;
-            document.getElementById('print-view').innerHTML = content;
-            window.print();
-        }
-
-        // --- FICHAS DETALLADAS ---
-        async function viewFicha(type, id) {
-            const container = document.getElementById('modal-container');
-            const title = document.getElementById('modal-title');
-            const content = document.getElementById('modal-content');
-            container.classList.remove('hidden');
-
-            if (type === 'articulo') {
-                const art = await db.articulos.get(id);
-                title.innerText = `Ficha de Artículo: ${art.nombre}`;
-                content.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div class="lg:col-span-1 space-y-6">
-                            <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm overflow-hidden aspect-square flex items-center justify-center">
-                                ${art.fotoUrl ? `<img src="${art.fotoUrl}" class="w-full h-full object-contain">` : `<div class="text-slate-200"><i data-lucide="image" class="w-24 h-24"></i></div>`}
-                            </div>
-                            <div class="bg-slate-900 text-white p-6 rounded-3xl space-y-4">
-                                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stock Actual</div>
-                                <div class="text-4xl font-black ${art.controlarStock && art.stock <= 5 ? 'text-rose-400' : 'text-blue-400'}">${art.controlarStock ? art.stock : '∞'}</div>
-                                <div class="text-xs opacity-60">${art.controlarStock ? 'Unidades en almacén' : 'Servicio sin control de stock'}</div>
-                            </div>
-                        </div>
-                        <div class="lg:col-span-2 space-y-8">
-                            <div class="grid grid-cols-2 gap-6">
-                                <div class="p-6 bg-white rounded-2xl border border-slate-100">
-                                    <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Referencia</div>
-                                    <div class="text-lg font-black text-slate-800">${art.referencia}</div>
-                                </div>
-                                <div class="p-6 bg-white rounded-2xl border border-slate-100">
-                                    <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Precio Base</div>
-                                    <div class="text-lg font-black text-slate-800">${formatEuro(art.precio)}</div>
-                                </div>
-                            </div>
-                            <div class="p-8 bg-white rounded-3xl border border-slate-200">
-                                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Descripción y Características</h4>
-                                <p class="text-slate-600 leading-relaxed">${art.descripcion || 'Sin descripción detallada.'}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (type === 'sat') {
-                const sat = await db.sat.get(id);
-                const cliente = await db.clientes.get(parseInt(sat.clienteId));
-                title.innerText = `Ficha de Intervención S.A.T.: ${sat.numero}`;
-                content.innerHTML = `
-                    <div class="space-y-8">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="p-6 bg-white rounded-2xl border border-slate-200">
-                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Cliente</div>
-                                <div class="text-lg font-black text-slate-800">${cliente?.nombre || 'Desconocido'}</div>
-                            </div>
-                            <div class="p-6 bg-white rounded-2xl border border-slate-200">
-                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Equipo</div>
-                                <div class="text-lg font-black text-slate-800">${sat.marca} ${sat.modelo}</div>
-                            </div>
-                            <div class="p-6 bg-slate-900 text-white rounded-2xl shadow-xl">
-                                <div class="text-[10px] font-bold opacity-70 uppercase mb-1">Estado Actual</div>
-                                <div class="text-lg font-black text-blue-400">${sat.estado}</div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div class="bg-white p-8 rounded-3xl border border-slate-200 space-y-4">
-                                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Detalles Técnicos</h4>
-                                <div class="space-y-2">
-                                    <p class="text-sm"><strong>Nº Serie:</strong> ${sat.serie || '-'}</p>
-                                    <p class="text-sm"><strong>Avería:</strong> ${sat.averia}</p>
-                                    <p class="text-sm"><strong>Accesorios:</strong> ${sat.accesorios || '-'}</p>
-                                </div>
-                                <div class="pt-4 border-t border-slate-100">
-                                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Cambiar Estado</label>
-                                    <select onchange="updateSATStatus(${sat.id}, this.value)" class="w-full border border-slate-200 p-3 rounded-xl font-bold">
-                                        <option value="Recibido" ${sat.estado === 'Recibido' ? 'selected' : ''}>Recibido</option>
-                                        <option value="En Taller" ${sat.estado === 'En Taller' ? 'selected' : ''}>En Taller</option>
-                                        <option value="Esperando Piezas" ${sat.estado === 'Esperando Piezas' ? 'selected' : ''}>Esperando Piezas</option>
-                                        <option value="Reparado" ${sat.estado === 'Reparado' ? 'selected' : ''}>Reparado</option>
-                                        <option value="Entregado" ${sat.estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="bg-white p-8 rounded-3xl border border-slate-200 space-y-6">
-                                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Acciones de Facturación</h4>
-                                <div class="grid grid-cols-1 gap-4">
-                                    <button onclick="convertSATToDoc(${sat.id}, 'presupuesto')" class="flex items-center justify-between p-4 bg-blue-50 text-blue-700 rounded-2xl hover:bg-blue-100 transition-colors">
-                                        <span class="font-black text-sm">Generar Presupuesto</span>
-                                        <i data-lucide="file-text" class="w-5 h-5"></i>
-                                    </button>
-                                    <button onclick="convertSATToDoc(${sat.id}, 'factura')" class="flex items-center justify-between p-4 bg-emerald-50 text-emerald-700 rounded-2xl hover:bg-emerald-100 transition-colors">
-                                        <span class="font-black text-sm">Generar Factura Directa</span>
-                                        <i data-lucide="receipt" class="w-5 h-5"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                const entity = await db[type + 's'].get(id);
-                const docs = type === 'cliente' 
-                    ? [...await db.presupuestos.where('clienteId').equals(id.toString()).toArray(), ...await db.albaranes.where('clienteId').equals(id.toString()).toArray(), ...await db.facturas.where('clienteId').equals(id.toString()).toArray()]
-                    : await db.compras.where('proveedorId').equals(id.toString()).toArray();
-                
-                title.innerText = `Ficha de ${type.toUpperCase()}: ${entity.nombre}`;
-                content.innerHTML = `
-                    <div class="space-y-8">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="p-6 bg-white rounded-2xl border border-slate-200">
-                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">CIF / NIF</div>
-                                <div class="text-lg font-black text-slate-800">${entity.cif}</div>
-                            </div>
-                            <div class="p-6 bg-white rounded-2xl border border-slate-200">
-                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Email</div>
-                                <div class="text-lg font-black text-slate-800">${entity.email || '-'}</div>
-                            </div>
-                            <div class="p-6 bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-500/20">
-                                <div class="text-[10px] font-bold opacity-70 uppercase mb-1">Total Operaciones</div>
-                                <div class="text-lg font-black">${formatEuro(docs.reduce((acc, d) => acc + d.total, 0))}</div>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden">
-                            <div class="p-6 border-b border-slate-100 bg-slate-50 font-black text-xs uppercase tracking-widest text-slate-400">Historial de Documentos Relacionados</div>
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400">
-                                    <tr><th class="p-4">Tipo</th><th class="p-4">Número</th><th class="p-4">Fecha</th><th class="p-4 text-right">Total</th></tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    ${docs.length ? docs.map(d => `
-                                        <tr>
-                                            <td class="p-4 font-bold text-slate-500">${d.numero.split('-')[0]}</td>
-                                            <td class="p-4 font-black text-blue-600">${d.numero}</td>
-                                            <td class="p-4 text-slate-400">${d.fecha}</td>
-                                            <td class="p-4 text-right font-black text-slate-800">${formatEuro(d.total)}</td>
-                                        </tr>
-                                    `).join('') : '<tr><td colspan="4" class="p-10 text-center text-slate-400">No hay documentos registrados</td></tr>'}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-            }
-            lucide.createIcons();
-        }
-
-        async function updateSATStatus(id, status) {
-            await db.sat.update(id, { estado: status });
-            Swal.fire('Estado Actualizado', `La orden ahora está en estado: ${status}`, 'success');
-            viewFicha('sat', id);
-            loadListado();
-        }
-
-        async function convertSATToDoc(id, targetType) {
-            const sat = await db.sat.get(id);
-            const prefix = targetType === 'presupuesto' ? 'PRE' : 'FAC';
-            const newNum = `${prefix}-${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}-${Math.floor(Math.random()*10000)}`;
-            
-            const newDoc = {
-                numero: newNum,
-                clienteId: sat.clienteId,
-                fecha: new Date().toISOString().split('T')[0],
-                estado: 'Pendiente',
-                total: 0
-            };
-
-            if (targetType === 'factura') {
-                const { value: metodo } = await Swal.fire({
-                    title: 'Método de Pago',
-                    input: 'select',
-                    inputOptions: { 'Efectivo': 'Efectivo', 'Tarjeta': 'Tarjeta', 'Transferencia': 'Transferencia', 'Bizum': 'Bizum' },
-                    inputPlaceholder: 'Selecciona método',
-                    showCancelButton: true
-                });
-                if (!metodo) return;
-                newDoc.metodoPago = metodo;
-                newDoc.estado = 'Pagada';
-                newDoc.hash = btoa(newDoc.numero + newDoc.fecha);
-            }
-
-            const targetId = await db[targetType + 's'].add(newDoc);
-            closeModal();
-            openModal(targetType, targetId);
-        }
-
-        // --- REPORTES ---
-        async function loadReportes() {
-            const facturas = await db.facturas.toArray();
-            const compras = await db.compras.toArray();
-            
-            let ivaVentas = 0;
-            let ivaCompras = 0;
-            let totalVentas = 0;
-            let totalCompras = 0;
-
-            for (const f of facturas) {
-                totalVentas += f.total;
-                const lines = await db.lineas_factura.where('facturaId').equals(f.id).toArray();
-                lines.forEach(l => ivaVentas += (l.cantidad * l.precio * (l.iva/100)));
-            }
-            for (const c of compras) {
-                totalCompras += c.total;
-                const lines = await db.lineas_compra.where('compraId').equals(c.id).toArray();
-                lines.forEach(l => ivaCompras += (l.cantidad * l.precio * (l.iva/100)));
-            }
-
-            document.getElementById('rep-iva-ventas').innerText = formatEuro(ivaVentas);
-            document.getElementById('rep-iva-compras').innerText = formatEuro(ivaCompras);
-            document.getElementById('rep-beneficio').innerText = formatEuro(totalVentas - totalCompras);
-
-            const pagos = {};
-            facturas.forEach(f => pagos[f.metodoPago] = (pagos[f.metodoPago] || 0) + f.total);
-            
-            const ctxP = document.getElementById('chart-pagos').getContext('2d');
-            if (charts.pagos) charts.pagos.destroy();
-            charts.pagos = new Chart(ctxP, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(pagos),
-                    datasets: [{ data: Object.values(pagos), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }]
-                },
-                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
-            });
-        }
-
-        // --- BACKUP ---
-        async function exportBackup() {
-            const tables = db.tables.map(t => t.name);
-            const data = {};
-            for (const t of tables) data[t] = await db[t].toArray();
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `erp_sat_pro_v10_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-        }
-
-        function importBackup() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    try {
-                        const data = JSON.parse(event.target.result);
-                        await db.transaction('rw', db.tables, async () => {
-                            for (const table in data) {
-                                if (db[table]) {
-                                    await db[table].clear();
-                                    await db[table].bulkAdd(data[table]);
-                                }
-                            }
-                        });
-                        location.reload();
-                    } catch (err) { Swal.fire('Error', 'Archivo no válido', 'error'); }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        }
-    </script>
+        reader.readAsDataURL(fotoFile);
+    } else {
+        await db.recordatorios.add(d);
+        closeReminderModal();
+        renderAgenda();
+        showToast('RECORDATORIO GUARDADO');
+    }
+};
+async function deleteReminder(id) {
+    if(confirm('¿Eliminar este recordatorio?')) {
+        await db.recordatorios.delete(id);
+        showToast('RECORDATORIO ELIMINADO');
+        renderAgenda();
+    }
+}
+window.openReminderForm = openReminderForm;
+window.previewFoto = previewFoto;
+window.renderAgenda = renderAgenda;
+window.deleteReminder = deleteReminder;
+</script>
 </body>
 </html>
