@@ -1,221 +1,184 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>SAT Pro V2</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAT PRO V2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="flex">
 
-<div id="app" class="flex w-full"></div>
+<body class="bg-slate-100">
 
-<script src="app.js"></script>
-<script src="db.js"></script>
-<script src="auth.js"></script>
-<script src="ui.js"></script>
-<script src="reports.js"></script>
-<script src="forms.js"></script>
+<div id="app"></div>
 
-</body>
-</html>
+<script>
+// ================= DB =================
+const db = new Dexie("SAT_PRO_V2");
 
+db.version(1).stores({
+  users: "++id, name, role",
+  reparaciones: "++id, ot, cliente, usuario, estado, fecha",
+  pedidos: "++id, producto, cliente, usuario, estado, fecha"
+});
 
-// db.js
-const DB = {
-  db: null,
+async function initDB() {
+  if (await db.users.count() === 0) {
+    await db.users.bulkAdd([
+      { name: "Daniel Farré", role: "admin", pass: "1234" },
+      { name: "José Ayala", role: "user", pass: "1234" },
+      { name: "David", role: "user", pass: "1234" }
+    ]);
+  }
+}
 
-  async init() {
-    this.db = new Dexie("SAT_PRO_V2");
+// ================= AUTH =================
+let currentUser = null;
 
-    this.db.version(1).stores({
-      users: "++id, name, role",
-      reparaciones: "++id, ot, cliente, usuario, estado, fecha",
-      pedidos: "++id, producto, cliente, usuario, estado, fecha",
-      piezas: "++id, nombre, proveedor",
-    });
+async function login() {
+  const user = document.getElementById("user").value;
+  const pass = document.getElementById("pass").value;
 
-    if (await this.db.users.count() === 0) {
-      await this.db.users.bulkAdd([
-        { name: "Daniel Farré", role: "admin", pass: "1234" },
-        { name: "José Ayala", role: "user", pass: "1234" },
-        { name: "David", role: "user", pass: "1234" }
-      ]);
+  const u = await db.users.where("name").equals(user).first();
+
+  if (u && u.pass === pass) {
+    currentUser = u;
+    localStorage.setItem("user", JSON.stringify(u));
+    renderApp();
+  } else {
+    alert("Error login");
+  }
+}
+
+function logout() {
+  localStorage.removeItem("user");
+  location.reload();
+}
+
+// ================= UI =================
+
+function renderLogin() {
+  app.innerHTML = `
+    <div class="flex h-screen items-center justify-center">
+      <div class="bg-white p-6 rounded-xl shadow w-80">
+        <h2 class="text-xl font-bold mb-4">SAT PRO</h2>
+        <input id="user" placeholder="Usuario" class="w-full mb-2 p-2 border rounded">
+        <input id="pass" type="password" placeholder="Contraseña" class="w-full mb-4 p-2 border rounded">
+        <button onclick="login()" class="w-full bg-blue-600 text-white p-2 rounded">Entrar</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderApp() {
+  app.innerHTML = `
+    <div class="flex h-screen">
+
+      <aside class="w-64 bg-white p-4">
+        <h2 class="font-bold mb-4">SAT PRO</h2>
+        <button onclick="renderDashboard()">Dashboard</button><br>
+        <button onclick="renderReportes()">Reportes</button><br>
+        ${currentUser.role === 'admin' ? '<button onclick="renderUsers()">Usuarios</button>' : ''}
+        <br><br>
+        <button onclick="logout()">Salir</button>
+      </aside>
+
+      <main class="flex-1 p-6" id="view"></main>
+
+    </div>
+  `;
+
+  renderDashboard();
+}
+
+// ================= DASHBOARD =================
+async function renderDashboard() {
+  const reps = await db.reparaciones.toArray();
+  const ped = await db.pedidos.toArray();
+
+  view.innerHTML = `
+    <h1 class="text-xl font-bold mb-4">Dashboard</h1>
+    <div class="grid grid-cols-3 gap-4">
+      <div class="bg-white p-4 rounded">Reparaciones: ${reps.length}</div>
+      <div class="bg-white p-4 rounded">Pedidos: ${ped.length}</div>
+    </div>
+  `;
+}
+
+// ================= REPORTES =================
+async function renderReportes() {
+  const reps = await db.reparaciones.toArray();
+  const ped = await db.pedidos.toArray();
+
+  const data = {};
+
+  [...reps, ...ped].forEach(x => {
+    if (!data[x.usuario]) data[x.usuario] = 0;
+    data[x.usuario]++;
+  });
+
+  view.innerHTML = `
+    <h1 class="text-xl font-bold mb-4">Reportes</h1>
+    <canvas id="chart"></canvas>
+  `;
+
+  new Chart(document.getElementById("chart"), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(data),
+      datasets: [{
+        data: Object.values(data)
+      }]
     }
-  }
-};
+  });
+}
 
+// ================= USERS =================
+async function renderUsers() {
+  const users = await db.users.toArray();
 
-// auth.js
-const Auth = {
-  currentUser: null,
+  view.innerHTML = `
+    <h1 class="text-xl font-bold mb-4">Usuarios</h1>
 
-  async login(name, pass) {
-    const user = await DB.db.users
-      .where("name").equals(name).first();
-
-    if (user && user.pass === pass) {
-      this.currentUser = user;
-      localStorage.setItem("user", JSON.stringify(user));
-      return true;
-    }
-    return false;
-  },
-
-  logout() {
-    localStorage.removeItem("user");
-    location.reload();
-  },
-
-  isAdmin() {
-    return this.currentUser?.role === "admin";
-  }
-};
-
-
-// forms.js
-const Forms = {
-
-  imageInput(name, value="") {
-    return `
-      <input type="file" onchange="Forms.handleImage(event, '${name}')">
-      <input type="hidden" name="${name}" value="${value}">
-    `;
-  },
-
-  handleImage(e, field) {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = ev => {
-      document.querySelector(`[name='${field}']`).value = ev.target.result;
-    };
-
-    reader.readAsDataURL(file);
-  }
-};
-
-
-// reports.js
-const Reports = {
-
-  async render() {
-    const reps = await DB.db.reparaciones.toArray();
-    const ped = await DB.db.pedidos.toArray();
-
-    const metrics = this.compute(reps, ped);
-
-    document.getElementById("app").innerHTML = `
-      <div>
-        <h1>REPORTES PRO</h1>
-        <canvas id="chart1"></canvas>
+    ${users.map(u => `
+      <div class="bg-white p-2 mb-2 flex justify-between">
+        ${u.name} (${u.role})
+        <button onclick="deleteUser(${u.id})">X</button>
       </div>
-    `;
+    `).join("")}
 
-    new Chart(document.getElementById("chart1"), {
-      type: "bar",
-      data: {
-        labels: Object.keys(metrics),
-        datasets: [{
-          data: Object.values(metrics)
-        }]
-      }
-    });
-  },
+    <input id="newUser" placeholder="Nuevo usuario" class="border p-2">
+    <button onclick="addUser()">Añadir</button>
+  `;
+}
 
-  compute(reps, ped) {
-    const result = {};
+async function addUser() {
+  const name = document.getElementById("newUser").value;
+  await db.users.add({ name, role: 'user', pass: '1234' });
+  renderUsers();
+}
 
-    [...reps, ...ped].forEach(x => {
-      if (!result[x.usuario]) result[x.usuario] = 0;
-      result[x.usuario]++;
-    });
+async function deleteUser(id) {
+  await db.users.delete(id);
+  renderUsers();
+}
 
-    return result;
-  }
-};
-
-
-// ui.js
-const UI = {
-
-  renderLogin() {
-    document.getElementById("app").innerHTML = `
-      <div>
-        <input id="user">
-        <input id="pass" type="password">
-        <button onclick="UI.doLogin()">Login</button>
-      </div>
-    `;
-  },
-
-  async doLogin() {
-    const u = document.getElementById("user").value;
-    const p = document.getElementById("pass").value;
-
-    if (await Auth.login(u,p)) {
-      UI.renderMain();
-    } else alert("Error");
-  },
-
-  renderMain() {
-    const adminBtn = Auth.isAdmin()
-      ? `<button onclick="UI.manageUsers()">Usuarios</button>`
-      : "";
-
-    document.getElementById("app").innerHTML = `
-      <div>
-        <h1>Dashboard</h1>
-        ${adminBtn}
-        <button onclick="Reports.render()">Reportes</button>
-      </div>
-    `;
-  },
-
-  async manageUsers() {
-    const users = await DB.db.users.toArray();
-
-    document.getElementById("app").innerHTML = `
-      <div>
-        <h2>Gestión Usuarios</h2>
-        ${users.map(u => `
-          <div>
-            ${u.name} (${u.role})
-            <button onclick="UI.deleteUser(${u.id})">X</button>
-          </div>
-        `).join("")}
-
-        <input id="newUser">
-        <button onclick="UI.addUser()">Añadir</button>
-      </div>
-    `;
-  },
-
-  async addUser() {
-    const name = document.getElementById("newUser").value;
-    await DB.db.users.add({ name, role: "user", pass:"1234" });
-    UI.manageUsers();
-  },
-
-  async deleteUser(id) {
-    await DB.db.users.delete(id);
-    UI.manageUsers();
-  }
-};
-
-
-// app.js
+// ================= INIT =================
 window.onload = async () => {
-  await DB.init();
+  await initDB();
 
   const saved = localStorage.getItem("user");
 
   if (saved) {
-    Auth.currentUser = JSON.parse(saved);
-    UI.renderMain();
+    currentUser = JSON.parse(saved);
+    renderApp();
   } else {
-    UI.renderLogin();
+    renderLogin();
   }
 };
+
+</script>
+
+</body>
+</html>
