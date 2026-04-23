@@ -1,239 +1,221 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SAT Pro Ultimate Production V10.0</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
-        :root { --primary: #2563eb; }
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; transition: background-color 0.3s; height: 100vh; overflow: hidden; }
-        body.dark { background-color: #0f172a; color: #e2e8f0; }
-        .scroll-container { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; height: 100%; }
-        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        body.dark .flat-card { background-color: #1e293b; border-color: #334155; }
-        .sidebar-link { display: flex; align-items: center; padding: 10px 12px; color: #64748b; border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; }
-        .sidebar-link.active { background-color: #eff6ff; color: var(--primary); font-weight: 600; }
-        body.dark .sidebar-link.active { background-color: #334155; color: #3b82f6; }
-        .form-section { background: #f8fafc; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
-        body.dark .form-section { background: #0f172a; border-color: #334155; }
-        .status-pill { padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-        .chart-container { position: relative; height: 250px; width: 100%; }
-        @media (max-width: 768px) { .sidebar-text { display: none; } aside { width: 64px !important; } .main-content { padding: 12px !important; } }
-        @media print {
-            body * { visibility: hidden !important; }
-            #print-area, #print-area * { visibility: visible !important; }
-            #print-area { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; display: block !important; background: white !important; color: black !important; }
-            .no-print { display: none !important; }
-        }
-        .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 30px; background: white; color: black; }
-        .ot-header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 15px; margin-bottom: 20px; }
-        .ot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .ot-label { font-size: 9px; color: #666; text-transform: uppercase; font-weight: bold; }
-        .ot-value { font-size: 13px; font-weight: 600; border-bottom: 1px solid #eee; padding-bottom: 2px; }
-        .signature-box { margin-top: 40px; display: flex; justify-content: space-between; }
-        .signature-field { width: 180px; border-top: 1px solid #000; text-align: center; padding-top: 5px; font-size: 10px; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>SAT Pro V2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="flex">
-<div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2"></div>
-<div id="login-screen" class="fixed inset-0 bg-slate-100 dark:bg-slate-900 flex items-center justify-center z-[60] p-4">
-    <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-200 dark:border-slate-700">
-        <div class="flex justify-center mb-6"><div class="bg-blue-600 p-4 rounded-2xl text-white shadow-xl"><i data-lucide="wrench" class="w-10 h-10"></i></div></div>
-        <h2 class="text-2xl font-bold mb-1 text-center dark:text-white">SAT Pro Production</h2>
-        <p class="text-slate-500 text-sm text-center mb-8">V10.0 - Full Edition</p>
-        <div class="space-y-4">
-            <input id="login-user" type="text" placeholder="Usuario" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:text-white" />
-            <input id="login-pass" type="password" placeholder="Contraseña" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:text-white" />
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-bold shadow-lg transition-all active:scale-95">ENTRAR</button>
-        </div>
-        <p id="login-error" class="text-red-500 text-xs mt-4 hidden text-center font-bold">CREDENCIALES INCORRECTAS</p>
-    </div>
-</div>
-<aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col z-40">
-    <div class="p-4 h-16 border-b flex items-center gap-3">
-        <div class="bg-blue-600 p-2 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
-        <h1 class="text-xl font-bold text-slate-800 dark:text-white sidebar-text tracking-tighter">SAT Pro</h1>
-    </div>
-    <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
-        <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Resumen</span></a>
-        <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="clipboard-list" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">SAT</span></a>
-        <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Piezas</span></a>
-        <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Pedidos</span></a>
-        <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Métricas</span></a>
-        <a href="#" onclick="showSection('agenda')" id="link-agenda" class="sidebar-link"><i data-lucide="calendar" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Agenda</span></a>
-    </nav>
-    <div class="p-4 border-t space-y-2">
-        <button onclick="toggleDarkMode()" class="flex items-center gap-3 text-slate-600 dark:text-slate-400 w-full p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50"><i data-lucide="moon" id="dark-icon" class="w-5 h-5"></i><span class="sidebar-text text-sm">Modo Oscuro</span></button>
-        <button onclick="logout()" class="flex items-center gap-3 text-slate-400 hover:text-red-600 w-full p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20"><i data-lucide="log-out" class="w-5 h-5"></i><span class="sidebar-text text-sm font-bold uppercase">Salir</span></button>
-    </div>
-</aside>
-<main class="flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-slate-900">
-    <header class="h-16 bg-white dark:bg-slate-800 border-b flex items-center justify-between px-4 md:px-8 z-30">
-        <h2 id="section-title" class="text-lg font-bold text-slate-800 dark:text-white uppercase tracking-tight">Dashboard</h2>
-        <div class="flex items-center gap-2">
-            <div id="search-container" class="hidden sm:flex items-center bg-slate-100 dark:bg-slate-700 rounded-xl px-3 py-1.5"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><input id="search-input" type="text" oninput="filterTable()" placeholder="Buscar..." class="bg-transparent border-none outline-none px-2 text-sm w-32 md:w-48 dark:text-white" /></div>
-            <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95"><i data-lucide="plus" class="w-4 h-4"></i><span class="hidden sm:inline">NUEVO</span></button>
-        </div>
-    </header>
-    <div class="flex-1 scroll-container p-4 md:p-8 main-content" id="main-view"></div>
-</main>
-<div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl border my-auto">
-        <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white dark:bg-slate-800 rounded-t-2xl z-10"><h3 id="modal-title" class="text-xl font-bold dark:text-white uppercase">Nuevo Registro</h3><button onclick="closeModal()" class="p-2 hover:bg-slate-100 rounded-full text-slate-400"><i data-lucide="x" class="w-6 h-6"></i></button></div>
-        <form id="record-form" class="p-6 scroll-container" style="max-height: 70vh;"><input type="hidden" id="form-id"><input type="hidden" id="form-section"><div id="form-fields" class="space-y-4"></div><div class="mt-8 flex gap-3 justify-end border-t pt-6"><button type="button" onclick="closeModal()" class="px-6 py-2.5 rounded-xl border font-bold text-slate-600 dark:text-slate-400">Cancelar</button><button type="submit" class="px-8 py-2.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg">Guardar</button></div></form>
-    </div>
-</div>
-<div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg border my-auto">
-        <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white dark:bg-slate-800 rounded-t-2xl z-10"><h3 class="text-xl font-bold dark:text-white uppercase">Detalles</h3><button onclick="closeDetailModal()" class="p-2 hover:bg-slate-100 rounded-full text-slate-400"><i data-lucide="x" class="w-6 h-6"></i></button></div>
-        <div class="p-6 scroll-container" id="detail-content" style="max-height: 60vh;"></div>
-        <div class="p-6 border-t flex gap-3 justify-end sticky bottom-0 bg-white dark:bg-slate-800 rounded-b-2xl"><button id="detail-delete-btn" class="p-2.5 rounded-xl border border-red-200 text-red-500 hover:bg-red-50"><i data-lucide="trash-2" class="w-5 h-5"></i></button><button id="detail-edit-btn" class="p-2.5 rounded-xl border text-slate-600 dark:text-slate-400"><i data-lucide="edit-3" class="w-5 h-5"></i></button><button id="detail-print-btn" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl hover:bg-blue-700 flex items-center justify-center gap-2 shadow-lg"><i data-lucide="printer" class="w-5 h-5"></i> Imprimir</button></div>
-    </div>
-</div>
-<div id="print-area" class="hidden"></div>
-<script>
-    const db = new Dexie('SAT_Pro_Ultimate_Production_DB');
-    db.version(1).stores({
-        reparaciones: '++id, ot, cliente, marca, modelo, estado, usuario, fecha, prioridad, garantia_fin',
-        piezas: '++id, nombre, proveedor, estado, usuario, fecha',
-        pedidos: '++id, producto, cliente, estado, fecha',
-        recordatorios: '++id, title, dueDate, priority, completed'
-    });
-    const $ = id => document.getElementById(id);
-    const USUARIOS = ['Daniel Farré', 'José Ayala', 'David'];
-    let currentSection = 'dashboard';
 
-    function login() { const u = $('login-user').value, p = $('login-pass').value; if(u && p === '1234') { localStorage.setItem('sat_user', u); $('login-screen').classList.add('hidden'); init(); } else { $('login-error').classList.remove('hidden'); } }
-    function logout() { localStorage.removeItem('sat_user'); location.reload(); }
-    function toggleDarkMode() { document.body.classList.toggle('dark'); localStorage.setItem('sat_theme', document.body.classList.contains('dark') ? 'dark' : 'light'); lucide.createIcons(); }
+<div id="app" class="flex w-full"></div>
 
-    async function init() {
-        if(!localStorage.getItem('sat_user')) { $('login-screen').classList.remove('hidden'); return; }
-        if(localStorage.getItem('sat_theme') === 'dark') document.body.classList.add('dark');
-        if(await db.reparaciones.count() === 0) await injectDemoData();
-        showSection('dashboard');
-        lucide.createIcons();
-    }
+<script src="app.js"></script>
+<script src="db.js"></script>
+<script src="auth.js"></script>
+<script src="ui.js"></script>
+<script src="reports.js"></script>
+<script src="forms.js"></script>
 
-    async function injectDemoData() {
-        const hoy = new Date().toISOString();
-        await db.reparaciones.bulkAdd([
-            { ot: 'OT-1001', cliente: 'Demo Juan', marca: 'Apple', modelo: 'iPhone 13', estado: 'Pendiente', usuario: 'Daniel Farré', fecha: hoy, prioridad: 'Alta', observaciones: 'Pantalla rota' },
-            { ot: 'OT-1002', cliente: 'Demo Maria', marca: 'Samsung', modelo: 'S21', estado: 'Entregado', usuario: 'José Ayala', fecha: hoy, prioridad: 'Normal', observaciones: 'Batería' }
-        ]);
-        await db.pedidos.bulkAdd([{ producto: 'Pantalla iPhone 13', cliente: 'Stock', estado: 'Pedido', fecha: hoy, precioCompra: 50, precioVenta: 120, cantidad: 1, usuario: 'David' }]);
-        await db.recordatorios.bulkAdd([{ title: 'Revisar stock semanal', dueDate: hoy.split('T')[0], priority: 'Normal', completed: false }]);
-    }
-
-    function showSection(section) {
-        currentSection = section;
-        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-        $(`link-${section}`).classList.add('active');
-        $('section-title').textContent = section === 'reparaciones' ? 'SAT' : section.charAt(0).toUpperCase() + section.slice(1);
-        $('search-container').classList.toggle('hidden', ['dashboard', 'reportes', 'agenda'].includes(section));
-        if(section === 'dashboard') renderDashboard();
-        else if(section === 'reportes') renderReportes();
-        else if(section === 'agenda') renderAgenda();
-        else renderTableView(section);
-    }
-
-    async function renderDashboard() {
-        const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
-        const ben = ped.reduce((s,p) => s + ((parseFloat(p.precioVenta)||0) - (parseFloat(p.precioCompra)||0)) * (parseInt(p.cantidad)||1), 0);
-        $('main-view').innerHTML = `<div class="space-y-6"><div class="grid grid-cols-2 lg:grid-cols-4 gap-4"><div class="flat-card p-5"><p class="ot-label">Reparaciones OK</p><div class="flex items-end justify-between mt-2"><h3 class="text-2xl font-black">${reps.filter(r=>r.estado==='Entregado').length}</h3><i data-lucide="check-circle" class="text-emerald-500"></i></div></div><div class="flat-card p-5"><p class="ot-label">Piezas Stock</p><div class="flex items-end justify-between mt-2"><h3 class="text-2xl font-black">${pie.length}</h3><i data-lucide="package" class="text-blue-500"></i></div></div><div class="flat-card p-5"><p class="ot-label">Pedidos Activos</p><div class="flex items-end justify-between mt-2"><h3 class="text-2xl font-black">${ped.filter(p=>p.estado!=='Entregado').length}</h3><i data-lucide="shopping-cart" class="text-amber-500"></i></div></div><div class="flat-card p-5"><p class="ot-label">Beneficio Est.</p><div class="flex items-end justify-between mt-2"><h3 class="text-2xl font-black text-emerald-600">${ben.toFixed(2)}€</h3><i data-lucide="trending-up" class="text-emerald-600"></i></div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="flat-card p-6"><h4 class="font-bold mb-4 dark:text-white uppercase text-xs tracking-widest">Ranking de Técnicos</h4><div class="chart-container"><canvas id="chart-tecnicos"></canvas></div></div><div class="flat-card p-6"><h4 class="font-bold mb-4 dark:text-white uppercase text-xs tracking-widest">Estados del Taller</h4><div class="chart-container"><canvas id="chart-estados"></canvas></div></div></div></div>`;
-        lucide.createIcons();
-        new Chart($('chart-tecnicos').getContext('2d'), { type: 'bar', data: { labels: USUARIOS, datasets: [{ label: 'OTs', data: USUARIOS.map(u => reps.filter(r => r.usuario === u).length), backgroundColor: '#3b82f6', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false } });
-        const est = ['Pendiente', 'En Proceso', 'Completado', 'Entregado'];
-        new Chart($('chart-estados').getContext('2d'), { type: 'doughnut', data: { labels: est, datasets: [{ data: est.map(e => reps.filter(r => r.estado === e).length), backgroundColor: ['#f59e0b','#3b82f6','#8b5cf6','#10b981'] }] }, options: { responsive: true, maintainAspectRatio: false } });
-    }
-
-    async function renderTableView(section) {
-        const data = await db[section].toArray();
-        data.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-        $('main-view').innerHTML = `<div class="flat-card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 dark:bg-slate-800/50 border-b"><tr>${getTableHeaders(section)}<th class="px-6 py-4"></th></tr></thead><tbody id="table-body">${data.map(item => renderTableRow(section, item)).join('')}</tbody></table></div></div>`;
-        lucide.createIcons();
-    }
-    function getTableHeaders(section) { const h = { reparaciones: ['OT', 'Cliente', 'Equipo', 'Garantía', 'Estado'], piezas: ['Nombre', 'Proveedor', 'Estado', 'Técnico'], pedidos: ['Producto', 'Cliente', 'Estado', 'Fecha'] }; return h[section].map(text => `<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">${text}</th>`).join(''); }
-    function renderTableRow(section, item) {
-        let cells = '';
-        if(section === 'reparaciones') { const isG = item.garantia_fin && new Date(item.garantia_fin) > new Date(); cells = `<td class="px-6 py-4 font-bold text-blue-600">${item.ot}</td><td class="px-6 py-4 text-sm font-bold">${item.cliente}</td><td class="px-6 py-4 text-xs">${item.marca} ${item.modelo}</td><td class="px-6 py-4"><span class="status-pill ${isG?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-500'}">${isG?'OK':'NO'}</span></td><td class="px-6 py-4"><span class="status-pill ${getStatusClass(item.estado)}">${item.estado}</span></td>`; }
-        else if(section === 'piezas') { cells = `<td class="px-6 py-4 font-bold">${item.nombre}</td><td class="px-6 py-4 text-sm">${item.proveedor}</td><td class="px-6 py-4"><span class="status-pill ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-xs">${item.usuario}</td>`; }
-        else { cells = `<td class="px-6 py-4 font-bold">${item.producto}</td><td class="px-6 py-4 text-sm">${item.cliente}</td><td class="px-6 py-4"><span class="status-pill ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-xs">${new Date(item.fecha).toLocaleDateString()}</td>`; }
-        return `<tr onclick="viewDetail('${section}', ${item.id})" class="border-b hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-all">${cells}<td class="px-6 py-4 text-right"><i data-lucide="maximize-2" class="w-4 h-4 text-slate-300"></i></td></tr>`;
-    }
-    function getStatusClass(s) { s = (s||'').toLowerCase(); if(['entregado','completado','recibido','instalado','pagado','cobrado'].some(x => s.includes(x))) return 'bg-emerald-100 text-emerald-700 border border-emerald-200'; if(['pendiente','pedido','espera','proceso'].some(x => s.includes(x))) return 'bg-amber-100 text-amber-700 border border-amber-200'; return 'bg-blue-100 text-blue-700 border border-blue-200'; }
-    function filterTable() { const q = $('search-input').value.toLowerCase(); document.querySelectorAll('#table-body tr').forEach(r => r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none'); }
-
-    async function renderReportes() {
-        const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
-        const hoy = new Date();
-        const g = { Vigente: reps.filter(r=>r.garantia_fin && new Date(r.garantia_fin)>hoy).length, Expirada: reps.filter(r=>r.garantia_fin && new Date(r.garantia_fin)<=hoy).length };
-        $('main-view').innerHTML = `<div class="space-y-6"><div class="flat-card p-6 flex justify-between items-center no-print"><div><h3 class="text-xl font-bold dark:text-white">Reporte de Actividad</h3><p class="text-sm text-slate-500">Métricas completas y rendimiento</p></div><button onclick="printReport()" class="bg-slate-800 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir Reporte</button></div><div id="report-content" class="space-y-6"><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="flat-card p-6"><h4 class="ot-label mb-4">Garantías</h4><div class="chart-container"><canvas id="chart-rep-gar"></canvas></div></div><div class="flat-card p-6"><h4 class="ot-label mb-4">Ranking SAT</h4><div class="chart-container"><canvas id="chart-rep-tec-rep"></canvas></div></div><div class="flat-card p-6"><h4 class="ot-label mb-4">Pedidos/Estado</h4><div class="chart-container"><canvas id="chart-rep-ped"></canvas></div></div></div><div class="flat-card p-6"><h4 class="ot-label mb-4">Ventas y Márgenes de Beneficio</h4><div class="overflow-x-auto"><table class="w-full text-xs text-left"><thead class="border-b"><tr class="text-slate-500"><th class="py-2">Concepto</th><th>Tipo</th><th>Técnico</th><th>Venta</th><th>Margen</th></tr></thead><tbody>${ped.map(p => `<tr><td class="py-2 font-bold">${p.producto}</td><td>Pedido</td><td>${p.usuario}</td><td>${p.precioVenta}€</td><td class="text-emerald-600 font-bold">${(p.precioVenta - (p.precioCompra||0)).toFixed(2)}€</td></tr>`).join('')}</tbody></table></div></div></div></div>`;
-        lucide.createIcons();
-        new Chart($('chart-rep-gar').getContext('2d'), { type:'pie', data:{ labels:['Vigente','Expirada'], datasets:[{ data:[g.Vigente, g.Expirada], backgroundColor:['#10b981','#ef4444'] }] } });
-        new Chart($('chart-rep-tec-rep').getContext('2d'), { type:'bar', data:{ labels:USUARIOS, datasets:[{ label:'Reparaciones', data:USUARIOS.map(u=>reps.filter(r=>r.usuario===u).length), backgroundColor:'#8b5cf6' }] } });
-        const pE = ['En Espera','Pedido','Entregado','Cobrado'];
-        new Chart($('chart-rep-ped').getContext('2d'), { type:'doughnut', data:{ labels:pE, datasets:[{ data:pE.map(e=>ped.filter(p=>p.estado===e).length), backgroundColor:['#f59e0b','#3b82f6','#10b981','#8b5cf6'] }] } });
-    }
-    function printReport() {
-        const content = $('report-content').innerHTML;
-        $('print-area').innerHTML = `<div class="print-container"><div class="ot-header"><div><div style="font-size:24px; font-weight:bold; color:#2563eb">SAT PRO - INFORME GENERAL</div><p style="font-size:10px; color:#666">Generado el ${new Date().toLocaleString()}</p></div></div>${content}</div>`;
-        window.print();
-    }
-
-    async function renderAgenda() {
-        const recs = await db.recordatorios.toArray();
-        $('main-view').innerHTML = `<div class="space-y-6"><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${recs.map(r => `<div class="flat-card p-4 border-l-4 ${r.priority==='Alta'?'border-red-500':'border-blue-500'} flex flex-col justify-between"><div><div class="flex justify-between items-start"><h4 class="font-bold text-sm dark:text-white">${r.title}</h4><button onclick="deleteReminder(${r.id})" class="text-slate-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><p class="text-[10px] text-slate-500 mt-1">${r.dueDate || 'Sin fecha'}</p></div><div class="mt-4 flex items-center gap-2"><input type="checkbox" ${r.completed?'checked':''} onchange="toggleReminder(${r.id})" class="rounded"><span class="text-xs ${r.completed?'line-through text-slate-400':''}">Completada</span></div></div>`).join('')}</div></div>`;
-        lucide.createIcons();
-    }
-    async function toggleReminder(id) { const r = await db.recordatorios.get(id); await db.recordatorios.update(id, { completed: !r.completed }); renderAgenda(); }
-    async function deleteReminder(id) { if(confirm('¿Eliminar?')) { await db.recordatorios.delete(id); renderAgenda(); } }
-
-    function openModal(editData = null) {
-        const modal = $('modal');
-        const active = (currentSection === 'dashboard' || currentSection === 'reportes') ? 'reparaciones' : currentSection;
-        $('form-id').value = editData ? editData.id : ''; $('form-section').value = active;
-        $('modal-title').textContent = editData ? `EDITAR ${active.toUpperCase()}` : `NUEVO ${active.toUpperCase()}`;
-        const fields = $('form-fields');
-        if(active === 'reparaciones') {
-            fields.innerHTML = `<div class="form-section"><p class="ot-label mb-3">Equipo e Identificación</p><div class="grid grid-cols-2 gap-3"><div><label class="ot-label">OT *</label><input type="text" name="ot" required class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.ot||''}"></div><div><label class="ot-label">Nº Serie</label><input type="text" name="serie" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.serie||''}"></div><div><label class="ot-label">Marca *</label><input type="text" name="marca" required class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.marca||''}"></div><div><label class="ot-label">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.modelo||''}"></div></div></div><div class="form-section"><p class="ot-label mb-3">Cliente y Seguridad</p><div class="grid grid-cols-2 gap-3"><div><label class="ot-label">PIN / Password</label><input type="text" name="password" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.password||''}"></div><div><label class="ot-label">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.cliente||''}"></div></div></div><div class="form-section"><p class="ot-label mb-3">Asignación y Estado</p><div class="grid grid-cols-3 gap-3"><div><label class="ot-label">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='En Proceso'?'selected':''}>En Proceso</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="ot-label">Prioridad</label><select name="prioridad" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div><div><label class="ot-label">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div><div class="form-section"><p class="ot-label mb-3">Garantía y Multimedia</p><div class="grid grid-cols-2 gap-3"><div><label class="ot-label">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.garantia_meses||0}"></div><div><label class="ot-label">Precio Reparación</label><input type="number" step="0.01" name="precio" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.precio||''}"></div></div><div class="mt-3"><label class="ot-label">Foto Equipo</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div><div><label class="ot-label">Observaciones / Diagnóstico</label><textarea name="observaciones" rows="3" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900">${editData?.observaciones||''}</textarea></div>`;
-        } else if(active === 'piezas') {
-            fields.innerHTML = `<div class="grid grid-cols-2 gap-4"><div><label class="ot-label">Nombre *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.nombre||''}"></div><div><label class="ot-label">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.proveedor||''}"></div><div><label class="ot-label">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.precioCompra||''}"></div><div><label class="ot-label">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.precioVenta||''}"></div><div><label class="ot-label">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900"><option>Recibido</option><option>Pedido</option><option>Agotado</option></select></div><div><label class="ot-label">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900">${USUARIOS.map(u=>`<option>${u}</option>`).join('')}</select></div></div>`;
-        } else if(active === 'pedidos') {
-            fields.innerHTML = `<div class="grid grid-cols-2 gap-4"><div><label class="ot-label">Producto *</label><input type="text" name="producto" required class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.producto||''}"></div><div><label class="ot-label">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.cliente||''}"></div><div><label class="ot-label">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.precioCompra||''}"></div><div><label class="ot-label">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.precioVenta||''}"></div><div><label class="ot-label">Cantidad</label><input type="number" name="cantidad" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.cantidad||1}"></div><div><label class="ot-label">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900"><option>En Espera</option><option>Entregado</option><option>Cobrado</option></select></div><div><label class="ot-label">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900">${USUARIOS.map(u=>`<option>${u}</option>`).join('')}</select></div></div>`;
-        } else if(active === 'recordatorios') {
-            fields.innerHTML = `<div><label class="ot-label">Título de la Tarea *</label><input type="text" name="title" required class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.title||''}"></div><div class="grid grid-cols-2 gap-4"><div><label class="ot-label">Fecha Límite</label><input type="date" name="dueDate" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900" value="${editData?.dueDate||''}"></div><div><label class="ot-label">Prioridad</label><select name="priority" class="w-full border rounded-xl p-3 text-sm dark:bg-slate-900"><option>Normal</option><option>Alta</option></select></div></div>`;
-        }
-        modal.classList.remove('hidden'); modal.classList.add('flex'); lucide.createIcons();
-    }
-    function closeModal() { $('modal').classList.add('hidden'); }
-    async function handleFile(input) { const f = input.files[0]; if(f){ const r = new FileReader(); r.onload = (e) => { $('form-imagen').value = e.target.result; }; r.readAsDataURL(f); } }
-    $('record-form').onsubmit = async (e) => {
-        e.preventDefault(); const data = Object.fromEntries(new FormData(e.target));
-        const id = $('form-id').value, section = $('form-section').value;
-        if(section === 'reparaciones' && data.garantia_meses > 0 && data.estado === 'Entregado') { let f = new Date(); f.setMonth(f.getMonth() + parseInt(data.garantia_meses)); data.garantia_fin = f.toISOString(); }
-        if(id) await db[section].update(parseInt(id), data); else { data.fecha = new Date().toISOString(); await db[section].add(data); }
-        closeModal(); showSection(currentSection);
-    };
-    async function viewDetail(section, id) {
-        const item = await db[section].get(id); if(!item) return;
-        $('detail-content').innerHTML = `<div class="grid grid-cols-2 gap-4 text-xs">${Object.entries(item).map(([k,v]) => (['id','imagen','garantia_fin','garantia_meses'].includes(k))?'':`<div><p class="ot-label">${k.replace('_',' ')}</p><p class="dark:text-white font-bold">${v||'-'}</p></div>`).join('')}</div>${item.imagen ? `<div class="mt-4"><p class="ot-label mb-2">Foto Adjunta</p><img src="${item.imagen}" class="w-full rounded-xl border"></div>` : ''}`;
-        $('detail-edit-btn').onclick = () => { closeDetailModal(); openModal(item); };
-        $('detail-delete-btn').onclick = async () => { if(confirm('¿Seguro que deseas eliminar este registro?')) { await db[section].delete(id); closeDetailModal(); showSection(currentSection); } };
-        $('detail-print-btn').onclick = () => printItem(section, item);
-        $('detail-modal').classList.remove('hidden'); $('detail-modal').classList.add('flex'); lucide.createIcons();
-    }
-    function closeDetailModal() { $('detail-modal').classList.add('hidden'); }
-    function printItem(section, item) {
-        $('print-area').innerHTML = `<div class="print-container"><div class="ot-header"><div><div style="font-size:24px; font-weight:bold; color:#2563eb">SAT PRO DASHBOARD</div><p style="font-size:10px; color:#666">Servicio Técnico Profesional</p></div><div style="text-align:right"><div style="font-weight:bold">ORDEN DE TRABAJO</div><div>Nº: ${item.ot || 'REF-'+item.id}</div><div>${new Date().toLocaleDateString()}</div></div></div><div class="ot-grid"><div><p class="ot-label">Cliente</p><p class="ot-value">${item.cliente}</p></div><div><p class="ot-label">Técnico</p><p class="ot-value">${item.usuario}</p></div></div><div class="ot-grid"><div><p class="ot-label">Equipo</p><p class="ot-value">${item.marca} ${item.modelo}</p></div><div><p class="ot-label">Nº Serie</p><p class="ot-value">${item.serie || '-'}</p></div></div><div style="margin-bottom:20px"><p class="ot-label">Observaciones y Diagnóstico</p><div style="border:1px solid #eee; padding:15px; min-height:100px; font-size:12px; line-height:1.6">${item.observaciones || 'Sin observaciones registradas.'}</div></div><div class="signature-box"><div class="signature-field">Firma Técnico</div><div class="signature-field">Firma Cliente</div></div></div>`;
-        window.print();
-    }
-    window.onload = init;
-</script>
 </body>
 </html>
+
+
+// db.js
+const DB = {
+  db: null,
+
+  async init() {
+    this.db = new Dexie("SAT_PRO_V2");
+
+    this.db.version(1).stores({
+      users: "++id, name, role",
+      reparaciones: "++id, ot, cliente, usuario, estado, fecha",
+      pedidos: "++id, producto, cliente, usuario, estado, fecha",
+      piezas: "++id, nombre, proveedor",
+    });
+
+    if (await this.db.users.count() === 0) {
+      await this.db.users.bulkAdd([
+        { name: "Daniel Farré", role: "admin", pass: "1234" },
+        { name: "José Ayala", role: "user", pass: "1234" },
+        { name: "David", role: "user", pass: "1234" }
+      ]);
+    }
+  }
+};
+
+
+// auth.js
+const Auth = {
+  currentUser: null,
+
+  async login(name, pass) {
+    const user = await DB.db.users
+      .where("name").equals(name).first();
+
+    if (user && user.pass === pass) {
+      this.currentUser = user;
+      localStorage.setItem("user", JSON.stringify(user));
+      return true;
+    }
+    return false;
+  },
+
+  logout() {
+    localStorage.removeItem("user");
+    location.reload();
+  },
+
+  isAdmin() {
+    return this.currentUser?.role === "admin";
+  }
+};
+
+
+// forms.js
+const Forms = {
+
+  imageInput(name, value="") {
+    return `
+      <input type="file" onchange="Forms.handleImage(event, '${name}')">
+      <input type="hidden" name="${name}" value="${value}">
+    `;
+  },
+
+  handleImage(e, field) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = ev => {
+      document.querySelector(`[name='${field}']`).value = ev.target.result;
+    };
+
+    reader.readAsDataURL(file);
+  }
+};
+
+
+// reports.js
+const Reports = {
+
+  async render() {
+    const reps = await DB.db.reparaciones.toArray();
+    const ped = await DB.db.pedidos.toArray();
+
+    const metrics = this.compute(reps, ped);
+
+    document.getElementById("app").innerHTML = `
+      <div>
+        <h1>REPORTES PRO</h1>
+        <canvas id="chart1"></canvas>
+      </div>
+    `;
+
+    new Chart(document.getElementById("chart1"), {
+      type: "bar",
+      data: {
+        labels: Object.keys(metrics),
+        datasets: [{
+          data: Object.values(metrics)
+        }]
+      }
+    });
+  },
+
+  compute(reps, ped) {
+    const result = {};
+
+    [...reps, ...ped].forEach(x => {
+      if (!result[x.usuario]) result[x.usuario] = 0;
+      result[x.usuario]++;
+    });
+
+    return result;
+  }
+};
+
+
+// ui.js
+const UI = {
+
+  renderLogin() {
+    document.getElementById("app").innerHTML = `
+      <div>
+        <input id="user">
+        <input id="pass" type="password">
+        <button onclick="UI.doLogin()">Login</button>
+      </div>
+    `;
+  },
+
+  async doLogin() {
+    const u = document.getElementById("user").value;
+    const p = document.getElementById("pass").value;
+
+    if (await Auth.login(u,p)) {
+      UI.renderMain();
+    } else alert("Error");
+  },
+
+  renderMain() {
+    const adminBtn = Auth.isAdmin()
+      ? `<button onclick="UI.manageUsers()">Usuarios</button>`
+      : "";
+
+    document.getElementById("app").innerHTML = `
+      <div>
+        <h1>Dashboard</h1>
+        ${adminBtn}
+        <button onclick="Reports.render()">Reportes</button>
+      </div>
+    `;
+  },
+
+  async manageUsers() {
+    const users = await DB.db.users.toArray();
+
+    document.getElementById("app").innerHTML = `
+      <div>
+        <h2>Gestión Usuarios</h2>
+        ${users.map(u => `
+          <div>
+            ${u.name} (${u.role})
+            <button onclick="UI.deleteUser(${u.id})">X</button>
+          </div>
+        `).join("")}
+
+        <input id="newUser">
+        <button onclick="UI.addUser()">Añadir</button>
+      </div>
+    `;
+  },
+
+  async addUser() {
+    const name = document.getElementById("newUser").value;
+    await DB.db.users.add({ name, role: "user", pass:"1234" });
+    UI.manageUsers();
+  },
+
+  async deleteUser(id) {
+    await DB.db.users.delete(id);
+    UI.manageUsers();
+  }
+};
+
+
+// app.js
+window.onload = async () => {
+  await DB.init();
+
+  const saved = localStorage.getItem("user");
+
+  if (saved) {
+    Auth.currentUser = JSON.parse(saved);
+    UI.renderMain();
+  } else {
+    UI.renderLogin();
+  }
+};
