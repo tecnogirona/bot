@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="color-scheme" content="light">
-    <title>S.A.T. Dashboard Ultimate V8.8</title>
+    <title>S.A.T. Dashboard Ultimate V7.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; background-color: #f8fafc !important; color: #1f2937 !important; }
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow: hidden; }
-        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; }
+        body.dark { background-color: #0f172a; color: #e2e8f0; }
+        .flat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; transition: background-color 0.3s; }
+        body.dark .flat-card { background-color: #1e293b; border-color: #334155; }
         .sidebar-link { display: flex; align-items: center; padding: 12px; color: #64748b; border-radius: 8px; margin-bottom: 4px; transition: all 0.2s; cursor: pointer; }
         .sidebar-link.active { background-color: #f1f5f9; color: #2563eb; font-weight: 600; }
+        body.dark .sidebar-link.active { background-color: #334155; color: #3b82f6; }
+        .metric-box { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .form-section { background: #f8fafc; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
+        body.dark .form-section { background: #0f172a; border-color: #334155; }
         .suggestion-card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 12px; border-left: 4px solid; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        body.dark .suggestion-card { background: #1e293b; }
         .suggestion-card.critical { border-left-color: #ef4444; background: #fef2f2; }
         .suggestion-card.warning { border-left-color: #f59e0b; background: #fffbeb; }
         .suggestion-card.success { border-left-color: #10b981; background: #ecfdf5; }
         .suggestion-card.info { border-left-color: #3b82f6; background: #eff6ff; }
+        body.dark .suggestion-card.critical { background: #450a0a; }
+        body.dark .suggestion-card.warning { background: #451a03; }
+        body.dark .suggestion-card.success { background: #064e3b; }
+        body.dark .suggestion-card.info { background: #172554; }
         
         .user-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
         .user-badge.daniel { background-color: #dbeafe; color: #1e40af; }
@@ -53,13 +60,9 @@
         .chart-container { position: relative; height: 250px; width: 100%; }
         .range-btn { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; background: #f1f5f9; border: none; transition: all 0.2s; }
         .range-btn.active { background: #2563eb; color: white; }
-        .ai-metric { background: #f1f5f9; padding: 12px; border-radius: 8px; text-align: center; border-left: 3px solid #2563eb; }
-        .ai-metric.alert { border-left-color: #ef4444; background: #fef2f2; }
-        .ai-metric.warn { border-left-color: #f59e0b; background: #fffbeb; }
-        .ai-metric.good { border-left-color: #10b981; background: #ecfdf5; }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden bg-slate-50">
+<body class="h-screen flex overflow-hidden">
 
 <div id="toast-container"></div>
 
@@ -81,39 +84,32 @@
 </div>
 
 <!-- Sidebar -->
-<aside class="w-16 md:w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col transition-all duration-300 z-30 h-screen overflow-y-auto">
-    <div class="p-4 border-b border-slate-100 flex items-center gap-3 flex-shrink-0">
+<aside class="w-16 md:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col transition-all duration-300 z-30">
+    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
         <div class="bg-blue-600 p-2 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
-        <h1 class="text-xl font-bold text-slate-800 sidebar-text">SAT Pro</h1>
+        <h1 class="text-xl font-bold text-slate-800 dark:text-white sidebar-text">SAT Pro</h1>
     </div>
     <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
         <a href="#" onclick="showSection('dashboard')" id="link-dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Resumen</span></a>
         <a href="#" onclick="showSection('reparaciones')" id="link-reparaciones" class="sidebar-link"><i data-lucide="clipboard-list" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reparaciones</span></a>
         <a href="#" onclick="showSection('piezas')" id="link-piezas" class="sidebar-link"><i data-lucide="package" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Piezas</span></a>
         <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Pedidos</span></a>
-        <a href="#" onclick="showSection('recordatorios')" id="link-recordatorios" class="sidebar-link"><i data-lucide="bell" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Recordatorios</span></a>
         <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reportes</span></a>
+        <a href="#" onclick="showSection('agenda')" id="link-agenda" class="sidebar-link"><i data-lucide="calendar" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Agenda</span></a>
     </nav>
-    <div class="p-3 border-t border-slate-100 space-y-2 flex-shrink-0">
-        <button onclick="generateAISuggestions()" class="flex items-center gap-3 text-slate-500 hover:text-purple-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm">
-            <i data-lucide="sparkles" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Auditoría</span>
-        </button>
-        <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm hidden md:flex">
-            <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Salir</span>
-        </button>
-    </div>
-    <div class="md:hidden p-3 border-t border-slate-100 flex-shrink-0">
-        <button onclick="logout()" class="flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 w-full p-3 rounded-lg text-sm font-bold bg-red-100">
-            <i data-lucide="log-out" class="w-4 h-4"></i>Cerrar Sesión
+    <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+        <button onclick="logout()" class="flex items-center gap-3 text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition-colors w-full p-2 font-bold rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20">
+            <i data-lucide="log-out" class="w-5 h-5"></i><span class="sidebar-text text-sm font-bold">Salir</span>
         </button>
     </div>
 </aside>
 
 <!-- Main Content -->
-<main class="flex-1 flex flex-col overflow-hidden bg-slate-50">
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 z-20 flex-shrink-0">
-        <h2 id="section-title" class="text-lg font-bold text-slate-800">Resumen</h2>
+<main class="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-8 z-20">
+        <h2 id="section-title" class="text-lg font-bold text-slate-800 dark:text-white">Resumen</h2>
         <div class="flex items-center gap-2 md:gap-4">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"><i data-lucide="moon" id="dark-icon" class="w-5 h-5"></i></button>
             <button onclick="openModal()" id="btn-new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95"><i data-lucide="plus" class="w-4 h-4"></i><span class="hidden sm:inline">Nuevo</span></button>
         </div>
     </header>
@@ -129,52 +125,52 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="flat-card p-6"><h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-blue-500"></i> Actividad Reciente</h4><div id="recent-activity" class="space-y-3"></div></div>
-                <div class="flat-card p-6"><h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="bell" class="w-5 h-5 text-amber-500"></i> Alertas</h4><div id="alert-container" class="space-y-3"></div><button onclick="showSection('recordatorios')" class="w-full mt-4 py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-xs font-bold hover:border-blue-500 hover:text-blue-500 transition-all">Ver todos los recordatorios</button></div>
+                <div class="flat-card p-6"><h4 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-blue-500"></i> Actividad Reciente</h4><div id="recent-activity" class="space-y-3"></div></div>
+                <div class="flat-card p-6"><h4 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="bell" class="w-5 h-5 text-amber-500"></i> Recordatorios</h4><div id="alert-container" class="space-y-3"></div><button onclick="openReminderModal()" class="w-full mt-4 py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-medium hover:border-blue-400 hover:text-blue-500 transition-all">+ Añadir Recordatorio</button></div>
             </div>
-
-            <div class="flat-card p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div><h4 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente</h4><p id="ai-dashboard-summary" class="text-xs text-slate-500 mt-1">Pulsa el botón para iniciar el análisis profundo del taller.</p></div>
-                    <button onclick="generateAISuggestions()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Analizar</button>
-                </div>
-                <div id="ai-mini-view" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-            </div>
+            
+            <div class="flat-card p-6"><h4 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="bot" class="w-5 h-5 text-purple-500"></i> Sugerencias con IA</h4><div id="ai-dashboard-summary" class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-sm text-slate-600 dark:text-slate-400 italic mb-4">Pulsa para analizar el estado del taller...</div><button onclick="generateAISuggestions()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="sparkles" class="w-4 h-4"></i> Generar Análisis Exhaustivo</button></div>
         </div>
 
         <!-- List View -->
         <div id="view-list" class="hidden space-y-4">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <div class="relative flex-1 max-w-md"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="search-input" type="text" placeholder="Buscar..." oninput="filterTable()" class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"></div>
-                <div class="flex gap-2 overflow-x-auto pb-1"><button onclick="exportData()" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Exportar</button><label class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer"><i data-lucide="upload" class="w-4 h-4"></i> Importar<input type="file" class="hidden" onchange="importData(event)"></label></div>
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:max-w-xs"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="search-input" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none" oninput="filterTable()"></div>
+                <div class="flex gap-2 w-full md:w-auto"><button onclick="exportData()" class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Exportar</button><label class="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 cursor-pointer"><i data-lucide="upload" class="w-4 h-4"></i> Importar<input type="file" id="import-file" class="hidden" onchange="importData(event)"></label></div>
             </div>
-            <div class="flat-card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead id="table-head" class="bg-slate-50"></thead><tbody id="table-body" class="divide-y divide-slate-100"></tbody></table></div></div>
+            <div class="flat-card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700"><tr id="table-head"></tr></thead><tbody id="table-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody></table></div></div>
         </div>
 
         <!-- Reports View -->
-        <div id="view-reportes" class="hidden space-y-6">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Ingresos Totales</p><h3 id="kpi-ingresos" class="text-xl font-black mt-1">0€</h3></div>
-                <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Costes Totales</p><h3 id="kpi-costes" class="text-xl font-black mt-1 text-red-500">0€</h3></div>
-                <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Beneficio Neto</p><h3 id="kpi-beneficio" class="text-xl font-black mt-1 text-emerald-600">0€</h3></div>
-                <div class="flat-card p-4"><p class="text-[10px] font-bold text-slate-500 uppercase">Margen Medio</p><h3 id="kpi-margen" class="text-xl font-black mt-1 text-blue-600">0%</h3></div>
+        <div id="view-reportes" class="hidden space-y-6 pb-20">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="metric-box">Ingresos<h3 id="kpi-ingresos" class="text-xl font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);">Costes<h3 id="kpi-costes" class="text-xl font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Beneficio<h3 id="kpi-beneficio" class="text-xl font-black mt-1">0€</h3></div>
+                <div class="metric-box" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">Margen<h3 id="kpi-margen" class="text-xl font-black mt-1">0%</h3></div>
             </div>
+            <div class="flat-card p-6"><h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="line-chart" class="w-5 h-5"></i> Evolución Mensual de Ingresos</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
+            <div class="flat-card p-6"><div class="flex justify-between items-center mb-4"><h4 class="font-bold flex items-center gap-2"><i data-lucide="users" class="w-5 h-5"></i> Evolución por Técnico</h4><div class="flex gap-2" id="range-selector"><button class="range-btn" data-months="3">3m</button><button class="range-btn active" data-months="6">6m</button><button class="range-btn" data-months="12">12m</button></div></div><div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div><div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-center text-[10px]"></div></div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Evolución Ingresos</h4><div class="chart-container"><canvas id="chart-evolucion-mensual"></canvas></div></div>
-                <div class="flat-card p-6">
-                    <div class="flex items-center justify-between mb-4"><h4 class="font-bold text-sm">Rendimiento por Técnico</h4><div class="flex gap-1"><button class="range-btn active" data-months="6">6M</button><button class="range-btn" data-months="12">12M</button></div></div>
-                    <div class="chart-container"><canvas id="chart-evolucion-usuarios"></canvas></div>
-                    <div id="user-summary" class="grid grid-cols-3 gap-2 mt-4 text-[10px]"></div>
+                <div class="flat-card p-6"><h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i> Ranking por Técnico (Inc. Garantías)</h4><div id="ranking-usuarios" class="space-y-3"></div></div>
+                <div class="flat-card p-6"><h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5"></i> Operaciones por Técnico</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flat-card p-4"><h4 class="text-xs font-bold mb-3 uppercase">Pedidos</h4><div class="chart-container" style="height:200px"><canvas id="chart-pedidos-estado"></canvas></div></div>
+                <div class="flat-card p-4"><h4 class="text-xs font-bold mb-3 uppercase">Reparaciones</h4><div class="chart-container" style="height:200px"><canvas id="chart-reparaciones-estado"></canvas></div></div>
+                <div class="flat-card p-4"><h4 class="text-xs font-bold mb-3 uppercase">Garantías</h4><div class="chart-container" style="height:200px"><canvas id="chart-garantias-estado"></canvas></div></div>
+            </div>
+            <div class="flat-card overflow-hidden"><div class="px-4 py-3 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 font-bold text-sm">Detalle de Ventas y Rentabilidad</div><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="px-4 py-2">Producto</th><th class="px-4 py-2">Tipo</th><th class="px-4 py-2">Venta</th><th class="px-4 py-2">Beneficio</th><th class="px-4 py-2">Margen</th><th class="px-4 py-2">Estado</th></tr></thead><tbody id="detalle-ventas-tbody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody></table></div></div>
+        </div>
+        
+        <!-- Agenda View -->
+        <div id="view-agenda" class="hidden space-y-6">
+            <div class="flat-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold">Recordatorios</h3>
+                    <button onclick="openReminderForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>NUEVO</button>
                 </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Ranking Actividad</h4><div id="ranking-usuarios" class="space-y-3"></div></div>
-                <div class="flat-card p-6 lg:col-span-2"><h4 class="font-bold text-sm mb-4">Operaciones por Tipo</h4><div class="chart-container"><canvas id="chart-operaciones-usuario"></canvas></div></div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Pedidos</h4><div class="chart-container"><canvas id="chart-pedidos-estado"></canvas></div></div>
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Reparaciones</h4><div class="chart-container"><canvas id="chart-reparaciones-estado"></canvas></div></div>
-                <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Garantías</h4><div class="chart-container"><canvas id="chart-garantias-estado"></canvas></div></div>
+                <div id="agenda-list" class="space-y-3"></div>
             </div>
         </div>
     </div>
@@ -182,40 +178,63 @@
 
 <!-- Modals -->
 <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content" style="max-height: 90vh;">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
-            <h3 id="modal-title" class="font-bold text-slate-800">Nueva Entrada</h3>
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 id="modal-title" class="font-bold text-slate-800 dark:text-white">Nuevo Registro</h3>
             <button onclick="closeModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <form id="record-form" class="p-6 overflow-y-auto flex-1" style="-webkit-overflow-scrolling: touch;">
+        <form id="record-form" class="p-6 overflow-y-auto flex-1 space-y-4">
             <input type="hidden" id="form-id">
             <input type="hidden" id="form-section">
             <div id="form-fields" class="space-y-4"></div>
         </form>
-        <div class="px-6 py-4 border-t border-slate-100 flex gap-3 flex-shrink-0 bg-white"><button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button><button type="submit" form="record-form" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all">Guardar Datos</button></div>
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex gap-3">
+            <button type="button" onclick="closeModal()" class="flex-1 py-3 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all">Cancelar</button>
+            <button type="submit" form="record-form" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-all">Guardar</button>
+        </div>
     </div>
 </div>
 
 <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col modal-content">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-            <h3 class="font-bold text-slate-800">Detalle de Registro</h3>
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col modal-content">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-slate-800 dark:text-white">Detalles</h3>
             <button onclick="closeDetailModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <div class="p-6 overflow-y-auto flex-1">
-            <div id="detail-content"></div>
-            <div class="mt-6 flex gap-2"><button id="detail-print-btn" class="flex-1 py-3 bg-slate-100 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir</button><button id="detail-edit-btn" class="flex-1 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="edit" class="w-4 h-4"></i> Editar</button><button id="detail-delete-btn" class="flex-1 py-3 bg-red-100 text-red-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Borrar</button></div>
+        <div id="detail-content" class="p-6 overflow-y-auto flex-1 space-y-4"></div>
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+            <button id="detail-print-btn" class="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir</button>
+            <button id="detail-edit-btn" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="edit-3" class="w-4 h-4"></i> Editar</button>
         </div>
     </div>
 </div>
 
 <div id="ai-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content" style="max-height: 90vh;">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
-            <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i> Auditoría Inteligente Completa</h3>
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col modal-content">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-500"></i> Análisis IA Detallado</h3>
             <button onclick="closeAIModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <div id="ai-content" class="p-6 overflow-y-auto flex-1 space-y-4"></div>
+        <div id="ai-content" class="p-6 overflow-y-auto flex-1"></div>
+    </div>
+</div>
+
+<div id="reminder-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-slate-800 dark:text-white">Nuevo Recordatorio</h3>
+            <button onclick="closeReminderModal()" class="p-2 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <form id="reminder-form" class="p-6 space-y-4 max-h-96 overflow-y-auto">
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase">Título *</label><input type="text" name="title" required class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase">Descripción</label><textarea name="description" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></textarea></div>
+            <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] font-bold text-slate-500 uppercase">Fecha</label><input type="date" name="dueDate" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></div><div><label class="text-[10px] font-bold text-slate-500 uppercase">Hora</label><input type="time" name="dueTime" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></div></div>
+            <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] font-bold text-slate-500 uppercase">Prioridad</label><select name="priority" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"><option value="info">Normal</option><option value="warning">Importante</option><option value="critical">Urgente</option></select></div><div><label class="text-[10px] font-bold text-slate-500 uppercase">Categoría</label><select name="category" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"><option>Taller</option><option>Cliente</option><option>Pagos</option></select></div></div>
+            <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] font-bold text-slate-500 uppercase">Responsable</label><select name="usuario" id="reminder-user-select" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></select></div><div><label class="text-[10px] font-bold text-slate-500 uppercase">Referencia</label><input type="text" name="referencia" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none" placeholder="OT, Pedido..."></div></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none"></textarea></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase">Foto (Opcional)</label><input type="file" name="foto" accept="image/*" class="w-full border rounded-xl p-3 mt-1 text-sm outline-none" onchange="previewFoto(event)"><img id="foto-preview" style="display:none; margin-top:8px; max-width:100%; border-radius:6px; max-height:120px;"></div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold active:scale-95 transition-all mt-2">Guardar</button>
+        </form>
     </div>
 </div>
 
@@ -223,12 +242,12 @@
 
 <script>
 // Database
-const db = new Dexie("SAT_Database_V8_8");
+const db = new Dexie("SAT_Database_V7");
 db.version(1).stores({
-    reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, imagen, observaciones, precio',
-    piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta, imagen, observaciones, referencia',
-    pedidos: '++id, cliente, producto, estado, fecha, usuario, precioCompra, precioVenta, cantidad, imagen, observaciones, tlf, ean',
-    recordatorios: '++id, title, desc, dueDate, priority, completed, imagen, fecha, nombre, apellidos, telefono, email, ref_ot'
+    reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario',
+    piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta',
+    pedidos: '++id, cliente, producto, estado, fecha, usuario, precioCompra, precioVenta, cantidad',
+    recordatorios: '++id, title, dueDate, priority, completed, category, usuario, referencia'
 });
 
 const USERS = [
@@ -237,6 +256,7 @@ const USERS = [
     { user: "david", pass: "1234", nombre: "David Varillas" }
 ];
 const USUARIOS = USERS.map(u => u.nombre);
+let showSection_orig = showSection;
 let currentUser = null, currentSection = 'dashboard', charts = {}, currentRange = 6;
 
 // Helpers
@@ -247,7 +267,7 @@ const escapeHtml = str => str ? String(str).replace(/[&<>"']/g, m => ({'&':'&amp
 function showToast(msg, type='success') {
     const c = $('toast-container');
     const t = document.createElement('div');
-    t.className = `px-6 py-3 rounded-xl text-white font-bold text-sm mb-2 shadow-lg ${type==='success'?'bg-emerald-500':'bg-red-500'}`;
+    t.className = `px-6 py-3 rounded-xl text-white font-bold text-sm mb-2 shadow-lg transition-all ${type==='success'?'bg-emerald-500':'bg-red-500'}`;
     t.textContent = msg;
     c.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
@@ -259,30 +279,71 @@ function login() {
     const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
     if(found) {
         currentUser = found;
-        localStorage.setItem("sat_user_v8_8", JSON.stringify(found));
+        localStorage.setItem("sat_user_v7", JSON.stringify(found));
         $('login-screen').classList.add('hidden');
         initApp();
     } else {
         $('login-error').classList.remove('hidden');
     }
 }
-function logout() { localStorage.removeItem("sat_user_v8_8"); location.reload(); }
+function logout() { localStorage.removeItem("sat_user_v7"); location.reload(); }
 
 // Init
+async function loadDemoData() {
+    const count = await db.reparaciones.count();
+    if(count > 0) return; // Ya hay datos
+    
+    const hoy = new Date();
+    const hace30 = new Date(hoy.getTime() - 30*24*60*60*1000);
+    const hace60 = new Date(hoy.getTime() - 60*24*60*60*1000);
+    
+    // Reparaciones
+    await db.reparaciones.bulkAdd([
+        { ot:'OT-001', cliente:'Empresa A', marca:'Dell', modelo:'Latitude', serie:'SN123', password:'pwd123', estado:'Completado', prioridad:'Normal', fecha:hace60.toISOString(), garantia_fin:new Date(hoy.getTime() + 90*24*60*60*1000).toISOString(), usuario:'Daniel Farré', precio:150 },
+        { ot:'OT-002', cliente:'Empresa B', marca:'HP', modelo:'ProBook', serie:'SN124', password:'pwd124', estado:'Completado', prioridad:'Alta', fecha:hace30.toISOString(), garantia_fin:new Date(hoy.getTime() + 60*24*60*60*1000).toISOString(), usuario:'José Ayala', precio:200 },
+        { ot:'OT-003', cliente:'Empresa C', marca:'Lenovo', modelo:'ThinkPad', serie:'SN125', password:'pwd125', estado:'Entregado', prioridad:'Normal', fecha:hace60.toISOString(), garantia_fin:new Date(hoy.getTime() - 10*24*60*60*1000).toISOString(), usuario:'David Varillas', precio:180 },
+        { ot:'OT-004', cliente:'Empresa A', marca:'Asus', modelo:'VivoBook', serie:'SN126', password:'pwd126', estado:'Pendiente', prioridad:'Alta', fecha:hoy.toISOString(), garantia_fin:new Date(hoy.getTime() + 30*24*60*60*1000).toISOString(), usuario:'Daniel Farré', precio:120 }
+    ]);
+    
+    // Piezas
+    await db.piezas.bulkAdd([
+        { nombre:'SSD 256GB', proveedor:'Kingston', estado:'Instalado', fecha:hace60.toISOString(), usuario:'Daniel Farré', precioCompra:40, precioVenta:80 },
+        { nombre:'RAM 8GB DDR4', proveedor:'Corsair', estado:'Pedido', fecha:hace30.toISOString(), usuario:'José Ayala', precioCompra:35, precioVenta:70 },
+        { nombre:'Batería Laptop', proveedor:'Dell', estado:'Vendido', fecha:hace60.toISOString(), usuario:'David Varillas', precioCompra:50, precioVenta:100 }
+    ]);
+    
+    // Pedidos
+    await db.pedidos.bulkAdd([
+        { cliente:'Cliente X', producto:'Monitor 24"', estado:'Entregado', fecha:hace60.toISOString(), usuario:'Daniel Farré', precioCompra:150, precioVenta:250, cantidad:2 },
+        { cliente:'Cliente Y', producto:'Teclado Mecánico', estado:'Pendiente', fecha:hace30.toISOString(), usuario:'José Ayala', precioCompra:60, precioVenta:120, cantidad:5 },
+        { cliente:'Cliente Z', producto:'Mouse Inalámbrico', estado:'Entregado', fecha:hace60.toISOString(), usuario:'David Varillas', precioCompra:15, precioVenta:35, cantidad:10 }
+    ]);
+}
+
 function initApp() {
     lucide.createIcons();
+    loadDemoData();
     showSection('dashboard');
     initRangeSelector();
+    if(localStorage.getItem('darkMode') === 'true') toggleDarkMode(true);
 }
 
 window.onload = () => {
-    const saved = localStorage.getItem("sat_user_v8_8");
+    const saved = localStorage.getItem("sat_user_v7");
     if(saved) {
         currentUser = JSON.parse(saved);
         $('login-screen').classList.add('hidden');
         initApp();
     }
 };
+
+function toggleDarkMode(force) {
+    const isDark = force !== undefined ? force : !document.body.classList.contains('dark');
+    document.body.classList.toggle('dark', isDark);
+    localStorage.setItem('darkMode', isDark);
+    $('dark-icon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+    lucide.createIcons();
+}
 
 // Navigation
 function showSection(section) {
@@ -291,16 +352,18 @@ function showSection(section) {
     const link = $(`link-${section}`);
     if(link) link.classList.add('active');
     
-    const titles = { dashboard:'Resumen', reparaciones:'Reparaciones', piezas:'Piezas', pedidos:'Pedidos', recordatorios:'Recordatorios', reportes:'Reportes' };
+    const titles = { dashboard:'Resumen', reparaciones:'Reparaciones', piezas:'Piezas', pedidos:'Pedidos', reportes:'Reportes', agenda:'Agenda' };
     $('section-title').textContent = titles[section];
-    $('btn-new').style.display = section === 'reportes' ? 'none' : 'flex';
+    $('btn-new').style.display = section === 'reportes' || section === 'agenda' ? 'none' : 'flex';
 
     $('view-dashboard').classList.toggle('hidden', section !== 'dashboard');
-    $('view-list').classList.toggle('hidden', !['reparaciones','piezas','pedidos','recordatorios'].includes(section));
+    $('view-list').classList.toggle('hidden', !['reparaciones','piezas','pedidos'].includes(section));
     $('view-reportes').classList.toggle('hidden', section !== 'reportes');
+    $('view-agenda').classList.toggle('hidden', section !== 'agenda');
 
     if(section === 'dashboard') updateDashboard();
     else if(section === 'reportes') updateReports();
+    else if(section === 'agenda') renderAgenda();
     else renderTable(section);
     
     lucide.createIcons();
@@ -331,7 +394,7 @@ function updateRecentActivity(reps, pie, ped) {
     const container = $('recent-activity');
     container.innerHTML = activity.length ? activity.slice(0,5).map(a => {
         let uClass = a.user === 'Daniel Farré' ? 'daniel' : a.user === 'José Ayala' ? 'jose' : 'david';
-        return `<div class="flex items-center gap-3"><div class="p-2 bg-slate-50 rounded-lg"><i data-lucide="${a.icon}" class="w-4 h-4"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(a.text)}</p><p class="text-[9px] text-slate-400">${a.date.toLocaleString()} · <span class="user-badge ${uClass}">${a.user}</span></p></div></div>`;
+        return `<div class="flex items-center gap-3"><div class="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><i data-lucide="${a.icon}" class="w-4 h-4"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(a.text)}</p><p class="text-[9px] text-slate-400">${a.date.toLocaleString()} · <span class="user-badge ${uClass}">${a.user}</span></p></div></div>`;
     }).join('') : '<p class="text-xs text-slate-400 italic">Sin actividad reciente.</p>';
     lucide.createIcons();
 }
@@ -344,20 +407,19 @@ async function updateAlerts(reps) {
     reps.forEach(r => {
         if(r.garantia_fin) {
             const diff = Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24));
-            if(diff >= 0 && diff <= 15) alerts.push({ id: r.id, section: 'reparaciones', title: `Garantía por caducar: ${r.ot}`, desc: `${diff} días para ${r.cliente}`, prio: 'warning' });
+            if(diff >= 0 && diff <= 15) alerts.push({ title: `Garantía por caducar: ${r.ot}`, desc: `${diff} días para ${r.cliente}`, prio: 'warning' });
         }
-        if(r.prioridad === 'Alta' && r.estado === 'Pendiente') alerts.push({ id: r.id, section: 'reparaciones', title: `URGENTE OT:${r.ot}`, desc: `Equipo esperando revisión`, prio: 'critical' });
+        if(r.prioridad === 'Alta' && r.estado === 'Pendiente') alerts.push({ title: `URGENTE OT:${r.ot}`, desc: `Equipo esperando revisión`, prio: 'critical' });
     });
-    recs.forEach(r => { if(!r.completed) alerts.push({ id: r.id, section: 'recordatorios', title: r.title, desc: r.dueDate || 'Sin fecha', prio: r.priority }); });
+    recs.forEach(r => { if(!r.completed) alerts.push({ title: r.title, desc: r.dueDate || 'Sin fecha', prio: r.priority }); });
     
     const container = $('alert-container');
     container.innerHTML = alerts.length ? alerts.map(a => `
-        <div class="suggestion-card ${a.prio} flex items-center justify-between cursor-pointer" onclick="viewDetail('${a.section}', ${a.id})">
+        <div class="suggestion-card ${a.prio} flex items-center justify-between">
             <div><p class="text-xs font-bold">${escapeHtml(a.title)}</p><p class="text-[10px] text-slate-500">${escapeHtml(a.desc)}</p></div>
             <div class="w-2 h-2 rounded-full ${a.prio==='critical'?'bg-red-500':a.prio==='warning'?'bg-amber-500':'bg-blue-500'}"></div>
         </div>
     `).join('') : '<p class="text-center text-slate-400 text-xs py-4 italic">No hay alertas pendientes.</p>';
-    lucide.createIcons();
 }
 
 // Reports & Charts
@@ -373,13 +435,12 @@ async function updateReports() {
     $('kpi-beneficio').textContent = (ingresos - costes).toFixed(2) + '€';
     $('kpi-margen').textContent = ingresos > 0 ? ((ingresos-costes)/ingresos*100).toFixed(1) + '%' : '0%';
 
-    setTimeout(() => {
-        updateEvolucionMensual(reps, ped);
-        updateEvolucionPorUsuario(reps, ped, currentRange);
-        updateRankingUsuarios(reps, pie, ped);
-        updateChartOperaciones(reps, pie, ped);
-        updateSmallCharts(reps, ped);
-    }, 100);
+    updateEvolucionMensual(reps, ped);
+    updateEvolucionPorUsuario(reps, ped, currentRange);
+    updateRankingUsuarios(reps, pie, ped);
+    updateChartOperaciones(reps, pie, ped);
+    updateSmallCharts(reps, ped);
+    updateDetalleVentas(pie, ped);
 }
 
 async function updateEvolucionMensual(reps, ped) {
@@ -425,7 +486,7 @@ async function updateEvolucionPorUsuario(reps, ped, months) {
     });
     const ctx = $('chart-evolucion-usuarios')?.getContext('2d');
     if(ctx) { if(charts.evU) charts.evU.destroy(); charts.evU = new Chart(ctx, { type:'line', data:{ labels:meses, datasets }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:10} } } } } }); }
-    $('user-summary').innerHTML = datasets.map(d => `<div style="border-left:3px solid ${d.borderColor}" class="bg-slate-50 p-2 rounded"><strong>${d.label}</strong><br>${d.data.reduce((a,b)=>a+b,0).toFixed(2)}€</div>`).join('');
+    $('user-summary').innerHTML = datasets.map(d => `<div style="border-left:3px solid ${d.borderColor}" class="bg-slate-50 dark:bg-slate-800 p-2 rounded"><strong>${d.label}</strong><br>${d.data.reduce((a,b)=>a+b,0).toFixed(2)}€</div>`).join('');
 }
 
 async function updateRankingUsuarios(reps, pie, ped) {
@@ -436,7 +497,7 @@ async function updateRankingUsuarios(reps, pie, ped) {
     }).sort((a,b)=>b.total-a.total);
     $('ranking-usuarios').innerHTML = ranking.map(r => {
         let avatar = r.user === 'Daniel Farré' ? 'bg-blue-100 text-blue-700' : r.user === 'José Ayala' ? 'bg-pink-100 text-pink-700' : 'bg-emerald-100 text-emerald-700';
-        return `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full ${avatar} flex items-center justify-center font-bold text-xs">${r.user[0]}</div><div><p class="font-bold text-xs">${r.user}</p><p class="text-[10px] text-slate-500">${r.total} op. totales</p></div></div><div class="flex gap-2 text-center"><div><p class="text-[10px] font-bold text-blue-600">${r.p}</p><p class="text-[8px] text-slate-400">Ped</p></div><div><p class="text-[10px] font-bold text-purple-600">${r.pi}</p><p class="text-[8px] text-slate-400">Piez</p></div><div><p class="text-[10px] font-bold text-pink-600">${r.r}</p><p class="text-[8px] text-slate-400">Rep</p></div><div><p class="text-[10px] font-bold text-green-600">${r.g}</p><p class="text-[8px] text-slate-400">Gar</p></div></div></div>`;
+        return `<div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full ${avatar} flex items-center justify-center font-bold text-xs">${r.user[0]}</div><div><p class="font-bold text-xs">${r.user}</p><p class="text-[10px] text-slate-500">${r.total} op. totales</p></div></div><div class="flex gap-2 text-center"><div><p class="text-[10px] font-bold text-blue-600">${r.p}</p><p class="text-[8px] text-slate-400">Ped</p></div><div><p class="text-[10px] font-bold text-purple-600">${r.pi}</p><p class="text-[8px] text-slate-400">Piez</p></div><div><p class="text-[10px] font-bold text-pink-600">${r.r}</p><p class="text-[8px] text-slate-400">Rep</p></div><div><p class="text-[10px] font-bold text-green-600">${r.g}</p><p class="text-[8px] text-slate-400">Gar</p></div></div></div>`;
     }).join('');
 }
 
@@ -447,13 +508,24 @@ async function updateChartOperaciones(reps, pie, ped) {
 
 function updateSmallCharts(reps, ped) {
     const config = (ctx, labels, data, colors) => new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:8} } } } } });
+    
     const pedE = {}; ped.forEach(x=>pedE[x.estado]=(pedE[x.estado]||0)+1);
     if($('chart-pedidos-estado')) config($('chart-pedidos-estado').getContext('2d'), Object.keys(pedE), Object.values(pedE), ['#6366f1','#8b5cf6','#d8b4fe']);
+    
     const repE = {}; reps.forEach(x=>repE[x.estado]=(repE[x.estado]||0)+1);
     if($('chart-reparaciones-estado')) config($('chart-reparaciones-estado').getContext('2d'), Object.keys(repE), Object.values(repE), ['#3b82f6','#0ea5e9','#22d3ee','#a5f3fc']);
+    
     const hoy = new Date(); const gS = { Vigente:0, Expirada:0, Proxima:0 };
     reps.forEach(r => { if(r.garantia_fin){ let d=Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24)); if(d<0) gS.Expirada++; else if(d<=15) gS.Proxima++; else gS.Vigente++; } });
     if($('chart-garantias-estado')) config($('chart-garantias-estado').getContext('2d'), Object.keys(gS), Object.values(gS), ['#10b981','#ef4444','#f59e0b']);
+}
+
+function updateDetalleVentas(pie, ped) {
+    const items = [];
+    ped.forEach(p => { let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0, cant=parseInt(p.cantidad)||1; items.push({ n:p.producto, t:'Pedido', v:v*cant, b:(v-c)*cant, m:v>0?((v-c)/v*100).toFixed(1):0, e:p.estado }); });
+    pie.forEach(p => { if(p.precioVenta){ let c=parseFloat(p.precioCompra)||0, v=parseFloat(p.precioVenta)||0; items.push({ n:p.nombre, t:'Pieza', v, b:v-c, m:v>0?((v-c)/v*100).toFixed(1):0, e:p.estado }); } });
+    items.sort((a,b)=>b.b-a.b);
+    $('detalle-ventas-tbody').innerHTML = items.slice(0,10).map(i => `<tr><td class="px-4 py-2 font-bold">${escapeHtml(i.n)}</td><td class="px-4 py-2">${i.t}</td><td class="px-4 py-2">${i.v.toFixed(2)}€</td><td class="px-4 py-2 font-bold ${i.b>=0?'text-emerald-600':'text-red-600'}">${i.b.toFixed(2)}€</td><td class="px-4 py-2">${i.m}%</td><td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${getStatusClass(i.e)}">${i.e}</span></td></tr>`).join('');
 }
 
 function initRangeSelector() {
@@ -472,39 +544,25 @@ function initRangeSelector() {
 async function renderTable(section) {
     const data = await db[section].toArray();
     const head = $('table-head'), body = $('table-body');
-    let headers = [];
-    if(section === 'reparaciones') headers = ['OT', 'Cliente', 'Equipo', 'Garantía', 'Estado'];
-    else if(section === 'piezas') headers = ['Pieza', 'Proveedor', 'Estado', 'Técnico'];
-    else if(section === 'pedidos') headers = ['Producto', 'Cliente', 'Estado', 'Fecha'];
-    else if(section === 'recordatorios') headers = ['Nombre/Ref', 'Fecha Límite', 'Prioridad', 'Completado'];
-
+    let headers = section === 'reparaciones' ? ['OT', 'Cliente', 'Equipo', 'Garantía', 'Estado'] : section === 'piezas' ? ['Pieza', 'Proveedor', 'Estado', 'Técnico'] : ['Producto', 'Cliente', 'Estado', 'Fecha'];
     head.innerHTML = headers.map(h => `<th class="px-6 py-4 font-bold text-slate-500 uppercase text-[10px]">${h}</th>`).join('') + '<th class="px-6 py-4"></th>';
     body.innerHTML = data.length ? '' : '<tr><td colspan="6" class="p-10 text-center text-slate-400 italic">Sin datos.</td></tr>';
-    
-    data.sort((a,b) => new Date(b.fecha || b.dueDate) - new Date(a.fecha || a.dueDate)).forEach(item => {
+    data.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach(item => {
         let content = '';
         if(section === 'reparaciones') {
             const isG = item.garantia_fin && new Date(item.garantia_fin) > new Date();
             content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.ot)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.cliente)}</td><td class="px-6 py-4 text-[10px]">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${isG?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-500'}">${isG?'Vigente':'Expirada'}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td>`;
         } else if(section === 'piezas') {
             content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.nombre)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.proveedor)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-[10px] font-medium text-blue-600">${item.usuario}</td>`;
-        } else if(section === 'pedidos') {
+        } else {
             content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.producto)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.cliente)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-[10px]">${new Date(item.fecha).toLocaleDateString()}</td>`;
-        } else if(section === 'recordatorios') {
-            const label = item.nombre ? `${item.nombre} ${item.apellidos||''}` : item.title;
-            content = `<td class="px-6 py-4 font-bold">${escapeHtml(label)}<br><span class="text-[8px] text-slate-400">${escapeHtml(item.ref_ot||'Sin OT')}</span></td><td class="px-6 py-4 text-xs">${item.dueDate || '-'}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${item.priority==='critical'?'bg-red-100 text-red-700':item.priority==='warning'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${item.priority}</span></td><td class="px-6 py-4"><input type="checkbox" ${item.completed?'checked':''} onclick="event.stopPropagation(); toggleReminder(${item.id})"></td>`;
         }
-        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 cursor-pointer";
+        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer";
         tr.innerHTML = `${content}<td class="px-6 py-4 text-right"><button onclick="viewDetail('${section}', ${item.id})" class="p-2 text-slate-400 hover:text-blue-600"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></td>`;
-        tr.onclick = (e) => { if(!e.target.closest('button') && !e.target.closest('input')) viewDetail(section, item.id); };
+        tr.onclick = (e) => { if(!e.target.closest('button')) viewDetail(section, item.id); };
         body.appendChild(tr);
     });
     lucide.createIcons();
-}
-
-async function toggleReminder(id) {
-    const r = await db.recordatorios.get(id);
-    if(r) { r.completed = !r.completed; await db.recordatorios.put(r); renderTable('recordatorios'); updateDashboard(); }
 }
 
 function getStatusClass(s) {
@@ -529,27 +587,11 @@ function openModal(editData = null) {
     
     let html = '';
     if(active === 'reparaciones') {
-        html = `
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Equipo</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">OT *</label><input type="text" name="ot" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.ot||''}"></div><div><label class="text-[10px] font-bold">Nº Serie</label><input type="text" name="serie" class="w-full border rounded-xl p-3 text-sm" value="${editData?.serie||''}"></div><div><label class="text-[10px] font-bold">Marca *</label><input type="text" name="marca" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.marca||''}"></div><div><label class="text-[10px] font-bold">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.modelo||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Seguridad y Cliente</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">PIN / Password</label><input type="text" name="password" class="w-full border rounded-xl p-3 text-sm" value="${editData?.password||''}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Técnico</p><div class="grid grid-cols-3 gap-3"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='En Proceso'?'selected':''}>En Proceso</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="prioridad" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Garantía, Precio y Foto</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded-xl p-3 text-sm" value="${editData?.garantia_meses||0}"></div><div><label class="text-[10px] font-bold">Precio Reparación</label><input type="number" step="0.01" name="precio" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precio||''}"></div></div><div class="mt-3"><label class="text-[10px] font-bold">Foto (Cámara)</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div>
-            <div><label class="text-[10px] font-bold">Observaciones / Notas Cliente</label><textarea name="observaciones" rows="3" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div>`;
+        html = `<div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Equipo</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">OT *</label><input type="text" name="ot" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.ot||''}"></div><div><label class="text-[10px] font-bold">Nº Serie</label><input type="text" name="serie" class="w-full border rounded-xl p-3 text-sm" value="${editData?.serie||''}"></div><div><label class="text-[10px] font-bold">Marca *</label><input type="text" name="marca" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.marca||''}"></div><div><label class="text-[10px] font-bold">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.modelo||''}"></div></div></div><div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Seguridad y Cliente</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">PIN / Password</label><input type="text" name="password" class="w-full border rounded-xl p-3 text-sm" value="${editData?.password||''}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div></div></div><div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Técnico</p><div class="grid grid-cols-3 gap-3"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='En Proceso'?'selected':''}>En Proceso</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="prioridad" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div><div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Garantía y Foto</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded-xl p-3 text-sm" value="${editData?.garantia_meses||0}"></div><div><label class="text-[10px] font-bold">Precio Reparación</label><input type="number" step="0.01" name="precio" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precio||''}"></div></div><div class="mt-3"><label class="text-[10px] font-bold">Foto (Cámara)</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div><div><label class="text-[10px] font-bold">Observaciones / Notas Cliente</label><textarea name="observaciones" rows="3" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div>`;
     } else if(active === 'piezas') {
-        html = `
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Información de Pieza</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.nombre||''}"></div><div><label class="text-[10px] font-bold">Referencia / SKU</label><input type="text" name="referencia" class="w-full border rounded-xl p-3 text-sm" value="${editData?.referencia||''}"></div><div><label class="text-[10px] font-bold">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded-xl p-3 text-sm" value="${editData?.proveedor||''}"></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Precios</p><div class="grid grid-cols-3 gap-4"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Instalado'?'selected':''}>Instalado</option><option ${editData?.estado==='Vendido'?'selected':''}>Vendido</option></select></div><div><label class="text-[10px] font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Multimedia y Notas</p><div><label class="text-[10px] font-bold">Foto Pieza</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div><div class="mt-3"><label class="text-[10px] font-bold">Notas Internas</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div></div>`;
+        html = `<div class="form-section"><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.nombre||''}"></div><div><label class="text-[10px] font-bold">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded-xl p-3 text-sm" value="${editData?.proveedor||''}"></div><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Instalado'?'selected':''}>Instalado</option></select></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div>`;
     } else if(active === 'pedidos') {
-        html = `
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Datos del Pedido</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Producto *</label><input type="text" name="producto" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.producto||''}"></div><div><label class="text-[10px] font-bold">EAN / Referencia</label><input type="text" name="ean" class="w-full border rounded-xl p-3 text-sm" value="${editData?.ean||''}"></div><div><label class="text-[10px] font-bold">Cantidad</label><input type="number" name="cantidad" class="w-full border rounded-xl p-3 text-sm" value="${editData?.cantidad||1}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Gestión y Precios</p><div class="grid grid-cols-3 gap-4"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='En Espera'?'selected':''}>En Espera</option><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">P. Compra Unit.</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta Unit.</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Multimedia y Notas</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Teléfono Cliente</label><input type="tel" name="tlf" class="w-full border rounded-xl p-3 text-sm" value="${editData?.tlf||''}"></div><div><label class="text-[10px] font-bold">Foto Producto / Caja</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div><div class="mt-3"><label class="text-[10px] font-bold">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div></div>`;
-    } else if(active === 'recordatorios') {
-        html = `
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Información del Cliente</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Nombre *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.nombre||''}"></div><div><label class="text-[10px] font-bold">Apellidos</label><input type="text" name="apellidos" class="w-full border rounded-xl p-3 text-sm" value="${editData?.apellidos||''}"></div><div><label class="text-[10px] font-bold">Teléfono</label><input type="tel" name="telefono" class="w-full border rounded-xl p-3 text-sm" value="${editData?.telefono||''}"></div><div><label class="text-[10px] font-bold">Email</label><input type="email" name="email" class="w-full border rounded-xl p-3 text-sm" value="${editData?.email||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Detalle y Referencia</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Título / Motivo *</label><input type="text" name="title" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.title||''}"></div><div><label class="text-[10px] font-bold">Referencia OT</label><input type="text" name="ref_ot" class="w-full border rounded-xl p-3 text-sm" placeholder="Ej: OT-1234" value="${editData?.ref_ot||''}"></div><div class="col-span-2"><label class="text-[10px] font-bold">Descripción / Notas</label><textarea name="desc" rows="2" class="w-full border rounded-xl p-3 text-sm">${editData?.desc||''}</textarea></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Planificación y Multimedia</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Fecha Límite</label><input type="date" name="dueDate" class="w-full border rounded-xl p-3 text-sm" value="${editData?.dueDate||''}"></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="priority" class="w-full border rounded-xl p-3 text-sm"><option value="info" ${editData?.priority==='info'?'selected':''}>Normal</option><option value="warning" ${editData?.priority==='warning'?'selected':''}>Importante</option><option value="critical" ${editData?.priority==='critical'?'selected':''}>Urgente</option></select></div><div class="col-span-2"><label class="text-[10px] font-bold">Foto Adjunta</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div></div>`;
+        html = `<div class="form-section"><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Producto *</label><input type="text" name="producto" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.producto||''}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='En Espera'?'selected':''}>En Espera</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">Cantidad</label><input type="number" name="cantidad" class="w-full border rounded-xl p-3 text-sm" value="${editData?.cantidad||1}"></div></div></div><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">P. Compra Unit.</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta Unit.</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div>`;
     }
     fields.innerHTML = html; modal.classList.remove('hidden'); modal.classList.add('flex'); lucide.createIcons();
 }
@@ -571,7 +613,6 @@ $('record-form').onsubmit = async (e) => {
             await db[section].put(merged);
         } else {
             data.fecha = new Date().toISOString();
-            if(section === 'recordatorios') data.completed = false;
             await db[section].add(data);
         }
         showToast('Guardado'); closeModal(); showSection(currentSection);
@@ -582,20 +623,18 @@ $('record-form').onsubmit = async (e) => {
 async function viewDetail(section, id) {
     const item = await db[section].get(id); if(!item) return;
     let html = `<div class="grid grid-cols-2 gap-4 text-xs">${Object.entries(item).map(([k,v]) => {
-        if(['id','imagen','garantia_fin','fecha'].includes(k)) return '';
-        if(!v && v!==0) return '';
-        return `<div><p class="text-[9px] font-bold text-slate-400 uppercase">${k.replace('_',' ')}</p><p class="text-slate-700">${escapeHtml(v)}</p></div>`;
+        if(['id','imagen','garantia_fin'].includes(k)) return '';
+        return `<div><p class="text-[9px] font-bold text-slate-400 uppercase">${k.replace('_',' ')}</p><p class="text-slate-700 dark:text-slate-200">${escapeHtml(v)}</p></div>`;
     }).join('')}</div>${item.imagen ? `<div class="mt-4"><p class="text-[9px] font-bold text-slate-400 uppercase mb-2">Foto Adjunta</p><img src="${item.imagen}" class="w-full rounded-xl border border-slate-200"></div>` : ''}`;
     $('detail-content').innerHTML = html;
     $('detail-edit-btn').onclick = () => { closeDetailModal(); openModal(item); };
     $('detail-print-btn').onclick = () => printItem(section, item);
-    $('detail-delete-btn').onclick = async () => { if(confirm('¿Seguro que quieres borrarlo?')) { await db[section].delete(id); closeDetailModal(); showSection(currentSection); showToast('Borrado', 'error'); } };
     $('detail-modal').classList.remove('hidden'); $('detail-modal').classList.add('flex'); lucide.createIcons();
 }
 function closeDetailModal() { $('detail-modal').classList.add('hidden'); }
 
 function printItem(section, item) {
-    let title = section === 'reparaciones' ? 'ORDEN DE TRABAJO' : section === 'pedidos' ? 'ALBARÁN DE PEDIDO' : 'DETALLE DE REGISTRO';
+    let title = section === 'reparaciones' ? 'ORDEN DE TRABAJO' : section === 'pedidos' ? 'ALBARÁN DE PEDIDO' : 'DETALLE DE PIEZA';
     $('print-area').innerHTML = `
         <div class="print-container">
             <div class="print-header">
@@ -603,10 +642,11 @@ function printItem(section, item) {
                 <div style="text-align:right"><div style="font-weight:bold">${title}</div><div style="font-size:12px">Nº: ${item.ot || item.id}</div><div style="font-size:10px">${new Date().toLocaleDateString()}</div></div>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px; margin-bottom:30px">
-                <div><p class="print-label">Cliente / Título</p><p class="print-value">${item.cliente || item.nombre || 'S/D'} ${item.apellidos||''}</p><p class="print-label" style="margin-top:10px">Equipo / Producto</p><p class="print-value">${item.marca || ''} ${item.modelo || item.producto || item.title || ''}</p></div>
-                <div><p class="print-label">Técnico / Fecha</p><p class="print-value">${item.usuario || item.dueDate || 'General'}</p><p class="print-label" style="margin-top:10px">Estado / Prioridad</p><p class="print-value">${item.estado || item.priority}</p></div>
+                <div><p class="print-label">Cliente</p><p class="print-value">${item.cliente || 'S/D'}</p><p class="print-label" style="margin-top:10px">Equipo / Producto</p><p class="print-value">${item.marca || ''} ${item.modelo || item.producto || ''}</p></div>
+                <div><p class="print-label">Técnico Asignado</p><p class="print-value">${item.usuario || 'General'}</p><p class="print-label" style="margin-top:10px">Estado Actual</p><p class="print-value">${item.estado}</p></div>
             </div>
-            <div style="margin-bottom:30px"><p class="print-label">Descripción / Observaciones</p><div style="border:1px solid #eee; padding:15px; min-height:100px; font-size:12px; margin-top:5px">${item.observaciones || item.desc || 'Sin observaciones adicionales.'}</div></div>
+            <div style="margin-bottom:30px"><p class="print-label">Descripción / Observaciones</p><div style="border:1px solid #eee; padding:15px; min-height:100px; font-size:12px; margin-top:5px">${item.observaciones || 'Sin observaciones adicionales.'}</div></div>
+            ${section === 'reparaciones' ? `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px"><div><p class="print-label">Nº Serie</p><p class="print-value">${item.serie || '-'}</p></div><div><p class="print-label">Contraseña</p><p class="print-value">${item.password || '-'}</p></div></div>` : ''}
             <div class="signature-box"><div class="signature-field">Firma Técnico</div><div class="signature-field">Firma Cliente</div></div>
             <div style="margin-top:40px; font-size:9px; color:#999; text-align:center">Este documento es un justificante de servicio. Gracias por su confianza.</div>
         </div>`;
@@ -617,142 +657,40 @@ function printItem(section, item) {
 async function generateAISuggestions() {
     const modal = $('ai-modal'), content = $('ai-content');
     modal.classList.remove('hidden'); modal.classList.add('flex');
-    content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller en profundidad...</p></div>';
+    content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller...</p></div>';
     
     const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
-    
-    let ingresosRep = reps.reduce((s,r) => s + (parseFloat(r.precio)||0), 0);
-    let ingresosPed = ped.reduce((s,p) => s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)), 0);
-    let ingresosPie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioVenta)||0), 0);
-    let costePed = ped.reduce((s,p) => s + ((parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1)), 0);
-    let costePie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioCompra)||0), 0);
-    let ingresoTotal = ingresosRep + ingresosPed + ingresosPie;
-    let costeTotal = costePed + costePie;
-    let beneficio = ingresoTotal - costeTotal;
-    let margenPromedio = ingresoTotal > 0 ? (beneficio / ingresoTotal * 100) : 0;
-    
-    let piezasAntiguasPedido = pie.filter(p => p.estado === 'Pedido' && (new Date() - new Date(p.fecha)) > 7*24*60*60*1000);
-    let piezasRecibidas = pie.filter(p => p.estado === 'Recibido').length;
-    
-    let now = new Date();
-    let garantiasProximas = reps.filter(r => r.garantia_fin && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) <= 15 && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) >= 0).length;
-    let garantiasExpiradas = reps.filter(r => r.garantia_fin && new Date(r.garantia_fin) < now).length;
-    
-    let cargaTecnicos = USUARIOS.map(u => {
-        let pendientes = reps.filter(r => r.usuario === u && r.estado === 'Pendiente').length;
-        let enProceso = reps.filter(r => r.usuario === u && r.estado === 'En Proceso').length;
-        let urgentes = reps.filter(r => r.usuario === u && r.prioridad === 'Alta' && r.estado !== 'Entregado').length;
-        return { usuario: u, pendientes, enProceso, urgentes, total: pendientes + enProceso };
-    });
-    
-    let pedidosPendientes = ped.filter(p => p.estado !== 'Entregado').length;
-    let pedidosAntiguos = ped.filter(p => p.estado === 'Pedido' && (new Date() - new Date(p.fecha)) > 14*24*60*60*1000).length;
+    const stats = {
+        p: reps.filter(r=>r.estado==='Pendiente').length,
+        u: reps.filter(r=>r.prioridad==='Alta' && r.estado!=='Entregado').length,
+        pi: pie.filter(p=>p.estado==='Pedido').length,
+        pe: ped.filter(p=>p.estado!=='Entregado').length,
+        ben: ped.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1),0)
+    };
     
     setTimeout(() => {
-        let html = `
-            <div class="grid grid-cols-3 gap-3 mb-4">
-                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Ingresos Totales</p><p class="text-xl font-black text-blue-600">${ingresoTotal.toFixed(0)}€</p></div>
-                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Beneficio Neto</p><p class="text-xl font-black text-emerald-600">${beneficio.toFixed(0)}€</p></div>
-                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Margen Medio</p><p class="text-xl font-black text-purple-600">${margenPromedio.toFixed(1)}%</p></div>
-            </div>
-            
-            <div class="suggestion-card critical mb-4">
-                <div class="flex gap-3"><i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0"></i><div>
-                    <p class="font-bold text-xs">📊 Análisis Financiero Detallado</p>
-                    <div class="mt-2 text-[10px] space-y-1">
-                        <p><strong>Reparaciones:</strong> ${ingresosRep.toFixed(2)}€ (${(ingresosRep/ingresoTotal*100).toFixed(1)}% del total)</p>
-                        <p><strong>Pedidos:</strong> ${ingresosPed.toFixed(2)}€ (${(ingresosPed/ingresoTotal*100).toFixed(1)}% del total)</p>
-                        <p><strong>Piezas Vendidas:</strong> ${ingresosPie.toFixed(2)}€ (${(ingresosPie/ingresoTotal*100).toFixed(1)}% del total)</p>
-                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${margenPromedio > 30 ? 'Márgenes saludables. Mantener estrategia.' : 'Revisar precios de compra con proveedores.'}</p>
-                    </div>
-                </div></div>
-            </div>
-            
-            <div class="suggestion-card ${piezasAntiguasPedido.length > 0 ? 'warning' : 'success'} mb-4">
-                <div class="flex gap-3"><i data-lucide="package" class="w-5 h-5 flex-shrink-0"></i><div>
-                    <p class="font-bold text-xs">📦 Control de Stock Crítico</p>
-                    <div class="mt-2 text-[10px] space-y-1">
-                        <p><strong>Piezas en Pedido:</strong> ${pie.filter(p => p.estado === 'Pedido').length} unidades</p>
-                        <p><strong>Piezas Recibidas (sin instalar):</strong> ${piezasRecibidas} unidades</p>
-                        ${piezasAntiguasPedido.length > 0 ? `<p class="text-red-600"><strong>⚠️ Piezas retrasadas:</strong> ${piezasAntiguasPedido.length} llevan más de 7 días</p>` : ''}
-                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${piezasAntiguasPedido.length > 0 ? 'Contactar proveedores urgentemente.' : 'Stock en orden. Seguir monitoreando.'}</p>
-                    </div>
-                </div></div>
-            </div>
-            
-            <div class="suggestion-card ${garantiasProximas > 0 ? 'warning' : 'success'} mb-4">
-                <div class="flex gap-3"><i data-lucide="shield-check" class="w-5 h-5 flex-shrink-0"></i><div>
-                    <p class="font-bold text-xs">🛡️ Gestión de Garantías</p>
-                    <div class="mt-2 text-[10px] space-y-1">
-                        <p><strong>Garantías Vigentes:</strong> ${reps.filter(r => r.garantia_fin && new Date(r.garantia_fin) > now).length} equipos</p>
-                        <p><strong>Próximas a Vencer (≤15 días):</strong> ${garantiasProximas} equipos</p>
-                        <p><strong>Garantías Expiradas:</strong> ${garantiasExpiradas} equipos</p>
-                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${garantiasProximas > 0 ? 'Contactar clientes para renovación o revisión.' : 'Garantías bajo control.'}</p>
-                    </div>
-                </div></div>
-            </div>
-            
-            <div class="suggestion-card info mb-4">
-                <div class="flex gap-3"><i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i><div>
-                    <p class="font-bold text-xs">👥 Carga de Trabajo por Técnico</p>
-                    <div class="mt-2 text-[10px] space-y-2">
-                        ${cargaTecnicos.map(c => `
-                            <div class="bg-slate-50 p-2 rounded">
-                                <p class="font-bold">${c.usuario}</p>
-                                <p class="text-[9px]">Pendientes: ${c.pendientes} | En Proceso: ${c.enProceso} | Urgentes: ${c.urgentes}</p>
-                                <p class="text-[9px] font-bold ${c.total > 5 ? 'text-red-600' : 'text-green-600'}">${c.total > 5 ? '⚠️ Saturado' : '✓ Normal'}</p>
-                            </div>
-                        `).join('')}
-                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${cargaTecnicos.some(c => c.total > 5) ? 'Redistribuir tareas urgentes.' : 'Carga equilibrada.'}</p>
-                    </div>
-                </div></div>
-            </div>
-            
-            <div class="suggestion-card ${pedidosAntiguos > 0 ? 'critical' : 'success'}">
-                <div class="flex gap-3"><i data-lucide="shopping-cart" class="w-5 h-5 flex-shrink-0"></i><div>
-                    <p class="font-bold text-xs">🛒 Estado de Pedidos</p>
-                    <div class="mt-2 text-[10px] space-y-1">
-                        <p><strong>Pedidos Activos:</strong> ${pedidosPendientes} en espera</p>
-                        <p><strong>Pedidos Completados:</strong> ${ped.filter(p => p.estado === 'Entregado').length}</p>
-                        ${pedidosAntiguos > 0 ? `<p class="text-red-600"><strong>⚠️ Pedidos retrasados:</strong> ${pedidosAntiguos} llevan más de 14 días</p>` : ''}
-                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${pedidosAntiguos > 0 ? 'Acelerar entregas o contactar clientes.' : 'Flujo de pedidos normal.'}</p>
-                    </div>
-                </div></div>
-            </div>
-        `;
-        
-        content.innerHTML = html;
-        
-        $('ai-mini-view').innerHTML = `
-            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i><p class="text-[10px] font-bold uppercase text-slate-500">Rentabilidad</p></div>
-                <p class="text-sm font-black text-emerald-600">${beneficio.toFixed(0)}€</p>
-                <p class="text-[10px] text-slate-500 mt-1">Margen: ${margenPromedio.toFixed(1)}%</p>
-            </div>
-            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                <div class="flex items-center gap-2 mb-2"><i data-lucide="alert-circle" class="w-4 h-4 ${piezasAntiguasPedido.length > 0 ? 'text-red-500' : 'text-green-500'}"></i><p class="text-[10px] font-bold uppercase text-slate-500">Stock Crítico</p></div>
-                <p class="text-sm font-black">${piezasAntiguasPedido.length}</p>
-                <p class="text-[10px] text-slate-500 mt-1">Piezas retrasadas</p>
-            </div>
-            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                <div class="flex items-center gap-2 mb-2"><i data-lucide="shield-alert" class="w-4 h-4 ${garantiasProximas > 0 ? 'text-amber-500' : 'text-green-500'}"></i><p class="text-[10px] font-bold uppercase text-slate-500">Garantías</p></div>
-                <p class="text-sm font-black">${garantiasProximas}</p>
-                <p class="text-[10px] text-slate-500 mt-1">Próximas a vencer</p>
-            </div>
-        `;
-        
-        $('ai-dashboard-summary').innerHTML = `Análisis completado: ${beneficio.toFixed(0)}€ de beneficio, ${piezasAntiguasPedido.length} piezas retrasadas, ${garantiasProximas} garantías próximas.`;
+        let sug = [];
+        if(stats.u>0) sug.push({t:'cr', i:'alert-circle', h:'Urgencias detectadas', d:`Hay ${stats.u} equipos prioritarios.`, a:'Priorizar estas OT hoy.'});
+        if(stats.pi>3) sug.push({t:'wa', i:'package', h:'Retraso en piezas', d:`${stats.pi} piezas en pedido.`, a:'Contactar proveedores.'});
+        if(stats.ben<1000) sug.push({t:'in', i:'trending-down', h:'Rentabilidad baja', d:`Beneficio: ${stats.ben.toFixed(2)}€`, a:'Revisar márgenes.'});
+        else sug.push({t:'su', i:'trending-up', h:'Buen rendimiento', d:`Beneficio: ${stats.ben.toFixed(2)}€`, a:'Seguir así.'});
+
+        content.innerHTML = `<div class="grid grid-cols-2 gap-3 mb-6"><div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl text-center"><p class="text-[9px] font-bold text-blue-500 uppercase">Pendientes</p><p class="text-xl font-black text-blue-700">${stats.p}</p></div><div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl text-center"><p class="text-[9px] font-bold text-red-500 uppercase">Urgentes</p><p class="text-xl font-black text-red-700">${stats.u}</p></div></div><h4 class="font-bold text-sm mb-3">Recomendaciones IA</h4><div class="space-y-3">${sug.map(s=>`<div class="suggestion-card ${s.t==='cr'?'critical':s.t==='wa'?'warning':s.t==='su'?'success':'info'}"><div class="flex gap-3"><i data-lucide="${s.i}" class="w-5 h-5"></i><div><p class="text-xs font-bold">${s.h}</p><p class="text-[10px] text-slate-600 dark:text-slate-400 mt-1">${s.d}</p><p class="text-[10px] font-bold mt-1 text-blue-600">💡 ${s.a}</p></div></div></div>`).join('')}</div>`;
+        $('ai-dashboard-summary').innerHTML = `Análisis completado: ${stats.p} pendientes, ${stats.u} urgencias. Beneficio actual: ${stats.ben.toFixed(2)}€`;
         lucide.createIcons();
-    }, 1200);
+    }, 800);
 }
 
 function closeAIModal() { $('ai-modal').classList.add('hidden'); }
+function openReminderModal() { $('reminder-modal').classList.remove('hidden'); $('reminder-modal').classList.add('flex'); }
+function closeReminderModal() { $('reminder-modal').classList.add('hidden'); }
+$('reminder-form').onsubmit = async (e) => { e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); d.completed = false; await db.recordatorios.add(d); closeReminderModal(); updateAlerts(await db.reparaciones.toArray()); showToast('Añadido'); };
 
 // Data Management
 async function exportData() {
     const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray() };
     const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_8_${new Date().toISOString().split('T')[0]}.json`; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
 }
 async function importData(e) {
     const f = e.target.files[0]; if(!f) return;
@@ -765,9 +703,82 @@ async function importData(e) {
 
 window.showSection = showSection; window.openModal = openModal; window.closeModal = closeModal;
 window.viewDetail = viewDetail; window.closeDetailModal = closeDetailModal; window.login = login;
-window.logout = logout; window.generateAISuggestions = generateAISuggestions;
-window.closeAIModal = closeAIModal; window.exportData = exportData; window.importData = importData; window.handleFile = handleFile; window.filterTable = filterTable;
-window.toggleReminder = toggleReminder;
+window.logout = logout; window.toggleDarkMode = toggleDarkMode; window.generateAISuggestions = generateAISuggestions;
+window.closeAIModal = closeAIModal; window.openReminderModal = openReminderModal; window.closeReminderModal = closeReminderModal;
+window.exportData = exportData; window.importData = importData; window.handleFile = handleFile; window.filterTable = filterTable;
+
+// Agenda
+function openReminderForm() {
+    const userSelect = $('reminder-user-select');
+    userSelect.innerHTML = USUARIOS.map(u => `<option>${u}</option>`).join('');
+    $('reminder-modal').style.display = 'flex';
+    $('foto-preview').style.display = 'none';
+    $('reminder-form').reset();
+}
+function closeReminderModal() {
+    $('reminder-modal').style.display = 'none';
+}
+function previewFoto(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = $('foto-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+async function renderAgenda() {
+    const recs = await db.recordatorios.toArray();
+    const container = $('agenda-list');
+    if(!recs.length) { container.innerHTML = '<p class="text-center text-slate-400 text-sm py-6 italic">Sin recordatorios</p>'; return; }
+    container.innerHTML = recs.map(r => `<div class="flat-card p-4 border-l-4 ${r.priority === 'critical' ? 'border-red-500' : r.priority === 'warning' ? 'border-amber-500' : 'border-blue-500'}"><div class="flex justify-between items-start"><div class="flex-1"><p class="font-bold text-sm">${escapeHtml(r.title)}</p><p class="text-xs text-slate-500 mt-1">${r.dueDate ? new Date(r.dueDate).toLocaleDateString() : ''} ${r.dueTime ? r.dueTime : ''}</p></div><button onclick="deleteReminder(${r.id})" class="text-red-500 hover:text-red-700 font-bold">✕</button></div>${r.description ? `<p class="text-xs text-slate-600 mt-2">${escapeHtml(r.description)}</p>` : ''}${r.referencia ? `<p class="text-xs text-blue-600 mt-1">Ref: ${escapeHtml(r.referencia)}</p>` : ''}${r.observaciones ? `<p class="text-xs text-slate-500 mt-1 italic">${escapeHtml(r.observaciones)}</p>` : ''}${r.foto ? `<img src="${r.foto}" style="margin-top:8px; max-width:100%; border-radius:6px; max-height:150px;">` : ''}</div>`).join('');
+}
+$('reminder-form').onsubmit = async (e) => { 
+    e.preventDefault(); 
+    const formData = new FormData(e.target);
+    const d = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        dueDate: formData.get('dueDate'),
+        dueTime: formData.get('dueTime'),
+        priority: formData.get('priority'),
+        category: formData.get('category'),
+        usuario: formData.get('usuario'),
+        referencia: formData.get('referencia'),
+        observaciones: formData.get('observaciones'),
+        completed: false
+    };
+    const fotoFile = formData.get('foto');
+    if(fotoFile && fotoFile.size > 0) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            d.foto = e.target.result;
+            await db.recordatorios.add(d);
+            closeReminderModal();
+            renderAgenda();
+            showToast('RECORDATORIO GUARDADO');
+        };
+        reader.readAsDataURL(fotoFile);
+    } else {
+        await db.recordatorios.add(d);
+        closeReminderModal();
+        renderAgenda();
+        showToast('RECORDATORIO GUARDADO');
+    }
+};
+async function deleteReminder(id) {
+    if(confirm('¿Eliminar este recordatorio?')) {
+        await db.recordatorios.delete(id);
+        showToast('RECORDATORIO ELIMINADO');
+        renderAgenda();
+    }
+}
+window.openReminderForm = openReminderForm;
+window.previewFoto = previewFoto;
+window.renderAgenda = renderAgenda;
+window.deleteReminder = deleteReminder;
 </script>
 </body>
 </html>
