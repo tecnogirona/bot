@@ -84,7 +84,7 @@
 </div>
 
 <!-- Sidebar -->
-<aside class="w-16 md:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col transition-all duration-300 z-30">
+<aside class="fixed left-0 top-0 bottom-0 w-16 md:w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all duration-300 z-40">
     <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
         <div class="bg-blue-600 p-2 rounded-lg text-white"><i data-lucide="wrench" class="w-5 h-5"></i></div>
         <h1 class="text-xl font-bold text-slate-800 dark:text-white sidebar-text">SAT Pro</h1>
@@ -655,28 +655,38 @@ function printItem(section, item) {
 
 // AI Analysis
 async function generateAISuggestions() {
-    const modal = $('ai-modal'), content = $('ai-content');
-    modal.classList.remove('hidden'); modal.classList.add('flex');
-    content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller...</p></div>';
-    
+    const modal = $("ai-modal"), content = $("ai-content");
+    modal.classList.remove("hidden"); modal.classList.add("flex");
+    content.innerHTML = "<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller...</p></div>";
     const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    const hoy = new Date();
     const stats = {
-        p: reps.filter(r=>r.estado==='Pendiente').length,
-        u: reps.filter(r=>r.prioridad==='Alta' && r.estado!=='Entregado').length,
-        pi: pie.filter(p=>p.estado==='Pedido').length,
-        pe: ped.filter(p=>p.estado!=='Entregado').length,
-        ben: ped.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1),0)
+        p: reps.filter(r=>r.estado==="Pendiente").length,
+        u: reps.filter(r=>r.prioridad==="Alta" && r.estado!==="Entregado").length,
+        c: reps.filter(r=>r.estado==="Completado" || r.estado==="Entregado").length,
+        garVigente: reps.filter(r=>r.garantia_fin && new Date(r.garantia_fin)>hoy).length,
+        garExpirada: reps.filter(r=>r.garantia_fin && new Date(r.garantia_fin)<=hoy).length,
+        garProxima: reps.filter(r=>r.garantia_fin && Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24))<=15 && Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24))>0).length,
+        pi: pie.filter(p=>p.estado==="Pedido").length,
+        piSinStock: pie.filter(p=>p.estado==="Pedido" || p.estado==="Agotado").length,
+        piVendidas: pie.filter(p=>p.estado==="Vendido" || p.estado==="Instalado").length,
+        pe: ped.filter(p=>p.estado!==="Entregado").length,
+        peEntregados: ped.filter(p=>p.estado==="Entregado").length,
+        ingresos: ped.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)),0) + pie.filter(p=>p.estado==="Vendido"||p.estado==="Instalado").reduce((s,p)=>s+(parseFloat(p.precioVenta)||0),0) + reps.reduce((s,r)=>s+(parseFloat(r.precio)||0),0),
+        costes: ped.reduce((s,p)=>s+((parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1)),0) + pie.filter(p=>p.estado==="Vendido"||p.estado==="Instalado").reduce((s,p)=>s+(parseFloat(p.precioCompra)||0),0),
+        ben: ped.reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0))*(parseInt(p.cantidad)||1),0) + pie.filter(p=>p.estado==="Vendido"||p.estado==="Instalado").reduce((s,p)=>s+((parseFloat(p.precioVenta)||0)-(parseFloat(p.precioCompra)||0)),0)
     };
-    
+    stats.margen = stats.ingresos > 0 ? ((stats.ben/stats.ingresos)*100).toFixed(1) : 0;
     setTimeout(() => {
         let sug = [];
-        if(stats.u>0) sug.push({t:'cr', i:'alert-circle', h:'Urgencias detectadas', d:`Hay ${stats.u} equipos prioritarios.`, a:'Priorizar estas OT hoy.'});
-        if(stats.pi>3) sug.push({t:'wa', i:'package', h:'Retraso en piezas', d:`${stats.pi} piezas en pedido.`, a:'Contactar proveedores.'});
-        if(stats.ben<1000) sug.push({t:'in', i:'trending-down', h:'Rentabilidad baja', d:`Beneficio: ${stats.ben.toFixed(2)}€`, a:'Revisar márgenes.'});
-        else sug.push({t:'su', i:'trending-up', h:'Buen rendimiento', d:`Beneficio: ${stats.ben.toFixed(2)}€`, a:'Seguir así.'});
-
-        content.innerHTML = `<div class="grid grid-cols-2 gap-3 mb-6"><div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl text-center"><p class="text-[9px] font-bold text-blue-500 uppercase">Pendientes</p><p class="text-xl font-black text-blue-700">${stats.p}</p></div><div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl text-center"><p class="text-[9px] font-bold text-red-500 uppercase">Urgentes</p><p class="text-xl font-black text-red-700">${stats.u}</p></div></div><h4 class="font-bold text-sm mb-3">Recomendaciones IA</h4><div class="space-y-3">${sug.map(s=>`<div class="suggestion-card ${s.t==='cr'?'critical':s.t==='wa'?'warning':s.t==='su'?'success':'info'}"><div class="flex gap-3"><i data-lucide="${s.i}" class="w-5 h-5"></i><div><p class="text-xs font-bold">${s.h}</p><p class="text-[10px] text-slate-600 dark:text-slate-400 mt-1">${s.d}</p><p class="text-[10px] font-bold mt-1 text-blue-600">💡 ${s.a}</p></div></div></div>`).join('')}</div>`;
-        $('ai-dashboard-summary').innerHTML = `Análisis completado: ${stats.p} pendientes, ${stats.u} urgencias. Beneficio actual: ${stats.ben.toFixed(2)}€`;
+        if(stats.u>0) sug.push({t:"cr", i:"alert-circle", h:"Urgencias detectadas", d:`${stats.u} equipos prioritarios sin entregar.`, a:"Priorizar estas OT hoy."});
+        if(stats.garExpirada>0) sug.push({t:"wa", i:"alert-triangle", h:"Garantías expiradas", d:`${stats.garExpirada} reparaciones sin cobertura.`, a:"Revisar y documentar."});
+        if(stats.pi>2) sug.push({t:"wa", i:"package", h:"Stock crítico", d:`${stats.pi} piezas en pedido, ${stats.piSinStock} sin stock.`, a:"Contactar proveedores urgente."});
+        if(stats.pe>3) sug.push({t:"wa", i:"truck", h:"Entregas pendientes", d:`${stats.pe} pedidos sin entregar.`, a:"Acelerar logística."});
+        if(stats.ben<500) sug.push({t:"in", i:"trending-down", h:"Rentabilidad baja", d:`Beneficio: ${stats.ben.toFixed(2)}€ (Margen: ${stats.margen}%)`, a:"Revisar márgenes."});
+        else sug.push({t:"su", i:"trending-up", h:"Buen rendimiento", d:`Beneficio: ${stats.ben.toFixed(2)}€ (Margen: ${stats.margen}%)`, a:"Mantener estrategia."});
+        content.innerHTML = `<div class="space-y-3 max-h-96 overflow-y-auto"><div class="grid grid-cols-2 gap-2"><div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg text-center"><p class="text-[8px] font-bold text-blue-500 uppercase">Pendientes</p><p class="text-lg font-black text-blue-700">${stats.p}</p></div><div class="bg-red-50 dark:bg-red-900/20 p-2 rounded-lg text-center"><p class="text-[8px] font-bold text-red-500 uppercase">Urgentes</p><p class="text-lg font-black text-red-700">${stats.u}</p></div><div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg text-center"><p class="text-[8px] font-bold text-emerald-500 uppercase">Completadas</p><p class="text-lg font-black text-emerald-700">${stats.c}</p></div><div class="bg-purple-50 dark:bg-purple-900/20 p-2 rounded-lg text-center"><p class="text-[8px] font-bold text-purple-500 uppercase">Entregas</p><p class="text-lg font-black text-purple-700">${stats.peEntregados}</p></div></div><div class="border-t border-slate-200 dark:border-slate-700 pt-2"><h5 class="text-xs font-bold mb-2 uppercase text-slate-600">Garantías</h5><div class="grid grid-cols-3 gap-2 text-center text-[10px]"><div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded"><p class="font-bold text-emerald-700">${stats.garVigente}</p><p class="text-[8px] text-slate-600">Vigentes</p></div><div class="bg-amber-100 dark:bg-amber-900/30 p-2 rounded"><p class="font-bold text-amber-700">${stats.garProxima}</p><p class="text-[8px] text-slate-600">Próximas</p></div><div class="bg-red-100 dark:bg-red-900/30 p-2 rounded"><p class="font-bold text-red-700">${stats.garExpirada}</p><p class="text-[8px] text-slate-600">Expiradas</p></div></div></div><div class="border-t border-slate-200 dark:border-slate-700 pt-2"><h5 class="text-xs font-bold mb-2 uppercase text-slate-600">Inventario</h5><div class="grid grid-cols-3 gap-2 text-center text-[10px]"><div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded"><p class="font-bold text-blue-700">${stats.piSinStock}</p><p class="text-[8px] text-slate-600">Sin Stock</p></div><div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded"><p class="font-bold text-purple-700">${stats.pi}</p><p class="text-[8px] text-slate-600">En Pedido</p></div><div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded"><p class="font-bold text-emerald-700">${stats.piVendidas}</p><p class="text-[8px] text-slate-600">Vendidas</p></div></div></div><div class="border-t border-slate-200 dark:border-slate-700 pt-2"><h5 class="text-xs font-bold mb-2 uppercase text-slate-600">Financiero</h5><div class="grid grid-cols-3 gap-2 text-[10px]"><div class="bg-slate-100 dark:bg-slate-900/30 p-2 rounded"><p class="text-[8px] font-bold text-slate-600 uppercase">Ingresos</p><p class="font-bold text-slate-800 dark:text-slate-200">${stats.ingresos.toFixed(0)}€</p></div><div class="bg-slate-100 dark:bg-slate-900/30 p-2 rounded"><p class="text-[8px] font-bold text-slate-600 uppercase">Costes</p><p class="font-bold text-slate-800 dark:text-slate-200">${stats.costes.toFixed(0)}€</p></div><div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded"><p class="text-[8px] font-bold text-emerald-600 uppercase">Beneficio</p><p class="font-bold text-emerald-700">${stats.ben.toFixed(0)}€</p></div></div><p class="text-[9px] text-slate-500 mt-2 text-center">Margen: <span class="font-bold text-slate-700">${stats.margen}%</span></p></div><div class="border-t border-slate-200 dark:border-slate-700 pt-2"><h4 class="font-bold text-xs mb-2 uppercase">Recomendaciones IA</h4><div class="space-y-2">${sug.map(s=>`<div class="suggestion-card ${s.t==="cr"?"critical":s.t==="wa"?"warning":s.t==="su"?"success":"info"}"><div class="flex gap-2"><i data-lucide="${s.i}" class="w-4 h-4 flex-shrink-0"></i><div><p class="text-[9px] font-bold">${s.h}</p><p class="text-[8px] text-slate-600 dark:text-slate-400 mt-0.5">${s.d}</p><p class="text-[8px] font-bold mt-1 text-blue-600">💡 ${s.a}</p></div></div></div>`).join("")}</div></div></div>`;
+        $("ai-dashboard-summary").innerHTML = `✓ Análisis 360°: ${stats.p} pendientes, ${stats.u} urgencias, ${stats.garExpirada} garantías expiradas. Beneficio: ${stats.ben.toFixed(2)}€ (${stats.margen}% margen).`;
         lucide.createIcons();
     }, 800);
 }
