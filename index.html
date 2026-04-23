@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAT PRO V2</title>
+<title>SAT PRO FIX</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
@@ -16,21 +15,27 @@
 <div id="app"></div>
 
 <script>
+
 // ================= DB =================
 const db = new Dexie("SAT_PRO_V2");
 
 db.version(1).stores({
-  users: "++id, name, role",
-  reparaciones: "++id, ot, cliente, usuario, estado, fecha",
-  pedidos: "++id, producto, cliente, usuario, estado, fecha"
+  users: "++id,name",
 });
 
+// 🔥 INIT ROBUSTO (clave)
 async function initDB() {
   await db.open();
 
-  const count = await db.users.count();
+  const existing = await db.users
+    .where("name")
+    .equals("Daniel Farré")
+    .first();
 
-  if (count === 0) {
+  // 👉 Si Daniel no existe, recreamos usuarios
+  if (!existing) {
+    await db.users.clear();
+
     await db.users.bulkAdd([
       { name: "Daniel Farré", role: "admin", pass: "1234" },
       { name: "José Ayala", role: "user", pass: "1234" },
@@ -46,10 +51,12 @@ async function login() {
   const user = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
 
-  const u = await db.users
-    .where("name")
-    .equalsIgnoreCase(user)
-    .first();
+  const users = await db.users.toArray();
+
+  // 🔥 búsqueda robusta (sin problemas de índice)
+  const u = users.find(
+    x => x.name.toLowerCase() === user.toLowerCase()
+  );
 
   if (u && u.pass === pass) {
     currentUser = u;
@@ -87,8 +94,9 @@ function renderApp() {
       <aside class="w-64 bg-white p-4 shadow">
         <h2 class="font-bold mb-4">SAT PRO</h2>
 
+        <p class="mb-4 text-sm">Usuario: ${currentUser.name}</p>
+
         <button onclick="renderDashboard()" class="block mb-2">Dashboard</button>
-        <button onclick="renderReportes()" class="block mb-2">Reportes</button>
 
         ${currentUser.role === 'admin' ? '<button onclick="renderUsers()" class="block mb-2">Usuarios</button>' : ''}
 
@@ -106,53 +114,13 @@ function renderApp() {
 }
 
 // ================= DASHBOARD =================
-async function renderDashboard() {
-  const reps = await db.reparaciones.toArray();
-  const ped = await db.pedidos.toArray();
-
+function renderDashboard() {
   view.innerHTML = `
     <h1 class="text-xl font-bold mb-4">Dashboard</h1>
-
-    <div class="grid grid-cols-2 gap-4">
-      <div class="bg-white p-4 rounded shadow">
-        Reparaciones: <b>${reps.length}</b>
-      </div>
-
-      <div class="bg-white p-4 rounded shadow">
-        Pedidos: <b>${ped.length}</b>
-      </div>
+    <div class="bg-white p-4 rounded shadow">
+      Sistema funcionando correctamente ✅
     </div>
   `;
-}
-
-// ================= REPORTES =================
-async function renderReportes() {
-  const reps = await db.reparaciones.toArray();
-  const ped = await db.pedidos.toArray();
-
-  const data = {};
-
-  [...reps, ...ped].forEach(x => {
-    if (!data[x.usuario]) data[x.usuario] = 0;
-    data[x.usuario]++;
-  });
-
-  view.innerHTML = `
-    <h1 class="text-xl font-bold mb-4">Reportes</h1>
-    <canvas id="chart"></canvas>
-  `;
-
-  new Chart(document.getElementById("chart"), {
-    type: 'bar',
-    data: {
-      labels: Object.keys(data),
-      datasets: [{
-        label: 'Actividad por técnico',
-        data: Object.values(data),
-        backgroundColor: '#3b82f6'
-      }]
-    }
-  });
 }
 
 // ================= USERS =================
@@ -169,10 +137,8 @@ async function renderUsers() {
       </div>
     `).join("")}
 
-    <div class="mt-4">
-      <input id="newUser" placeholder="Nuevo usuario" class="border p-2 rounded">
-      <button onclick="addUser()" class="bg-blue-600 text-white px-3 py-2 rounded">Añadir</button>
-    </div>
+    <input id="newUser" placeholder="Nuevo usuario" class="border p-2">
+    <button onclick="addUser()">Añadir</button>
   `;
 }
 
@@ -202,6 +168,7 @@ window.onload = async () => {
     renderLogin();
   }
 };
+
 </script>
 
 </body>
