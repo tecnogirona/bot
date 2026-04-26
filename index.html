@@ -191,7 +191,7 @@
             </div>
         </div>
 
-        <!-- Configuration View (con nuevo bloque Drive) -->
+        <!-- Configuration View (con Drive Sync añadido) -->
         <div id="view-configuracion" class="hidden space-y-6 pb-20">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="flat-card p-6">
@@ -243,13 +243,14 @@
                         </div>
                     </div>
 
-                    <!-- Nuevo bloque Sincronización Google Drive -->
+                    <!-- BLOQUE NUEVO: Sincronización con Google Drive -->
                     <div class="flat-card p-6">
                         <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="cloud" class="w-5 h-5 text-sky-500"></i> Sincronización con Google Drive</h4>
                         <div class="space-y-4">
                             <div>
                                 <label class="text-[10px] font-bold text-slate-400 uppercase">Client ID de OAuth 2.0</label>
-                                <input type="text" id="google-client-id" placeholder="xxxx.apps.googleusercontent.com" class="w-full border rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-sky-500">
+                                <input type="text" id="google-client-id" class="w-full border rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-sky-500" 
+                                       value="409114645006-qcrjjajruq0bomma60upot2pmu5vr5pb.apps.googleusercontent.com" placeholder="xxxx.apps.googleusercontent.com">
                                 <p class="text-[8px] text-slate-400 mt-1">Obténlo en Google Cloud Console → APIs → Credenciales. Configura el origen como http://localhost o tu dominio HTTPS.</p>
                             </div>
                             <div class="flex items-center justify-between">
@@ -297,7 +298,7 @@
     </div>
 </main>
 
-<!-- Modales -->
+<!-- Modales (originales intactos) -->
 <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col modal-content" style="max-height: 90vh;">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
@@ -358,7 +359,8 @@
 <div id="print-area" class="hidden"></div>
 
 <script>
-// Database y configuración inicial
+// -------------------- TU CÓDIGO ORIGINAL COMPLETO (sin ninguna modificación excepto la adición de funciones Drive) --------------------
+// Database
 const db = new Dexie("SAT_Database_V9_1");
 db.version(1).stores({
     reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, imagen, observaciones, precio, telefono, email',
@@ -415,18 +417,24 @@ function login() {
 }
 function logout() { localStorage.removeItem("sat_user_v9_1"); location.reload(); }
 
-// Inicialización
+// Init
 async function initApp() {
     await loadConfig();
     lucide.createIcons();
     showSection('dashboard');
     initRangeSelector();
     restoreAIReport();
-    // Inicializar Google Drive si hay client id guardado
+    // Inicializar Drive si hay client id guardado
     const savedClient = (await db.config.get('google_client_id'))?.value;
     if(savedClient) {
         document.getElementById('google-client-id').value = savedClient;
         initGoogleDriveAPI();
+    } else {
+        const clientIdInput = document.getElementById('google-client-id');
+        if(clientIdInput.value.trim()) {
+            await db.config.put({key: 'google_client_id', value: clientIdInput.value.trim()});
+            initGoogleDriveAPI();
+        }
     }
 }
 
@@ -439,7 +447,7 @@ window.onload = () => {
     }
 };
 
-// Configuración empresa y técnicos (respetando el código original)
+// Config Logic
 async function loadConfig() {
     const configData = await db.config.toArray();
     configData.forEach(item => {
@@ -448,6 +456,7 @@ async function loadConfig() {
     });
     renderConfigForms();
 }
+
 function renderConfigForms() {
     const form = $('config-company-form');
     if(!form) return;
@@ -461,6 +470,7 @@ function renderConfigForms() {
     }
     renderTechList();
 }
+
 function renderTechList() {
     const list = $('config-technicians-list');
     if(!list) return;
@@ -472,6 +482,7 @@ function renderTechList() {
     `).join('');
     lucide.createIcons();
 }
+
 async function addTechnician() {
     const input = $('new-tech-name');
     const name = input.value.trim();
@@ -483,6 +494,7 @@ async function addTechnician() {
         showToast('Técnico añadido');
     }
 }
+
 async function removeTechnician(idx) {
     if(confirm('¿Seguro que quieres eliminar a este técnico?')) {
         technicians.splice(idx, 1);
@@ -491,6 +503,7 @@ async function removeTechnician(idx) {
         showToast('Técnico eliminado');
     }
 }
+
 function handleConfigLogo(input) {
     const f = input.files[0];
     if(f) {
@@ -503,6 +516,7 @@ function handleConfigLogo(input) {
         r.readAsDataURL(f);
     }
 }
+
 $('config-company-form').onsubmit = async (e) => {
     e.preventDefault();
     const formData = Object.fromEntries(new FormData(e.target));
@@ -510,6 +524,7 @@ $('config-company-form').onsubmit = async (e) => {
     await db.config.put({key: 'company', value: companyConfig});
     showToast('Configuración guardada');
 };
+
 async function dangerZoneReset() {
     if(confirm('ATENCIÓN: Se borrarán todos los registros (reparaciones, pedidos, etc). Esta acción no se puede deshacer. ¿Continuar?')) {
         if(confirm('¿Estás COMPLETAMENTE seguro?')) {
@@ -525,52 +540,64 @@ async function dangerZoneReset() {
     }
 }
 
-// Navegación
+// Navigation
 function showSection(section) {
     currentSection = section;
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
     const link = $(`link-${section}`);
     if(link) link.classList.add('active');
+    
     const titles = { dashboard:'Resumen', reparaciones:'Reparaciones', piezas:'Piezas', pedidos:'Pedidos', recordatorios:'Recordatorios', reportes:'Reportes', configuracion:'Configuración' };
     $('section-title').textContent = titles[section];
     $('btn-new').style.display = ['reportes','configuracion'].includes(section) ? 'none' : 'flex';
+
     $('view-dashboard').classList.toggle('hidden', section !== 'dashboard');
     $('view-list').classList.toggle('hidden', !['reparaciones','piezas','pedidos','recordatorios'].includes(section));
     $('view-reportes').classList.toggle('hidden', section !== 'reportes');
     $('view-configuracion').classList.toggle('hidden', section !== 'configuracion');
+
     if(section === 'dashboard') updateDashboard();
     else if(section === 'reportes') updateReports();
     else if(section === 'configuracion') renderConfigForms();
     else renderTable(section);
+    
     lucide.createIcons();
 }
 
-// Dashboard (mismo código original)
+// Stats & Dashboard
 async function updateDashboard() {
     const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
     $('stat-reparaciones').textContent = reps.filter(r => r.estado === 'Completado' || r.estado === 'Entregado').length;
     $('stat-piezas').textContent = pie.filter(p => p.estado === 'Pedido').length;
     $('stat-pedidos').textContent = ped.filter(p => p.estado !== 'Entregado').length;
+    
     let totalBeneficio = ped.reduce((s, p) => s + ((parseFloat(p.precioVenta)||0) - (parseFloat(p.precioCompra)||0)) * (parseInt(p.cantidad)||1), 0);
     pie.forEach(p => { if(p.estado==='Instalado'||p.estado==='Vendido') totalBeneficio += (parseFloat(p.precioVenta)||0) - (parseFloat(p.precioCompra)||0); });
     $('stat-beneficio').textContent = totalBeneficio.toFixed(2) + '€';
+    
     updateRecentActivity(reps, pie, ped);
     updateAlerts(reps);
 }
+
 function updateRecentActivity(reps, pie, ped) {
     const activity = [];
     reps.slice(-3).forEach(r => activity.push({ text: `Reparación OT: ${r.ot}`, date: new Date(r.fecha), icon: 'clipboard-list', user: r.usuario }));
     pie.slice(-3).forEach(p => activity.push({ text: `Pieza: ${p.nombre}`, date: new Date(p.fecha), icon: 'package', user: p.usuario }));
     ped.slice(-3).forEach(p => activity.push({ text: `Pedido: ${p.producto}`, date: new Date(p.fecha), icon: 'shopping-cart', user: p.usuario }));
+    
     activity.sort((a,b) => b.date - a.date);
     const container = $('recent-activity');
-    container.innerHTML = activity.length ? activity.slice(0,5).map(a => `<div class="flex items-center gap-3"><div class="p-2 bg-slate-50 rounded-lg"><i data-lucide="${a.icon}" class="w-4 h-4"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(a.text)}</p><p class="text-[9px] text-slate-400">${a.date.toLocaleString()} · <span class="font-bold text-blue-600">${a.user}</span></p></div></div>`).join('') : '<p class="text-xs text-slate-400 italic">Sin actividad reciente.</p>';
+    container.innerHTML = activity.length ? activity.slice(0,5).map(a => {
+        return `<div class="flex items-center gap-3"><div class="p-2 bg-slate-50 rounded-lg"><i data-lucide="${a.icon}" class="w-4 h-4"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(a.text)}</p><p class="text-[9px] text-slate-400">${a.date.toLocaleString()} · <span class="font-bold text-blue-600">${a.user}</span></p></div></div>`;
+    }).join('') : '<p class="text-xs text-slate-400 italic">Sin actividad reciente.</p>';
     lucide.createIcons();
 }
+
 async function updateAlerts(reps) {
     const recs = await db.recordatorios.toArray();
     const alerts = [];
     const now = new Date();
+
     reps.forEach(r => {
         if(r.garantia_fin) {
             const diff = Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24));
@@ -579,38 +606,722 @@ async function updateAlerts(reps) {
         if(r.prioridad === 'Alta' && r.estado === 'Pendiente') alerts.push({ id: r.id, section: 'reparaciones', title: `URGENTE OT:${r.ot}`, desc: `Equipo esperando revisión`, prio: 'critical' });
     });
     recs.forEach(r => { if(!r.completed) alerts.push({ id: r.id, section: 'recordatorios', title: r.title, desc: r.dueDate || 'Sin fecha', prio: r.priority }); });
+    
     const container = $('alert-container');
-    container.innerHTML = alerts.length ? alerts.map(a => `<div class="suggestion-card ${a.prio} flex items-center justify-between cursor-pointer" onclick="viewDetail('${a.section}', ${a.id})"><div><p class="text-xs font-bold">${escapeHtml(a.title)}</p><p class="text-[10px] text-slate-500">${escapeHtml(a.desc)}</p></div><div class="w-2 h-2 rounded-full ${a.prio==='critical'?'bg-red-500':a.prio==='warning'?'bg-amber-500':'bg-blue-500'}"></div></div>`).join('') : '<p class="text-center text-slate-400 text-xs py-4 italic">No hay alertas pendientes.</p>';
+    container.innerHTML = alerts.length ? alerts.map(a => `
+        <div class="suggestion-card ${a.prio} flex items-center justify-between cursor-pointer" onclick="viewDetail('${a.section}', ${a.id})">
+            <div><p class="text-xs font-bold">${escapeHtml(a.title)}</p><p class="text-[10px] text-slate-500">${escapeHtml(a.desc)}</p></div>
+            <div class="w-2 h-2 rounded-full ${a.prio==='critical'?'bg-red-500':a.prio==='warning'?'bg-amber-500':'bg-blue-500'}"></div>
+        </div>
+    `).join('') : '<p class="text-center text-slate-400 text-xs py-4 italic">No hay alertas pendientes.</p>';
     lucide.createIcons();
 }
 
-// Reportes (resumido, el original completo estaba, pero por brevedad pongo la estructura; en el archivo final debe ir todo)
-async function updateReports() { /* mismo código original - por claridad se omite pero en el entregable va completo */ }
-function initRangeSelector() { /* original */ }
-async function renderTable(section) { /* original */ }
-async function toggleReminder(id) { /* original */ }
-function getStatusClass(s) { /* original */ }
-function filterTable() { /* original */ }
-function openModal(editData = null) { /* original */ }
-function closeModal() { $('modal').classList.add('hidden'); }
-async function handleFile(input) { /* original */ }
-$('record-form').onsubmit = async (e) => { /* original */ };
-async function viewDetail(section, id) { /* original */ }
-function closeDetailModal() { $('detail-modal').classList.add('hidden'); }
-function printItem(section, item) { /* original */ }
-async function generateAISuggestions() { /* original */ }
-function restoreAIReport() { /* original */ }
-function closeAIModal() { $('ai-modal').classList.add('hidden'); }
-function generateRepairOrder(data) { /* original */ }
-function generateOrderDocument(data) { /* original */ }
-function showDocumentPreview(html) { /* original */ }
-function closeDocumentModal() { $('document-modal').classList.add('hidden'); }
-function printDocument() { /* original */ }
-function downloadDocument() { /* original */ }
-async function exportData() { /* original */ }
-async function importData(e) { /* original */ }
+// Reports & Charts
+async function updateReports() {
+    const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    let ingresos=0, costes=0;
+    ped.forEach(p => { ingresos += (parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1); costes += (parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1); });
+    pie.forEach(p => { if(p.estado==='Instalado'||p.estado==='Vendido'){ ingresos += parseFloat(p.precioVenta)||0; costes += parseFloat(p.precioCompra)||0; } });
+    ingresos += reps.reduce((s,r) => s + (parseFloat(r.precio)||0), 0);
 
-// ==================== GOOGLE DRIVE INTEGRATION ====================
+    $('kpi-ingresos').textContent = ingresos.toFixed(2) + '€';
+    $('kpi-costes').textContent = costes.toFixed(2) + '€';
+    $('kpi-beneficio').textContent = (ingresos - costes).toFixed(2) + '€';
+    $('kpi-margen').textContent = ingresos > 0 ? ((ingresos-costes)/ingresos*100).toFixed(1) + '%' : '0%';
+
+    setTimeout(() => {
+        updateEvolucionMensual(reps, ped);
+        updateEvolucionPorUsuario(reps, ped, currentRange);
+        updateRankingUsuarios(reps, pie, ped);
+        updateChartOperaciones(reps, pie, ped);
+        updateSmallCharts(reps, ped);
+    }, 100);
+}
+
+async function updateEvolucionMensual(reps, ped) {
+    const hoy = new Date();
+    const meses = [], data = [];
+    for(let i=5; i>=0; i--) {
+        let f = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+        meses.push(f.toLocaleDateString('es-ES',{month:'short',year:'numeric'}));
+        let ini = new Date(f.getFullYear(), f.getMonth(), 1);
+        let fin = new Date(f.getFullYear(), f.getMonth()+1, 0, 23, 59, 59);
+        let total = ped.reduce((s,p) => {
+            let d = new Date(p.fecha);
+            return (d>=ini && d<=fin) ? s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)) : s;
+        }, 0);
+        total += reps.reduce((s,r) => {
+            let d = new Date(r.fecha);
+            return (d>=ini && d<=fin) ? s + (parseFloat(r.precio)||0) : s;
+        }, 0);
+        data.push(total);
+    }
+    const ctx = $('chart-evolucion-mensual')?.getContext('2d');
+    if(ctx) { if(charts.ev) charts.ev.destroy(); charts.ev = new Chart(ctx, { type:'line', data:{ labels:meses, datasets:[{ label:'Ingresos (€)', data, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.1)', fill:true, tension:0.3 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } } }); }
+}
+
+async function updateEvolucionPorUsuario(reps, ped, months) {
+    const hoy = new Date();
+    const meses = [];
+    for(let i=months-1; i>=0; i--) {
+        let f = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+        meses.push(f.toLocaleDateString('es-ES',{month:'short'}));
+    }
+    const colorPalette = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
+    const datasets = technicians.map((u, idx) => {
+        let vals = [];
+        for(let i=months-1; i>=0; i--) {
+            let ini = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+            let fin = new Date(hoy.getFullYear(), hoy.getMonth()-i+1, 0, 23, 59, 59);
+            let total = ped.reduce((s,p) => (p.usuario===u && new Date(p.fecha)>=ini && new Date(p.fecha)<=fin) ? s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)) : s, 0);
+            total += reps.reduce((s,r) => (r.usuario===u && new Date(r.fecha)>=ini && new Date(r.fecha)<=fin) ? s + (parseFloat(r.precio)||0) : s, 0);
+            vals.push(total);
+        }
+        return { label:u, data:vals, borderColor:colorPalette[idx % colorPalette.length], backgroundColor:'transparent', tension:0.3, pointRadius:2 };
+    });
+    const ctx = $('chart-evolucion-usuarios')?.getContext('2d');
+    if(ctx) { if(charts.evU) charts.evU.destroy(); charts.evU = new Chart(ctx, { type:'line', data:{ labels:meses, datasets }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:10} } } } } }); }
+    $('user-summary').innerHTML = datasets.map(d => `<div style="border-left:3px solid ${d.borderColor}" class="bg-slate-50 p-2 rounded"><strong>${d.label}</strong><br>${d.data.reduce((a,b)=>a+b,0).toFixed(2)}€</div>`).join('');
+}
+
+async function updateRankingUsuarios(reps, pie, ped) {
+    const ranking = technicians.map(u => {
+        const p = ped.filter(x=>x.usuario===u).length, pi = pie.filter(x=>x.usuario===u).length, r = reps.filter(x=>x.usuario===u).length;
+        const g = reps.filter(x=>x.usuario===u && x.garantia_fin && new Date(x.garantia_fin)>new Date()).length;
+        return { user:u, total:p+pi+r, p, pi, r, g };
+    }).sort((a,b)=>b.total-a.total);
+    $('ranking-usuarios').innerHTML = ranking.map(r => {
+        return `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">${r.user[0]}</div><div><p class="font-bold text-xs">${r.user}</p><p class="text-[10px] text-slate-500">${r.total} op. totales</p></div></div><div class="flex gap-2 text-center"><div><p class="text-[10px] font-bold text-blue-600">${r.p}</p><p class="text-[8px] text-slate-400">Ped</p></div><div><p class="text-[10px] font-bold text-purple-600">${r.pi}</p><p class="text-[8px] text-slate-400">Piez</p></div><div><p class="text-[10px] font-bold text-pink-600">${r.r}</p><p class="text-[8px] text-slate-400">Rep</p></div><div><p class="text-[10px] font-bold text-green-600">${r.g}</p><p class="text-[8px] text-slate-400">Gar</p></div></div></div>`;
+    }).join('');
+}
+
+async function updateChartOperaciones(reps, pie, ped) {
+    const ctx = $('chart-operaciones-usuario')?.getContext('2d');
+    if(ctx) { if(charts.op) charts.op.destroy(); charts.op = new Chart(ctx, { type:'bar', data:{ labels:technicians, datasets:[{ label:'Pedidos', data:technicians.map(u=>ped.filter(x=>x.usuario===u).length), backgroundColor:'#3b82f6' },{ label:'Piezas', data:technicians.map(u=>pie.filter(x=>x.usuario===u).length), backgroundColor:'#8b5cf6' },{ label:'Reparaciones', data:technicians.map(u=>reps.filter(x=>x.usuario===u).length), backgroundColor:'#ec4899' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:10} } } } } }); }
+}
+
+function updateSmallCharts(reps, ped) {
+    const config = (ctx, labels, data, colors) => new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:8} } } } } });
+    
+    const pedE = {}; ped.forEach(x=>pedE[x.estado]=(pedE[x.estado]||0)+1);
+    if($('chart-pedidos-estado')) {
+        if(charts.pedE) charts.pedE.destroy();
+        charts.pedE = config($('chart-pedidos-estado').getContext('2d'), Object.keys(pedE), Object.values(pedE), ['#6366f1','#8b5cf6','#d8b4fe','#a5f3fc']);
+    }
+    
+    const repE = {}; reps.forEach(x=>repE[x.estado]=(repE[x.estado]||0)+1);
+    if($('chart-reparaciones-estado')) {
+        if(charts.repE) charts.repE.destroy();
+        charts.repE = config($('chart-reparaciones-estado').getContext('2d'), Object.keys(repE), Object.values(repE), ['#3b82f6','#0ea5e9','#22d3ee','#a5f3fc','#94a3b8']);
+    }
+    
+    const hoy = new Date(); const gS = { Vigente:0, Expirada:0, Proxima:0 };
+    reps.forEach(r => { if(r.garantia_fin){ let d=Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24)); if(d<0) gS.Expirada++; else if(d<=15) gS.Proxima++; else gS.Vigente++; } });
+    if($('chart-garantias-estado')) {
+        if(charts.garE) charts.garE.destroy();
+        charts.garE = config($('chart-garantias-estado').getContext('2d'), Object.keys(gS), Object.values(gS), ['#10b981','#ef4444','#f59e0b']);
+    }
+}
+
+function initRangeSelector() {
+    document.querySelectorAll('.range-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRange = parseInt(btn.dataset.months);
+            const [reps, ped] = await Promise.all([db.reparaciones.toArray(), db.pedidos.toArray()]);
+            updateEvolucionPorUsuario(reps, ped, currentRange);
+        });
+    });
+}
+
+// Table Rendering
+async function renderTable(section) {
+    const data = await db[section].toArray();
+    const head = $('table-head'), body = $('table-body');
+    let headers = [];
+    if(section === 'reparaciones') headers = ['OT', 'Cliente', 'Equipo', 'Garantía', 'Estado'];
+    else if(section === 'piezas') headers = ['Pieza', 'Proveedor', 'Estado', 'Técnico'];
+    else if(section === 'pedidos') headers = ['Producto', 'Cliente', 'Estado', 'Fecha'];
+    else if(section === 'recordatorios') headers = ['Nombre/Ref', 'Fecha Límite', 'Prioridad', 'Completado'];
+
+    head.innerHTML = headers.map(h => `<th class="px-6 py-4 font-bold text-slate-500 uppercase text-[10px]">${h}</th>`).join('') + '<th class="px-6 py-4"></th>';
+    body.innerHTML = data.length ? '' : '<tr><td colspan="6" class="p-10 text-center text-slate-400 italic">Sin datos.</td></tr>';
+    
+    data.sort((a,b) => new Date(b.fecha || b.dueDate) - new Date(a.fecha || a.dueDate)).forEach(item => {
+        let content = '';
+        if(section === 'reparaciones') {
+            const isG = item.garantia_fin && new Date(item.garantia_fin) > new Date();
+            content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.ot)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.cliente)}</td><td class="px-6 py-4 text-[10px]">${escapeHtml(item.marca)} ${escapeHtml(item.modelo)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${isG?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-500'}">${isG?'Vigente':'Expirada'}</span></td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td>`;
+        } else if(section === 'piezas') {
+            content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.nombre)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.proveedor)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-[10px] font-medium text-blue-600">${item.usuario}</td>`;
+        } else if(section === 'pedidos') {
+            content = `<td class="px-6 py-4 font-bold">${escapeHtml(item.producto)}</td><td class="px-6 py-4 text-xs">${escapeHtml(item.cliente)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${getStatusClass(item.estado)}">${item.estado}</span></td><td class="px-6 py-4 text-[10px]">${new Date(item.fecha).toLocaleDateString()}</td>`;
+        } else if(section === 'recordatorios') {
+            const label = item.nombre ? `${item.nombre} ${item.apellidos||''}` : item.title;
+            content = `<td class="px-6 py-4 font-bold">${escapeHtml(label)}<br><span class="text-[8px] text-slate-400">${escapeHtml(item.ref_ot||'Sin OT')}</span></td><td class="px-6 py-4 text-xs">${item.dueDate || '-'}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${item.priority==='critical'?'bg-red-100 text-red-700':item.priority==='warning'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${item.priority}</span></td><td class="px-6 py-4"><input type="checkbox" ${item.completed?'checked':''} onclick="event.stopPropagation(); toggleReminder(${item.id})"></td>`;
+        }
+        const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 cursor-pointer";
+        tr.innerHTML = `${content}<td class="px-6 py-4 text-right"><button onclick="viewDetail('${section}', ${item.id})" class="p-2 text-slate-400 hover:text-blue-600"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></td>`;
+        tr.onclick = (e) => { if(!e.target.closest('button') && !e.target.closest('input')) viewDetail(section, item.id); };
+        body.appendChild(tr);
+    });
+    lucide.createIcons();
+}
+
+async function toggleReminder(id) {
+    const r = await db.recordatorios.get(id);
+    if(r) { r.completed = !r.completed; await db.recordatorios.put(r); renderTable('recordatorios'); updateDashboard(); }
+}
+
+function getStatusClass(s) {
+    s = (s||'').toLowerCase();
+    if(['entregado','completado','recibido','instalado','vendido'].some(x => s.includes(x))) return 'bg-emerald-100 text-emerald-700';
+    if(['pendiente','pedido','espera'].some(x => s.includes(x))) return 'bg-amber-100 text-amber-700';
+    return 'bg-blue-100 text-blue-700';
+}
+
+function filterTable() {
+    const q = normalize($('search-input').value);
+    const rows = $('table-body').querySelectorAll('tr');
+    rows.forEach(r => { r.style.display = normalize(r.textContent).includes(q) ? '' : 'none'; });
+}
+
+// Modals & Forms
+function openModal(editData = null) {
+    const modal = $('modal'), fields = $('form-fields'), idIn = $('form-id'), secIn = $('form-section');
+    let active = ['dashboard','reportes','configuracion'].includes(currentSection) ? 'reparaciones' : currentSection;
+    idIn.value = editData ? editData.id : ''; secIn.value = active;
+    $('modal-title').textContent = editData ? `Editar ${active}` : `Nueva ${active}`;
+    
+    let html = '';
+    if(active === 'reparaciones') {
+        html = `
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Equipo</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">OT *</label><input type="text" name="ot" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.ot||''}"></div><div><label class="text-[10px] font-bold">Nº Serie</label><input type="text" name="serie" class="w-full border rounded-xl p-3 text-sm" value="${editData?.serie||''}"></div><div><label class="text-[10px] font-bold">Marca *</label><input type="text" name="marca" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.marca||''}"></div><div><label class="text-[10px] font-bold">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.modelo||''}"></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Seguridad y Cliente</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">PIN / Password</label><input type="text" name="password" class="w-full border rounded-xl p-3 text-sm" value="${editData?.password||''}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div><div><label class="text-[10px] font-bold">Teléfono</label><input type="text" name="telefono" class="w-full border rounded-xl p-3 text-sm" value="${editData?.telefono||''}"></div><div><label class="text-[10px] font-bold">Email</label><input type="email" name="email" class="w-full border rounded-xl p-3 text-sm" value="${editData?.email||''}"></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Técnico</p><div class="grid grid-cols-3 gap-3"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='En Proceso'?'selected':''}>En Proceso</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="prioridad" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${technicians.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Garantía, Precio y Foto</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded-xl p-3 text-sm" value="${editData?.garantia_meses||0}"></div><div><label class="text-[10px] font-bold">Precio Reparación</label><input type="number" step="0.01" name="precio" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precio||''}"></div></div><div class="mt-3"><label class="text-[10px] font-bold">Foto (Cámara)</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div>
+            <div><label class="text-[10px] font-bold">Observaciones / Notas Cliente</label><textarea name="observaciones" rows="3" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div>`;
+    } else if(active === 'piezas') {
+        html = `
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Información de Pieza</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.nombre||''}"></div><div><label class="text-[10px] font-bold">Referencia / SKU</label><input type="text" name="referencia" class="w-full border rounded-xl p-3 text-sm" value="${editData?.referencia||''}"></div><div><label class="text-[10px] font-bold">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded-xl p-3 text-sm" value="${editData?.proveedor||''}"></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${technicians.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Precios</p><div class="grid grid-cols-3 gap-4"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Instalado'?'selected':''}>Instalado</option><option ${editData?.estado==='Vendido'?'selected':''}>Vendido</option></select></div><div><label class="text-[10px] font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Multimedia y Notas</p><div><label class="text-[10px] font-bold">Foto Pieza</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div><div class="mt-3"><label class="text-[10px] font-bold">Notas Internas</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div></div>`;
+    } else if(active === 'pedidos') {
+        html = `
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Datos del Pedido</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Producto *</label><input type="text" name="producto" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.producto||''}"></div><div><label class="text-[10px] font-bold">EAN / Referencia</label><input type="text" name="ean" class="w-full border rounded-xl p-3 text-sm" value="${editData?.ean||''}"></div><div><label class="text-[10px] font-bold">Cantidad</label><input type="number" name="cantidad" class="w-full border rounded-xl p-3 text-sm" value="${editData?.cantidad||1}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div><div><label class="text-[10px] font-bold">Teléfono</label><input type="text" name="tlf" class="w-full border rounded-xl p-3 text-sm" value="${editData?.tlf||''}"></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${technicians.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Costes</p><div class="grid grid-cols-3 gap-4"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='En Camino'?'selected':''}>En Camino</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div></div>
+            <div><label class="text-[10px] font-bold">Notas de Pedido</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div>`;
+    } else if(active === 'recordatorios') {
+        html = `
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Asunto</p><div><label class="text-[10px] font-bold">Título / Nombre Cliente *</label><input type="text" name="title" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.title||''}"></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Detalles</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Fecha Límite</label><input type="date" name="dueDate" class="w-full border rounded-xl p-3 text-sm" value="${editData?.dueDate||''}"></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="priority" class="w-full border rounded-xl p-3 text-sm"><option value="info" ${editData?.priority==='info'?'selected':''}>Baja</option><option value="warning" ${editData?.priority==='warning'?'selected':''}>Media</option><option value="critical" ${editData?.priority==='critical'?'selected':''}>Urgente</option></select></div></div></div>
+            <div><label class="text-[10px] font-bold">Descripción</label><textarea name="desc" rows="3" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.desc||''}</textarea></div>`;
+    }
+    
+    fields.innerHTML = html;
+    modal.classList.remove('hidden'); modal.classList.add('flex');
+    lucide.createIcons();
+}
+
+function closeModal() { $('modal').classList.add('hidden'); }
+async function handleFile(input) { const f = input.files[0]; if(f){ const r = new FileReader(); r.onload = (e) => { $('form-imagen').value = e.target.result; }; r.readAsDataURL(f); } }
+
+$('record-form').onsubmit = async (e) => {
+    e.preventDefault(); const data = Object.fromEntries(new FormData(e.target));
+    const id = $('form-id').value, section = $('form-section').value;
+    try {
+        if(section==='reparaciones' && data.garantia_meses>0 && (data.estado==='Entregado'||data.estado==='Completado')){
+            let f = new Date(); f.setMonth(f.getMonth()+parseInt(data.garantia_meses)); data.garantia_fin = f.toISOString();
+        }
+        if(id) {
+            const old = await db[section].get(parseInt(id));
+            const merged = {...old, ...data};
+            if(!data.imagen && old.imagen) merged.imagen = old.imagen;
+            await db[section].put(merged);
+        } else {
+            data.fecha = new Date().toISOString();
+            if(section === 'recordatorios') data.completed = false;
+            await db[section].add(data);
+        }
+        showToast('Guardado'); closeModal(); showSection(currentSection);
+    } catch(err) { showToast('Error', 'error'); }
+};
+
+// Details & Print
+async function viewDetail(section, id) {
+    const item = await db[section].get(id); if(!item) return;
+    let html = `<div class="grid grid-cols-2 gap-4 text-xs">${Object.entries(item).map(([k,v]) => {
+        if(['id','imagen','garantia_fin','fecha'].includes(k)) return '';
+        if(!v && v!==0) return '';
+        return `<div><p class="text-[9px] font-bold text-slate-400 uppercase">${k.replace('_',' ')}</p><p class="text-slate-700">${escapeHtml(v)}</p></div>`;
+    }).join('')}</div>${item.imagen ? `<div class="mt-4"><p class="text-[9px] font-bold text-slate-400 uppercase mb-2">Foto Adjunta</p><img src="${item.imagen}" class="w-full rounded-xl border border-slate-200"></div>` : ''}`;
+    $('detail-content').innerHTML = html;
+    $('detail-edit-btn').onclick = () => { closeDetailModal(); openModal(item); };
+    $('detail-print-btn').onclick = () => printItem(section, item);
+    $('detail-delete-btn').onclick = async () => { if(confirm('¿Seguro que quieres borrarlo?')) { await db[section].delete(id); closeDetailModal(); showSection(currentSection); showToast('Borrado', 'error'); } };
+    $('detail-modal').classList.remove('hidden'); $('detail-modal').classList.add('flex'); lucide.createIcons();
+}
+function closeDetailModal() { $('detail-modal').classList.add('hidden'); }
+
+function printItem(section, item) {
+    let doc = '';
+    if(section === 'reparaciones') {
+        doc = generateRepairOrder(item);
+    } else if(section === 'pedidos') {
+        doc = generateOrderDocument(item);
+    } else {
+        doc = `
+            <div class="print-container">
+                <div class="print-header">
+                    <div>
+                        <div class="company-logo-container">
+                            ${companyConfig.logo ? `<img src="${companyConfig.logo}" class="company-logo-img">` : `<div class="company-logo-text">${companyConfig.name}</div>`}
+                        </div>
+                        <div class="company-info">${companyConfig.name}<br>${companyConfig.cif}<br>${companyConfig.address}<br>Tlf: ${companyConfig.phone} | ${companyConfig.email}</div>
+                    </div>
+                    <div class="doc-type">
+                        <div class="doc-type-title">${section.toUpperCase()}</div>
+                        <div class="doc-number">REF: #${item.id}</div>
+                    </div>
+                </div>
+                <div class="print-grid">
+                    <div>
+                        <div class="print-box-title">Detalles del Registro</div>
+                        <div class="print-box-content">
+                            ${Object.entries(item).map(([k,v]) => {
+                                if(['id','imagen','garantia_fin','fecha','observaciones'].includes(k)) return '';
+                                if(!v && v!==0) return '';
+                                return `<p><strong>${k.toUpperCase()}:</strong> ${escapeHtml(v)}</p>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+                ${item.observaciones ? `<div class="print-notes"><div class="print-box-title">Observaciones</div>${escapeHtml(item.observaciones)}</div>` : ''}
+            </div>`;
+    }
+    showDocumentPreview(doc);
+}
+
+// AI Analysis
+async function generateAISuggestions() {
+    const modal = $('ai-modal'), content = $('ai-content');
+    modal.classList.remove('hidden'); modal.classList.add('flex');
+    content.innerHTML = '<div class="flex flex-col items-center py-12"><div class="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-4"></div><p class="text-sm font-bold text-slate-500">Analizando taller en profundidad...</p></div>';
+    
+    const [reps, pie, ped] = await Promise.all([db.reparaciones.toArray(), db.piezas.toArray(), db.pedidos.toArray()]);
+    
+    let ingresosRep = reps.reduce((s,r) => s + (parseFloat(r.precio)||0), 0);
+    let ingresosPed = ped.reduce((s,p) => s + ((parseFloat(p.precioVenta)||0)*(parseInt(p.cantidad)||1)), 0);
+    let ingresosPie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioVenta)||0), 0);
+    let costePed = ped.reduce((s,p) => s + ((parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1)), 0);
+    let costePie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioCompra)||0), 0);
+
+    let ingresoTotal = ingresosRep + ingresosPed + ingresosPie;
+    let costeTotal = costePed + costePie;
+    let beneficio = ingresoTotal - costeTotal;
+    let margenPromedio = ingresoTotal > 0 ? (beneficio / ingresoTotal * 100) : 0;
+    
+    let piezasAntiguasPedido = pie.filter(p => p.estado === 'Pedido' && (new Date() - new Date(p.fecha)) > 7*24*60*60*1000);
+    let piezasRecibidas = pie.filter(p => p.estado === 'Recibido').length;
+    
+    let now = new Date();
+    let garantiasProximas = reps.filter(r => r.garantia_fin && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) <= 15 && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) >= 0).length;
+    let garantiasExpiradas = reps.filter(r => r.garantia_fin && new Date(r.garantia_fin) < now).length;
+    
+    let cargaTecnicos = technicians.map(u => {
+        let pendientes = reps.filter(r => r.usuario === u && r.estado === 'Pendiente').length;
+        let enProceso = reps.filter(r => r.usuario === u && r.estado === 'En Proceso').length;
+        let urgentes = reps.filter(r => r.usuario === u && r.prioridad === 'Alta' && r.estado !== 'Entregado').length;
+        return { usuario: u, pendientes, enProceso, urgentes, total: pendientes + enProceso };
+    });
+    
+    let pedidosPendientes = ped.filter(p => p.estado !== 'Entregado').length;
+    let pedidosAntiguos = ped.filter(p => p.estado === 'Pedido' && (new Date() - new Date(p.fecha)) > 14*24*60*60*1000).length;
+    
+    setTimeout(() => {
+        let html = `
+            <div class="grid grid-cols-3 gap-3 mb-4">
+                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Ingresos Totales</p><p class="text-xl font-black text-blue-600">${ingresoTotal.toFixed(0)}€</p></div>
+                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Beneficio Neto</p><p class="text-xl font-black text-emerald-600">${beneficio.toFixed(0)}€</p></div>
+                <div class="ai-metric"><p class="text-[9px] font-bold text-slate-400 uppercase">Margen Medio</p><p class="text-xl font-black text-purple-600">${margenPromedio.toFixed(1)}%</p></div>
+            </div>
+            
+            <div class="suggestion-card critical mb-4">
+                <div class="flex gap-3"><i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">📊 Análisis Financiero Detallado</p>
+                    <div class="mt-2 text-[10px] space-y-1">
+                        <p><strong>Reparaciones:</strong> ${ingresosRep.toFixed(2)}€ (${(ingresosRep/ingresoTotal*100).toFixed(1)}% del total)</p>
+                        <p><strong>Pedidos:</strong> ${ingresosPed.toFixed(2)}€ (${(ingresosPed/ingresoTotal*100).toFixed(1)}% del total)</p>
+                        <p><strong>Piezas Vendidas:</strong> ${ingresosPie.toFixed(2)}€ (${(ingresosPie/ingresoTotal*100).toFixed(1)}% del total)</p>
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${margenPromedio > 30 ? 'Márgenes saludables. Mantener estrategia.' : 'Revisar precios de compra con proveedores.'}</p>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div class="suggestion-card ${piezasAntiguasPedido.length > 0 ? 'warning' : 'success'} mb-4">
+                <div class="flex gap-3"><i data-lucide="package" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">📦 Control de Stock Crítico</p>
+                    <div class="mt-2 text-[10px] space-y-1">
+                        <p><strong>Piezas en Pedido:</strong> ${pie.filter(p => p.estado === 'Pedido').length} unidades</p>
+                        <p><strong>Piezas Recibidas (sin instalar):</strong> ${piezasRecibidas} unidades</p>
+                        ${piezasAntiguasPedido.length > 0 ? `<p class="text-red-600"><strong>⚠️ Piezas retrasadas:</strong> ${piezasAntiguasPedido.length} llevan más de 7 días</p>` : ''}
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${piezasAntiguasPedido.length > 0 ? 'Contactar proveedores urgentemente.' : 'Stock en orden. Seguir monitoreando.'}</p>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div class="suggestion-card ${garantiasProximas > 0 ? 'warning' : 'success'} mb-4">
+                <div class="flex gap-3"><i data-lucide="shield-check" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">🛡️ Gestión de Garantías</p>
+                    <div class="mt-2 text-[10px] space-y-1">
+                        <p><strong>Garantías Vigentes:</strong> ${reps.filter(r => r.garantia_fin && new Date(r.garantia_fin) > now).length} equipos</p>
+                        <p><strong>Próximas a Vencer (≤15 días):</strong> ${garantiasProximas} equipos</p>
+                        <p><strong>Garantías Expiradas:</strong> ${garantiasExpiradas} equipos</p>
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${garantiasProximas > 0 ? 'Contactar clientes para renovación o revisión.' : 'Garantías bajo control.'}</p>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div class="suggestion-card info mb-4">
+                <div class="flex gap-3"><i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">👥 Carga de Trabajo por Técnico</p>
+                    <div class="mt-2 text-[10px] space-y-2">
+                        ${cargaTecnicos.map(c => `
+                            <div class="bg-slate-50 p-2 rounded">
+                                <p class="font-bold">${c.usuario}</p>
+                                <p class="text-[9px]">Pendientes: ${c.pendientes} | En Proceso: ${c.enProceso} | Urgentes: ${c.urgentes}</p>
+                                <p class="text-[9px] font-bold ${c.total > 5 ? 'text-red-600' : 'text-green-600'}">${c.total > 5 ? '⚠️ Saturado' : '✓ Normal'}</p>
+                            </div>
+                        `).join('')}
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${cargaTecnicos.some(c => c.total > 5) ? 'Redistribuir tareas urgentes.' : 'Carga equilibrada.'}</p>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div class="suggestion-card ${pedidosAntiguos > 0 ? 'critical' : 'success'}">
+                <div class="flex gap-3"><i data-lucide="shopping-cart" class="w-5 h-5 flex-shrink-0"></i><div>
+                    <p class="font-bold text-xs">🛒 Estado de Pedidos</p>
+                    <div class="mt-2 text-[10px] space-y-1">
+                        <p><strong>Pedidos Activos:</strong> ${pedidosPendientes} en espera</p>
+                        <p><strong>Pedidos Completados:</strong> ${ped.filter(p => p.estado === 'Entregado').length}</p>
+                        ${pedidosAntiguos > 0 ? `<p class="text-red-600"><strong>⚠️ Pedidos retrasados:</strong> ${pedidosAntiguos} llevan más de 14 días</p>` : ''}
+                        <p class="mt-2 font-bold text-blue-600">💡 Acción: ${pedidosAntiguos > 0 ? 'Acelerar entregas o contactar clientes.' : 'Flujo de pedidos normal.'}</p>
+                    </div>
+                </div></div>
+            </div>
+        `;
+        
+        content.innerHTML = html;
+        
+        const miniViewHtml = `
+            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i><p class="text-[10px] font-bold uppercase text-slate-500">Rentabilidad</p></div>
+                <p class="text-sm font-black text-emerald-600">${beneficio.toFixed(0)}€</p>
+                <p class="text-[10px] text-slate-500 mt-1">Margen: ${margenPromedio.toFixed(1)}%</p>
+            </div>
+            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                <div class="flex items-center gap-2 mb-2"><i data-lucide="alert-circle" class="w-4 h-4 ${piezasAntiguasPedido.length > 0 ? 'text-red-500' : 'text-green-500'}"></i><p class="text-[10px] font-bold uppercase text-slate-500">Stock Crítico</p></div>
+                <p class="text-sm font-black">${piezasAntiguasPedido.length}</p>
+                <p class="text-[10px] text-slate-500 mt-1">Piezas retrasadas</p>
+            </div>
+            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                <div class="flex items-center gap-2 mb-2"><i data-lucide="shield-alert" class="w-4 h-4 ${garantiasProximas > 0 ? 'text-amber-500' : 'text-green-500'}"></i><p class="text-[10px] font-bold uppercase text-slate-500">Garantías</p></div>
+                <p class="text-sm font-black">${garantiasProximas}</p>
+                <p class="text-[10px] text-slate-500 mt-1">Próximas a vencer</p>
+            </div>
+        `;
+        $('ai-mini-view').innerHTML = miniViewHtml;
+        
+        const summaryText = `Análisis completado: ${beneficio.toFixed(0)}€ de beneficio, ${piezasAntiguasPedido.length} piezas retrasadas, ${garantiasProximas} garantías próximas.`;
+        $('ai-dashboard-summary').innerHTML = summaryText;
+        
+        localStorage.setItem('sat_ai_report_v9_1', JSON.stringify({
+            full: html,
+            mini: miniViewHtml,
+            summary: summaryText,
+            timestamp: new Date().getTime()
+        }));
+        
+        lucide.createIcons();
+    }, 1200);
+}
+
+function restoreAIReport() {
+    const saved = localStorage.getItem('sat_ai_report_v9_1');
+    if(saved) {
+        const data = JSON.parse(saved);
+        if(new Date().getTime() - data.timestamp < 24*60*60*1000) {
+            $('ai-content').innerHTML = data.full;
+            $('ai-mini-view').innerHTML = data.mini;
+            $('ai-dashboard-summary').innerHTML = data.summary;
+        }
+    }
+}
+
+function closeAIModal() { $('ai-modal').classList.add('hidden'); }
+
+// Document Generation (PROFESIONAL DINÁMICO)
+function generateRepairOrder(data) {
+    return `
+        <div class="print-container">
+            <div class="print-header">
+                <div>
+                    <div class="company-logo-container">
+                        ${companyConfig.logo ? `<img src="${companyConfig.logo}" class="company-logo-img">` : `<div class="company-logo-text">${companyConfig.name}</div>`}
+                    </div>
+                    <div class="company-info">${companyConfig.name}<br>${companyConfig.cif}<br>${companyConfig.address}<br>Tlf: ${companyConfig.phone} | ${companyConfig.email}</div>
+                </div>
+                <div class="doc-type">
+                    <div class="doc-type-title">Orden de Reparación</div>
+                    <div class="doc-number">OT-${data.ot}</div>
+                    <div style="font-size:11px; color:#64748b; margin-top:5px;">Fecha: ${new Date(data.fecha).toLocaleDateString('es-ES')}</div>
+                </div>
+            </div>
+            
+            <div class="print-grid">
+                <div>
+                    <div class="print-box-title">Datos del Cliente</div>
+                    <div class="print-box-content">
+                        <p style="font-weight:700; font-size:14px; margin-bottom:4px;">${data.cliente || '-'}</p>
+                        <p>Teléfono: ${data.telefono || '-'}</p>
+                        <p>Email: ${data.email || '-'}</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="print-box-title">Información del Equipo</div>
+                    <div class="print-box-content">
+                        <p><strong>Marca/Modelo:</strong> ${data.marca || '-'} ${data.modelo || '-'}</p>
+                        <p><strong>Nº Serie:</strong> ${data.serie || '-'}</p>
+                        <p><strong>Seguridad:</strong> ${data.password || '-'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="print-box-title">Detalle del Servicio</div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th>Concepto / Descripción</th>
+                        <th style="text-align:right;">Estado</th>
+                        <th style="text-align:right;">Garantía</th>
+                        <th style="text-align:right;">Importe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>Servicio de Reparación Técnica</strong><br>
+                            <span style="font-size:10px; color:#64748b;">${data.observaciones || 'Sin descripción detallada'}</span>
+                        </td>
+                        <td style="text-align:right;">${data.estado}</td>
+                        <td style="text-align:right;">${data.garantia_meses || 0} Meses</td>
+                        <td style="text-align:right; font-weight:600;">${parseFloat(data.precio || 0).toFixed(2)}€</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align:right;">TOTAL A PAGAR:</td>
+                        <td style="text-align:right;">${parseFloat(data.precio || 0).toFixed(2)}€</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="print-notes">
+                <div style="font-weight:700; margin-bottom:5px;">Condiciones del Servicio:</div>
+                <p>${companyConfig.terms}</p>
+            </div>
+            
+            <div class="print-footer">
+                <div class="signature-area">
+                    <div class="signature-space"></div>
+                    Firma Cliente
+                </div>
+                <div class="signature-area">
+                    <div class="signature-space"></div>
+                    Sello y Firma SAT (Técnico: ${data.usuario})
+                </div>
+            </div>
+        </div>`;
+}
+
+function generateOrderDocument(data) {
+    const total = (parseFloat(data.precioVenta) || 0) * (parseInt(data.cantidad) || 1);
+    return `
+        <div class="print-container">
+            <div class="print-header">
+                <div>
+                    <div class="company-logo-container">
+                        ${companyConfig.logo ? `<img src="${companyConfig.logo}" class="company-logo-img">` : `<div class="company-logo-text">${companyConfig.name}</div>`}
+                    </div>
+                    <div class="company-info">${companyConfig.name}<br>${companyConfig.cif}<br>${companyConfig.address}<br>Tlf: ${companyConfig.phone} | ${companyConfig.email}</div>
+                </div>
+                <div class="doc-type">
+                    <div class="doc-type-title">Albarán de Pedido</div>
+                    <div class="doc-number">PED-${data.id}</div>
+                    <div style="font-size:11px; color:#64748b; margin-top:5px;">Fecha: ${new Date(data.fecha).toLocaleDateString('es-ES')}</div>
+                </div>
+            </div>
+            
+            <div class="print-grid">
+                <div>
+                    <div class="print-box-title">Facturar a</div>
+                    <div class="print-box-content">
+                        <p style="font-weight:700; font-size:14px; margin-bottom:4px;">${data.cliente || '-'}</p>
+                        <p>Teléfono: ${data.tlf || '-'}</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="print-box-title">Información Adicional</div>
+                    <div class="print-box-content">
+                        <p><strong>Estado:</strong> ${data.estado}</p>
+                        <p><strong>Vendedor:</strong> ${data.usuario}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="print-box-title">Artículos del Pedido</div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Referencia</th>
+                        <th style="text-align:center;">Cant.</th>
+                        <th style="text-align:right;">P. Unitario</th>
+                        <th style="text-align:right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>${data.producto}</strong></td>
+                        <td>${data.ean || '-'}</td>
+                        <td style="text-align:center;">${data.cantidad || 1}</td>
+                        <td style="text-align:right;">${parseFloat(data.precioVenta || 0).toFixed(2)}€</td>
+                        <td style="text-align:right; font-weight:600;">${total.toFixed(2)}€</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align:right;">TOTAL:</td>
+                        <td style="text-align:right;">${total.toFixed(2)}€</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            ${data.observaciones ? `<div class="print-notes"><div class="print-box-title">Notas del Pedido</div>${escapeHtml(data.observaciones)}</div>` : ''}
+            
+            <div class="print-footer" style="margin-top:60px;">
+                <div class="signature-area">
+                    <div class="signature-space"></div>
+                    Conformidad Cliente
+                </div>
+                <div class="signature-area">
+                    <div class="signature-space"></div>
+                    Firma Autorizada
+                </div>
+            </div>
+        </div>`;
+}
+
+function showDocumentPreview(html) {
+    $('document-content').innerHTML = html;
+    $('document-modal').classList.remove('hidden');
+    lucide.createIcons();
+}
+
+function closeDocumentModal() {
+    $('document-modal').classList.add('hidden');
+}
+
+function printDocument() {
+    const content = $('document-content').innerHTML;
+    const printWindow = window.open('', '', 'width=900,height=1200');
+    printWindow.document.write(`<html><head><title>Imprimir Documento</title><style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', Arial, sans-serif; margin: 0; padding: 0; background: white; }
+        .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 30px; background: white; color: #1f2937; line-height: 1.4; }
+        .print-header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+        .company-logo-container { display: flex; align-items: center; gap: 15px; }
+        .company-logo-img { max-height: 60px; max-width: 150px; object-fit: contain; }
+        .company-logo-text { font-size: 28px; font-weight: 800; color: #2563eb; letter-spacing: -1px; }
+        .company-info { font-size: 11px; color: #64748b; line-height: 1.2; }
+        .doc-type { text-align: right; }
+        .doc-type-title { font-size: 20px; font-weight: 700; color: #1e293b; text-transform: uppercase; }
+        .doc-number { font-size: 14px; font-weight: 600; color: #2563eb; }
+        .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+        .print-box-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; }
+        .print-box-content { font-size: 12px; color: #1e293b; }
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .print-table th { background: #f8fafc; color: #64748b; padding: 12px 10px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        .print-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #334155; }
+        .print-table tr.total-row td { border-bottom: none; font-weight: 700; font-size: 14px; color: #1e293b; background: #f8fafc; }
+        .print-notes { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11px; color: #475569; }
+        .print-footer { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+        .signature-area { border-top: 1px solid #cbd5e1; padding-top: 10px; text-align: center; font-size: 10px; color: #64748b; font-weight: 600; }
+        .signature-space { height: 60px; }
+        @media print { .no-print { display: none; } }
+    </style></head><body>${content}</body></html>`);
+    printWindow.document.close();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+}
+
+function downloadDocument() {
+    const content = $('document-content').innerHTML;
+    const html = `<html><head><meta charset="UTF-8"><style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', Arial, sans-serif; margin: 0; padding: 20px; background: #f1f5f9; }
+        .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 30px; background: white; color: #1f2937; line-height: 1.4; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .print-header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+        .company-logo-container { display: flex; align-items: center; gap: 15px; }
+        .company-logo-img { max-height: 60px; max-width: 150px; object-fit: contain; }
+        .company-logo-text { font-size: 28px; font-weight: 800; color: #2563eb; letter-spacing: -1px; }
+        .company-info { font-size: 11px; color: #64748b; line-height: 1.2; }
+        .doc-type { text-align: right; }
+        .doc-type-title { font-size: 20px; font-weight: 700; color: #1e293b; text-transform: uppercase; }
+        .doc-number { font-size: 14px; font-weight: 600; color: #2563eb; }
+        .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+        .print-box-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; }
+        .print-box-content { font-size: 12px; color: #1e293b; }
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .print-table th { background: #f8fafc; color: #64748b; padding: 12px 10px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        .print-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #334155; }
+        .print-table tr.total-row td { border-bottom: none; font-weight: 700; font-size: 14px; color: #1e293b; background: #f8fafc; }
+        .print-notes { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11px; color: #475569; }
+        .print-footer { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+        .signature-area { border-top: 1px solid #cbd5e1; padding-top: 10px; text-align: center; font-size: 10px; color: #64748b; font-weight: 600; }
+        .signature-space { height: 60px; }
+    </style></head><body>${content}</body></html>`;
+    const blob = new Blob([html], {type: 'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `documento_${new Date().getTime()}.html`;
+    a.click();
+}
+
+// Data Management
+async function exportData() {
+    const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray(), config: await db.config.toArray() };
+    const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V9_1_${new Date().toISOString().split('T')[0]}.json`; a.click();
+}
+async function importData(e) {
+    const f = e.target.files[0]; if(!f) return;
+    try {
+        const d = JSON.parse(await f.text());
+        for(let s in d) { 
+            if(s === 'config') {
+                for(let i of d[s]) await db.config.put(i);
+            } else {
+                for(let i of d[s]) { delete i.id; await db[s].add(i); }
+            }
+        }
+        showToast('Sistema Restaurado'); 
+        location.reload();
+    } catch(err) { showToast('Error al importar', 'error'); }
+}
+
+// ==================== GOOGLE DRIVE FUNCTIONS ====================
 let googleAuthInstance = null, googleSignedIn = false;
 
 function updateDriveUI(connected) {
@@ -624,7 +1335,6 @@ function updateDriveUI(connected) {
         restoreBtn.disabled = false;
         uploadBtn.classList.remove('text-slate-400', 'bg-slate-100');
         uploadBtn.classList.add('bg-sky-100', 'text-sky-700', 'border-sky-200');
-        restoreBtn.classList.remove('text-slate-400', 'bg-slate-100');
         restoreBtn.classList.add('bg-sky-100', 'text-sky-700', 'border-sky-200');
     } else {
         badge.className = 'drive-status disconnected';
