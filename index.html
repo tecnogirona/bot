@@ -66,7 +66,7 @@
             transform: scale(1.02);
         }
         
-        /* Carrusel optimizado con RGB (sin pausa) */
+        /* Carrusel */
         .carousel-container {
             width: 100%;
             overflow: hidden;
@@ -125,7 +125,7 @@
             filter: brightness(0) invert(1);
         }
         
-        /* Formulario HubSpot */
+        /* HubSpot */
         #hubspot-form-container, #hubspot-form-container * { color: #ffffff !important; }
         #hubspot-form-container .hs-form-field label { color: #e2e8f0 !important; font-weight: 500 !important; }
         #hubspot-form-container input, #hubspot-form-container textarea, #hubspot-form-container select {
@@ -156,7 +156,7 @@
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
         
-        /* Menú corregido */
+        /* Menú */
         .dropdown-menu {
             position: absolute;
             top: 100%;
@@ -180,7 +180,7 @@
 </head>
 <body>
 
-    <!-- Navbar con menú corregido -->
+    <!-- Navegación -->
     <nav class="fixed top-0 left-0 w-full z-50 bg-black/50 backdrop-blur-sm border-b border-white/10">
         <div class="container mx-auto px-6 lg:px-10 py-3 flex items-center justify-between flex-wrap">
             <a class="flex items-center gap-2 text-2xl font-black" href="index.html">
@@ -228,7 +228,7 @@
         </div>
     </nav>
 
-    <!-- Hero section (Reparaciones de Confianza) -->
+    <!-- Hero section -->
     <section class="animated-bg pt-40 pb-12 px-6 relative">
         <div class="container mx-auto flex flex-col lg:flex-row items-center gap-12">
             <div class="lg:w-1/2 text-center lg:text-left" data-aos="fade-right">
@@ -253,7 +253,6 @@
         <div class="container mx-auto">
             <div class="carousel-container">
                 <div class="carousel-track">
-                    <!-- Logos 100% funcionales -->
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/apple/white" alt="Apple"></div>
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/playstation/white" alt="PlayStation"></div>
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/microsoft/white" alt="Microsoft"></div>
@@ -266,7 +265,7 @@
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/hp/white" alt="HP"></div>
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/msi/white" alt="MSI"></div>
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/kingston/white" alt="Kingston"></div>
-                    <!-- Duplicado para efecto infinito -->
+                    <!-- Duplicado -->
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/apple/white" alt="Apple"></div>
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/playstation/white" alt="PlayStation"></div>
                     <div class="partner-logo"><img src="https://cdn.simpleicons.org/microsoft/white" alt="Microsoft"></div>
@@ -284,7 +283,6 @@
         </div>
     </section>
 
-    <!-- Resto de secciones (sin cambios en contenido) -->
     <!-- SERVICIOS DETALLADOS -->
     <section class="py-20 px-6 bg-[#0a0a0f]" id="servicios">
         <div class="container mx-auto">
@@ -329,16 +327,8 @@
         </div>
     </section>
 
-    <!-- GARANTÍA Y CONDICIONES -->
+    <!-- FAQ COMPLETO (10 preguntas) -->
     <section class="py-16 px-6 bg-black/30 border-t border-white/10">
-        <div class="container mx-auto max-w-3xl">
-            <div class="glass-neon p-6"><div class="flex items-center gap-3 mb-3"><i class="fas fa-file-contract text-3xl text-yellow-400"></i><h2 class="text-2xl font-bold">Garantía y Condiciones</h2></div>
-            <div class="space-y-3 text-gray-300 text-sm"><p>✅ <strong>Garantía legal:</strong> Todas nuestras reparaciones incluyen 3 años de garantía para particulares y 1 año para empresas, conforme a la legislación española.</p><p>✅ <strong>Cobertura:</strong> La garantía cubre defectos de mano de obra y materiales. En caso de fallo del repuesto, se sustituye sin coste adicional.</p><p>⚠️ <strong>Quedan excluidos de la garantía:</strong> Daños estéticos, roturas de pantalla por golpes posteriores, daños por líquidos, humedades, o cualquier otro daño accidental o mal uso del dispositivo tras la reparación.</p><p>⚠️ <strong>Importante:</strong> Recomendamos hacer una copia de seguridad de tus datos antes de entregar el dispositivo. No nos hacemos responsables de la pérdida de datos durante el proceso de reparación.</p><p>📞 Para más información, consúltanos sin compromiso.</p></div></div>
-        </div>
-    </section>
-
-    <!-- FAQ COMPLETO (10 preguntas detalladas) -->
-    <section class="py-16 px-6 bg-[#0a0a0f]">
         <div class="container mx-auto max-w-3xl">
             <div class="text-center mb-8"><h2 class="text-3xl font-bold">🗲 Preguntas Frecuentes</h2></div>
             <div class="space-y-3">
@@ -356,7 +346,7 @@
         </div>
     </section>
 
-    <!-- CONTACTO -->
+    <!-- CONTACTO (con garantía integrada) -->
     <section class="py-20 px-6 bg-gradient-to-br from-blue-950 to-indigo-950" id="contacto">
         <div class="container mx-auto">
             <div class="text-center mb-10"><h2 class="text-4xl md:text-5xl font-black">¿Hablamos?</h2><p class="text-xl text-blue-200">Presupuesto sin compromiso</p></div>
@@ -366,7 +356,16 @@
                     <div><i class="fas fa-map-marker-alt text-yellow-400 mr-3"></i> C/ Migdia, 23 - Girona</div>
                     <div><i class="fas fa-envelope text-yellow-400 mr-3"></i> tecnogirona@gmail.com</div>
                     <div><i class="fas fa-clock text-yellow-400 mr-3"></i> L-V 9-20h · S 10-15h</div>
-                    <div class="mt-3 p-3 bg-blue-600/20 rounded-xl text-center text-sm">Diagnóstico gratuito · Garantía · Rapidez</div>
+                    <div class="mt-3 p-3 bg-blue-600/20 rounded-xl text-center text-sm">🔧 Diagnóstico gratuito · Garantía 3 meses · Reparación rápida</div>
+                    <!-- Añadimos aquí el contenido de Garantía y Condiciones -->
+                    <div class="mt-4 p-4 glass-neon text-sm text-gray-300 space-y-2" style="background: rgba(0,0,0,0.4); border-radius: 1.5rem;">
+                        <p class="font-bold text-white">📋 Garantía y Condiciones</p>
+                        <p>✅ <strong>Garantía legal:</strong> Todas nuestras reparaciones incluyen 3 años de garantía para particulares y 1 año para empresas, conforme a la legislación española.</p>
+                        <p>✅ <strong>Cobertura:</strong> La garantía cubre defectos de mano de obra y materiales. En caso de fallo del repuesto, se sustituye sin coste adicional.</p>
+                        <p>⚠️ <strong>Quedan excluidos:</strong> Daños estéticos, roturas de pantalla por golpes posteriores, daños por líquidos, humedades, o cualquier otro daño accidental o mal uso del dispositivo tras la reparación.</p>
+                        <p>⚠️ <strong>Importante:</strong> Recomendamos hacer una copia de seguridad de tus datos antes de entregar el dispositivo. No nos hacemos responsables de la pérdida de datos durante el proceso de reparación.</p>
+                        <p>📞 Para más información, consúltanos sin compromiso.</p>
+                    </div>
                 </div>
             </div>
         </div>
