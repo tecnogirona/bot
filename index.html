@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="color-scheme" content="light">
-    <title>S.A.T. Dashboard Ultimate V8.9</title>
+    <title>S.A.T. Dashboard Ultimate V9.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -35,32 +35,45 @@
             #print-area { position: absolute; top: 0; left: 0; width: 100%; padding: 0; margin: 0; background: white; }
         }
         
-        .print-container { width: 100%; max-width: 900px; margin: 0 auto; padding: 40px; background: white; color: #1f2937; font-family: Arial, sans-serif; line-height: 1.6; }
-        .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
-        .print-title { font-size: 24px; font-weight: bold; color: #2563eb; text-transform: uppercase; }
-        .print-company { font-size: 12px; color: #666; }
-        .print-section { margin-bottom: 25px; }
-        .print-section-title { font-size: 14px; font-weight: bold; background: #f1f5f9; padding: 10px; margin-bottom: 12px; border-left: 4px solid #2563eb; }
-        .print-row { display: flex; margin-bottom: 10px; }
-        .print-label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; width: 30%; }
-        .print-value { font-size: 13px; font-weight: 500; width: 70%; }
-        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .print-table th { background: #2563eb; color: white; padding: 10px; text-align: left; font-size: 12px; font-weight: bold; }
-        .print-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
-        .print-table tr:nth-child(even) { background: #f8fafc; }
-        .signature-box { margin-top: 50px; display: flex; justify-content: space-between; }
-        .signature-field { width: 200px; border-top: 2px solid #000; text-align: center; padding-top: 10px; font-size: 11px; }
-        .document-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-center; z-index: 60; padding: 20px; }
-        .document-viewer { background: white; border-radius: 12px; width: 100%; max-width: 1000px; max-height: 90vh; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .document-toolbar { display: flex; gap: 10px; padding: 15px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; position: sticky; top: 0; }
-        .document-toolbar button { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s; }
-        .document-toolbar button:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        /* Diseño Profesional para Documentos */
+        .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 30px; background: white; color: #1f2937; font-family: 'Inter', Arial, sans-serif; line-height: 1.4; }
+        .print-header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+        .company-logo-container { display: flex; align-items: center; gap: 15px; }
+        .company-logo-img { max-height: 60px; max-width: 150px; object-fit: contain; }
+        .company-logo-text { font-size: 28px; font-weight: 800; color: #2563eb; letter-spacing: -1px; }
+        .company-info { font-size: 11px; color: #64748b; line-height: 1.2; }
+        .doc-type { text-align: right; }
+        .doc-type-title { font-size: 20px; font-weight: 700; color: #1e293b; text-transform: uppercase; }
+        .doc-number { font-size: 14px; font-weight: 600; color: #2563eb; }
+        
+        .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+        .print-box-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; }
+        .print-box-content { font-size: 12px; color: #1e293b; }
+        
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .print-table th { background: #f8fafc; color: #64748b; padding: 12px 10px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        .print-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #334155; }
+        .print-table tr.total-row td { border-bottom: none; font-weight: 700; font-size: 14px; color: #1e293b; background: #f8fafc; }
+        
+        .print-notes { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11px; color: #475569; }
+        .print-footer { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+        .signature-area { border-top: 1px solid #cbd5e1; padding-top: 10px; text-align: center; font-size: 10px; color: #64748b; font-weight: 600; }
+        .signature-space { height: 60px; }
+
+        .document-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 20px; }
+        .document-viewer { background: white; border-radius: 16px; width: 100%; max-width: 900px; max-height: 90vh; overflow: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .document-toolbar { display: flex; gap: 10px; padding: 12px 20px; border-bottom: 1px solid #e2e8f0; background: white; position: sticky; top: 0; z-index: 10; }
+        .document-toolbar button { padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 12px; font-weight: 600; color: #475569; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .document-toolbar button:hover { background: #f8fafc; color: #2563eb; border-color: #2563eb; }
+        .document-toolbar button.btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
+        .document-toolbar button.btn-primary:hover { background: #1d4ed8; }
 
         @media (max-width: 768px) {
             .sidebar-text { display: none; }
             aside { width: 64px !important; }
             .main-content { padding: 12px !important; }
             .modal-content { width: 95% !important; max-height: 95vh !important; }
+            .print-grid { grid-template-columns: 1fr; gap: 20px; }
         }
         
         #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
@@ -68,9 +81,6 @@
         .range-btn { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; background: #f1f5f9; border: none; transition: all 0.2s; }
         .range-btn.active { background: #2563eb; color: white; }
         .ai-metric { background: #f1f5f9; padding: 12px; border-radius: 8px; text-align: center; border-left: 3px solid #2563eb; }
-        .ai-metric.alert { border-left-color: #ef4444; background: #fef2f2; }
-        .ai-metric.warn { border-left-color: #f59e0b; background: #fffbeb; }
-        .ai-metric.good { border-left-color: #10b981; background: #ecfdf5; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden bg-slate-50">
@@ -107,6 +117,7 @@
         <a href="#" onclick="showSection('pedidos')" id="link-pedidos" class="sidebar-link"><i data-lucide="shopping-cart" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Pedidos</span></a>
         <a href="#" onclick="showSection('recordatorios')" id="link-recordatorios" class="sidebar-link"><i data-lucide="bell" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Recordatorios</span></a>
         <a href="#" onclick="showSection('reportes')" id="link-reportes" class="sidebar-link"><i data-lucide="bar-chart-big" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Reportes</span></a>
+        <a href="#" onclick="showSection('configuracion')" id="link-configuracion" class="sidebar-link"><i data-lucide="settings" class="w-5 h-5 md:mr-3"></i><span class="sidebar-text">Configuración</span></a>
     </nav>
     <div class="p-3 border-t border-slate-100 space-y-2 flex-shrink-0">
         <button onclick="generateAISuggestions()" class="flex items-center gap-3 text-slate-500 hover:text-purple-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm">
@@ -114,11 +125,6 @@
         </button>
         <button onclick="logout()" class="flex items-center gap-3 text-slate-500 hover:text-red-600 transition-colors w-full p-2 rounded-lg hover:bg-slate-100 text-sm hidden md:flex">
             <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i><span class="sidebar-text font-medium">Salir</span>
-        </button>
-    </div>
-    <div class="md:hidden p-3 border-t border-slate-100 flex-shrink-0">
-        <button onclick="logout()" class="flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 w-full p-3 rounded-lg text-sm font-bold bg-red-100">
-            <i data-lucide="log-out" class="w-4 h-4"></i>Cerrar Sesión
         </button>
     </div>
 </aside>
@@ -137,7 +143,7 @@
         <div id="view-dashboard" class="space-y-6">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Piezas Pedidas</p><div class="flex items-end justify-between mt-2"><h3 id="stat-piezas" class="text-2xl font-black">0</h3><div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="package" class="w-5 h-5"></i></div></div></div>
-                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Pedidos Activos</p><div class="flex items-end justify-between mt-2"><h3 id="stat-pedidos" class="text-2xl font-black">0</h3><div class="p-2 bg-green-50 rounded-lg text-green-600"><i data-lucide="shopping-cart" class="w-5 h-5"></i></div></div></div>
+                <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Pedidos Activos</p><div class="flex items-end justify-between mt-2"><h3 id="stat-pedidos" class="text-2xl font-black">0</h3><div class="p-2 bg-amber-50 rounded-lg text-amber-600"><i data-lucide="shopping-cart" class="w-5 h-5"></i></div></div></div>
                 <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Reparaciones OK</p><div class="flex items-end justify-between mt-2"><h3 id="stat-reparaciones" class="text-2xl font-black">0</h3><div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="check-circle" class="w-5 h-5"></i></div></div></div>
                 <div class="flat-card p-4 flex flex-col justify-between"><p class="text-[10px] font-bold text-slate-500 uppercase">Beneficio Total</p><div class="flex items-end justify-between mt-2"><h3 id="stat-beneficio" class="text-xl font-black text-emerald-600">0€</h3><div class="p-2 bg-emerald-50 rounded-lg text-emerald-600"><i data-lucide="trending-up" class="w-5 h-5"></i></div></div></div>
             </div>
@@ -191,6 +197,89 @@
                 <div class="flat-card p-6"><h4 class="font-bold text-sm mb-4">Estado Garantías</h4><div class="chart-container"><canvas id="chart-garantias-estado"></canvas></div></div>
             </div>
         </div>
+
+        <!-- Configuration View -->
+        <div id="view-configuracion" class="hidden space-y-6 pb-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="flat-card p-6">
+                    <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="building-2" class="w-5 h-5 text-blue-500"></i> Datos de Empresa</h4>
+                    <form id="config-company-form" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Nombre Comercial</label>
+                                <input type="text" name="name" class="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: SAT Reparaciones Pro">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">CIF / NIF</label>
+                                <input type="text" name="cif" class="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500" placeholder="B12345678">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Teléfono</label>
+                                <input type="text" name="phone" class="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500" placeholder="900 000 000">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Dirección</label>
+                                <input type="text" name="address" class="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500" placeholder="Calle Ejemplo 123, Madrid">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Email de Contacto</label>
+                                <input type="email" name="email" class="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500" placeholder="contacto@empresa.com">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Términos y Condiciones (PDF)</label>
+                                <textarea name="terms" rows="3" class="w-full border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500" placeholder="Texto que aparecerá al pie de los documentos..."></textarea>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Logo Empresa</label>
+                                <input type="file" accept="image/*" onchange="handleConfigLogo(this)" class="w-full text-xs mt-1">
+                                <input type="hidden" name="logo" id="config-logo-base64">
+                                <div id="config-logo-preview" class="mt-2 h-12 flex items-center"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all active:scale-95">Guardar Configuración</button>
+                    </form>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="users" class="w-5 h-5 text-purple-500"></i> Gestión de Técnicos</h4>
+                        <div id="config-technicians-list" class="space-y-2 mb-4"></div>
+                        <div class="flex gap-2">
+                            <input id="new-tech-name" type="text" placeholder="Nombre del nuevo técnico" class="flex-1 border rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-purple-500">
+                            <button onclick="addTechnician()" class="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold shadow-md hover:bg-purple-700 transition-all active:scale-95"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="flat-card p-6">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5 text-red-500"></i> Mantenimiento del Sistema</h4>
+                        <div class="space-y-3">
+                            <button onclick="exportData()" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all group">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-white rounded-lg border border-slate-200 text-slate-600 group-hover:text-blue-600"><i data-lucide="download" class="w-5 h-5"></i></div>
+                                    <div class="text-left"><p class="text-xs font-bold">Copia de Seguridad</p><p class="text-[10px] text-slate-500">Descarga todos los datos en JSON</p></div>
+                                </div>
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                            </button>
+                            <label class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all group cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-white rounded-lg border border-slate-200 text-slate-600 group-hover:text-emerald-600"><i data-lucide="upload" class="w-5 h-5"></i></div>
+                                    <div class="text-left"><p class="text-xs font-bold">Restaurar Copia</p><p class="text-[10px] text-slate-500">Importar datos desde un archivo</p></div>
+                                </div>
+                                <input type="file" class="hidden" onchange="importData(event)">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                            </label>
+                            <button onclick="dangerZoneReset()" class="w-full flex items-center justify-between p-4 bg-red-50 rounded-xl hover:bg-red-100 transition-all group">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-white rounded-lg border border-red-100 text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></div>
+                                    <div class="text-left"><p class="text-xs font-bold text-red-600">Zona Peligrosa</p><p class="text-[10px] text-red-400">Borrar todos los registros locales</p></div>
+                                </div>
+                                <i data-lucide="alert-triangle" class="w-4 h-4 text-red-300"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
@@ -236,11 +325,11 @@
 <div id="document-modal" class="document-modal hidden">
     <div class="document-viewer">
         <div class="document-toolbar">
-            <button onclick="printDocument()"><i data-lucide="printer" class="w-4 h-4" style="display:inline; margin-right:5px;"></i>Imprimir</button>
-            <button onclick="downloadDocument()"><i data-lucide="download" class="w-4 h-4" style="display:inline; margin-right:5px;"></i>Descargar</button>
-            <button onclick="closeDocumentModal()" style="margin-left:auto;"><i data-lucide="x" class="w-4 h-4" style="display:inline; margin-right:5px;"></i>Cerrar</button>
+            <button onclick="printDocument()" class="btn-primary"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir / PDF</button>
+            <button onclick="downloadDocument()"><i data-lucide="download" class="w-4 h-4"></i>Guardar HTML</button>
+            <button onclick="closeDocumentModal()" style="margin-left:auto;"><i data-lucide="x" class="w-4 h-4"></i>Cerrar</button>
         </div>
-        <div id="document-content" class="print-container"></div>
+        <div id="document-content"></div>
     </div>
 </div>
 
@@ -248,21 +337,32 @@
 
 <script>
 // Database
-const db = new Dexie("SAT_Database_V8_9");
+const db = new Dexie("SAT_Database_V9_1");
 db.version(1).stores({
-    reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, imagen, observaciones, precio',
+    reparaciones: '++id, ot, cliente, marca, modelo, serie, password, estado, prioridad, fecha, garantia_fin, usuario, imagen, observaciones, precio, telefono, email',
     piezas: '++id, nombre, proveedor, estado, fecha, usuario, precioCompra, precioVenta, imagen, observaciones, referencia',
     pedidos: '++id, cliente, producto, estado, fecha, usuario, precioCompra, precioVenta, cantidad, imagen, observaciones, tlf, ean',
-    recordatorios: '++id, title, desc, dueDate, priority, completed, imagen, fecha, nombre, apellidos, telefono, email, ref_ot'
+    recordatorios: '++id, title, desc, dueDate, priority, completed, imagen, fecha, nombre, apellidos, telefono, email, ref_ot',
+    config: 'key, value'
 });
 
-const USERS = [
+const DEFAULT_USERS = [
     { user: "daniel", pass: "1234", nombre: "Daniel Farré" },
     { user: "jose", pass: "1234", nombre: "José Ayala" },
     { user: "david", pass: "1234", nombre: "David Varillas" }
 ];
-const USUARIOS = USERS.map(u => u.nombre);
+
 let currentUser = null, currentSection = 'dashboard', charts = {}, currentRange = 6;
+let technicians = DEFAULT_USERS.map(u => u.nombre);
+let companyConfig = {
+    name: "SAT PRO",
+    cif: "B12345678",
+    phone: "900 000 000",
+    address: "C/ Principal 123, 28001 Madrid",
+    email: "sat@profesional.com",
+    terms: "1. El cliente acepta el presupuesto antes de la intervención. 2. Las reparaciones tienen la garantía legal especificada. 3. Pasados 30 días del aviso de recogida, se cobrará almacenaje.",
+    logo: ""
+};
 
 // Helpers
 const $ = id => document.getElementById(id);
@@ -281,33 +381,128 @@ function showToast(msg, type='success') {
 // Auth
 function login() {
     const user = $('login-user').value.trim(), pass = $('login-pass').value;
-    const found = USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
+    const found = DEFAULT_USERS.find(u => normalize(u.user) === normalize(user) && u.pass === pass);
     if(found) {
         currentUser = found;
-        localStorage.setItem("sat_user_v8_9", JSON.stringify(found));
+        localStorage.setItem("sat_user_v9_1", JSON.stringify(found));
         $('login-screen').classList.add('hidden');
         initApp();
     } else {
         $('login-error').classList.remove('hidden');
     }
 }
-function logout() { localStorage.removeItem("sat_user_v8_9"); location.reload(); }
+function logout() { localStorage.removeItem("sat_user_v9_1"); location.reload(); }
 
 // Init
-function initApp() {
+async function initApp() {
+    await loadConfig();
     lucide.createIcons();
     showSection('dashboard');
     initRangeSelector();
+    restoreAIReport();
 }
 
 window.onload = () => {
-    const saved = localStorage.getItem("sat_user_v8_9");
+    const saved = localStorage.getItem("sat_user_v9_1");
     if(saved) {
         currentUser = JSON.parse(saved);
         $('login-screen').classList.add('hidden');
         initApp();
     }
 };
+
+// Config Logic
+async function loadConfig() {
+    const configData = await db.config.toArray();
+    configData.forEach(item => {
+        if(item.key === 'company') companyConfig = {...companyConfig, ...item.value};
+        if(item.key === 'technicians') technicians = item.value;
+    });
+    renderConfigForms();
+}
+
+function renderConfigForms() {
+    const form = $('config-company-form');
+    if(!form) return;
+    Object.keys(companyConfig).forEach(key => {
+        const input = form.querySelector(`[name="${key}"]`);
+        if(input && key !== 'logo') input.value = companyConfig[key];
+    });
+    if(companyConfig.logo) {
+        $('config-logo-base64').value = companyConfig.logo;
+        $('config-logo-preview').innerHTML = `<img src="${companyConfig.logo}" class="h-full rounded border">`;
+    }
+    renderTechList();
+}
+
+function renderTechList() {
+    const list = $('config-technicians-list');
+    if(!list) return;
+    list.innerHTML = technicians.map((t, idx) => `
+        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-xs font-medium text-slate-700">${t}</span>
+            <button onclick="removeTechnician(${idx})" class="p-1 text-red-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>
+    `).join('');
+    lucide.createIcons();
+}
+
+async function addTechnician() {
+    const input = $('new-tech-name');
+    const name = input.value.trim();
+    if(name && !technicians.includes(name)) {
+        technicians.push(name);
+        await db.config.put({key: 'technicians', value: technicians});
+        input.value = '';
+        renderTechList();
+        showToast('Técnico añadido');
+    }
+}
+
+async function removeTechnician(idx) {
+    if(confirm('¿Seguro que quieres eliminar a este técnico?')) {
+        technicians.splice(idx, 1);
+        await db.config.put({key: 'technicians', value: technicians});
+        renderTechList();
+        showToast('Técnico eliminado');
+    }
+}
+
+function handleConfigLogo(input) {
+    const f = input.files[0];
+    if(f) {
+        const r = new FileReader();
+        r.onload = (e) => {
+            const base64 = e.target.result;
+            $('config-logo-base64').value = base64;
+            $('config-logo-preview').innerHTML = `<img src="${base64}" class="h-full rounded border">`;
+        };
+        r.readAsDataURL(f);
+    }
+}
+
+$('config-company-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = Object.fromEntries(new FormData(e.target));
+    companyConfig = {...companyConfig, ...formData};
+    await db.config.put({key: 'company', value: companyConfig});
+    showToast('Configuración guardada');
+};
+
+async function dangerZoneReset() {
+    if(confirm('ATENCIÓN: Se borrarán todos los registros (reparaciones, pedidos, etc). Esta acción no se puede deshacer. ¿Continuar?')) {
+        if(confirm('¿Estás COMPLETAMENTE seguro?')) {
+            await Promise.all([
+                db.reparaciones.clear(),
+                db.piezas.clear(),
+                db.pedidos.clear(),
+                db.recordatorios.clear()
+            ]);
+            showToast('Sistema reseteado', 'error');
+            location.reload();
+        }
+    }
+}
 
 // Navigation
 function showSection(section) {
@@ -316,16 +511,18 @@ function showSection(section) {
     const link = $(`link-${section}`);
     if(link) link.classList.add('active');
     
-    const titles = { dashboard:'Resumen', reparaciones:'Reparaciones', piezas:'Piezas', pedidos:'Pedidos', recordatorios:'Recordatorios', reportes:'Reportes' };
+    const titles = { dashboard:'Resumen', reparaciones:'Reparaciones', piezas:'Piezas', pedidos:'Pedidos', recordatorios:'Recordatorios', reportes:'Reportes', configuracion:'Configuración' };
     $('section-title').textContent = titles[section];
-    $('btn-new').style.display = section === 'reportes' ? 'none' : 'flex';
+    $('btn-new').style.display = ['reportes','configuracion'].includes(section) ? 'none' : 'flex';
 
     $('view-dashboard').classList.toggle('hidden', section !== 'dashboard');
     $('view-list').classList.toggle('hidden', !['reparaciones','piezas','pedidos','recordatorios'].includes(section));
     $('view-reportes').classList.toggle('hidden', section !== 'reportes');
+    $('view-configuracion').classList.toggle('hidden', section !== 'configuracion');
 
     if(section === 'dashboard') updateDashboard();
     else if(section === 'reportes') updateReports();
+    else if(section === 'configuracion') renderConfigForms();
     else renderTable(section);
     
     lucide.createIcons();
@@ -355,8 +552,7 @@ function updateRecentActivity(reps, pie, ped) {
     activity.sort((a,b) => b.date - a.date);
     const container = $('recent-activity');
     container.innerHTML = activity.length ? activity.slice(0,5).map(a => {
-        let uClass = a.user === 'Daniel Farré' ? 'daniel' : a.user === 'José Ayala' ? 'jose' : 'david';
-        return `<div class="flex items-center gap-3"><div class="p-2 bg-slate-50 rounded-lg"><i data-lucide="${a.icon}" class="w-4 h-4"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(a.text)}</p><p class="text-[9px] text-slate-400">${a.date.toLocaleString()} · <span class="user-badge ${uClass}">${a.user}</span></p></div></div>`;
+        return `<div class="flex items-center gap-3"><div class="p-2 bg-slate-50 rounded-lg"><i data-lucide="${a.icon}" class="w-4 h-4"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(a.text)}</p><p class="text-[9px] text-slate-400">${a.date.toLocaleString()} · <span class="font-bold text-blue-600">${a.user}</span></p></div></div>`;
     }).join('') : '<p class="text-xs text-slate-400 italic">Sin actividad reciente.</p>';
     lucide.createIcons();
 }
@@ -436,8 +632,8 @@ async function updateEvolucionPorUsuario(reps, ped, months) {
         let f = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
         meses.push(f.toLocaleDateString('es-ES',{month:'short'}));
     }
-    const colores = { "Daniel Farré":"#3b82f6", "José Ayala":"#ef4444", "David Varillas":"#10b981" };
-    const datasets = USUARIOS.map(u => {
+    const colorPalette = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
+    const datasets = technicians.map((u, idx) => {
         let vals = [];
         for(let i=months-1; i>=0; i--) {
             let ini = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
@@ -446,7 +642,7 @@ async function updateEvolucionPorUsuario(reps, ped, months) {
             total += reps.reduce((s,r) => (r.usuario===u && new Date(r.fecha)>=ini && new Date(r.fecha)<=fin) ? s + (parseFloat(r.precio)||0) : s, 0);
             vals.push(total);
         }
-        return { label:u, data:vals, borderColor:colores[u], backgroundColor:'transparent', tension:0.3, pointRadius:2 };
+        return { label:u, data:vals, borderColor:colorPalette[idx % colorPalette.length], backgroundColor:'transparent', tension:0.3, pointRadius:2 };
     });
     const ctx = $('chart-evolucion-usuarios')?.getContext('2d');
     if(ctx) { if(charts.evU) charts.evU.destroy(); charts.evU = new Chart(ctx, { type:'line', data:{ labels:meses, datasets }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:10} } } } } }); }
@@ -454,31 +650,42 @@ async function updateEvolucionPorUsuario(reps, ped, months) {
 }
 
 async function updateRankingUsuarios(reps, pie, ped) {
-    const ranking = USUARIOS.map(u => {
+    const ranking = technicians.map(u => {
         const p = ped.filter(x=>x.usuario===u).length, pi = pie.filter(x=>x.usuario===u).length, r = reps.filter(x=>x.usuario===u).length;
         const g = reps.filter(x=>x.usuario===u && x.garantia_fin && new Date(x.garantia_fin)>new Date()).length;
         return { user:u, total:p+pi+r, p, pi, r, g };
     }).sort((a,b)=>b.total-a.total);
     $('ranking-usuarios').innerHTML = ranking.map(r => {
-        let avatar = r.user === 'Daniel Farré' ? 'bg-blue-100 text-blue-700' : r.user === 'José Ayala' ? 'bg-pink-100 text-pink-700' : 'bg-emerald-100 text-emerald-700';
-        return `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full ${avatar} flex items-center justify-center font-bold text-xs">${r.user[0]}</div><div><p class="font-bold text-xs">${r.user}</p><p class="text-[10px] text-slate-500">${r.total} op. totales</p></div></div><div class="flex gap-2 text-center"><div><p class="text-[10px] font-bold text-blue-600">${r.p}</p><p class="text-[8px] text-slate-400">Ped</p></div><div><p class="text-[10px] font-bold text-purple-600">${r.pi}</p><p class="text-[8px] text-slate-400">Piez</p></div><div><p class="text-[10px] font-bold text-pink-600">${r.r}</p><p class="text-[8px] text-slate-400">Rep</p></div><div><p class="text-[10px] font-bold text-green-600">${r.g}</p><p class="text-[8px] text-slate-400">Gar</p></div></div></div>`;
+        return `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">${r.user[0]}</div><div><p class="font-bold text-xs">${r.user}</p><p class="text-[10px] text-slate-500">${r.total} op. totales</p></div></div><div class="flex gap-2 text-center"><div><p class="text-[10px] font-bold text-blue-600">${r.p}</p><p class="text-[8px] text-slate-400">Ped</p></div><div><p class="text-[10px] font-bold text-purple-600">${r.pi}</p><p class="text-[8px] text-slate-400">Piez</p></div><div><p class="text-[10px] font-bold text-pink-600">${r.r}</p><p class="text-[8px] text-slate-400">Rep</p></div><div><p class="text-[10px] font-bold text-green-600">${r.g}</p><p class="text-[8px] text-slate-400">Gar</p></div></div></div>`;
     }).join('');
 }
 
 async function updateChartOperaciones(reps, pie, ped) {
     const ctx = $('chart-operaciones-usuario')?.getContext('2d');
-    if(ctx) { if(charts.op) charts.op.destroy(); charts.op = new Chart(ctx, { type:'bar', data:{ labels:USUARIOS, datasets:[{ label:'Pedidos', data:USUARIOS.map(u=>ped.filter(x=>x.usuario===u).length), backgroundColor:'#3b82f6' },{ label:'Piezas', data:USUARIOS.map(u=>pie.filter(x=>x.usuario===u).length), backgroundColor:'#8b5cf6' },{ label:'Reparaciones', data:USUARIOS.map(u=>reps.filter(x=>x.usuario===u).length), backgroundColor:'#ec4899' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:10} } } } } }); }
+    if(ctx) { if(charts.op) charts.op.destroy(); charts.op = new Chart(ctx, { type:'bar', data:{ labels:technicians, datasets:[{ label:'Pedidos', data:technicians.map(u=>ped.filter(x=>x.usuario===u).length), backgroundColor:'#3b82f6' },{ label:'Piezas', data:technicians.map(u=>pie.filter(x=>x.usuario===u).length), backgroundColor:'#8b5cf6' },{ label:'Reparaciones', data:technicians.map(u=>reps.filter(x=>x.usuario===u).length), backgroundColor:'#ec4899' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:10} } } } } }); }
 }
 
 function updateSmallCharts(reps, ped) {
     const config = (ctx, labels, data, colors) => new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:8} } } } } });
+    
     const pedE = {}; ped.forEach(x=>pedE[x.estado]=(pedE[x.estado]||0)+1);
-    if($('chart-pedidos-estado')) config($('chart-pedidos-estado').getContext('2d'), Object.keys(pedE), Object.values(pedE), ['#6366f1','#8b5cf6','#d8b4fe']);
+    if($('chart-pedidos-estado')) {
+        if(charts.pedE) charts.pedE.destroy();
+        charts.pedE = config($('chart-pedidos-estado').getContext('2d'), Object.keys(pedE), Object.values(pedE), ['#6366f1','#8b5cf6','#d8b4fe','#a5f3fc']);
+    }
+    
     const repE = {}; reps.forEach(x=>repE[x.estado]=(repE[x.estado]||0)+1);
-    if($('chart-reparaciones-estado')) config($('chart-reparaciones-estado').getContext('2d'), Object.keys(repE), Object.values(repE), ['#3b82f6','#0ea5e9','#22d3ee','#a5f3fc']);
+    if($('chart-reparaciones-estado')) {
+        if(charts.repE) charts.repE.destroy();
+        charts.repE = config($('chart-reparaciones-estado').getContext('2d'), Object.keys(repE), Object.values(repE), ['#3b82f6','#0ea5e9','#22d3ee','#a5f3fc','#94a3b8']);
+    }
+    
     const hoy = new Date(); const gS = { Vigente:0, Expirada:0, Proxima:0 };
     reps.forEach(r => { if(r.garantia_fin){ let d=Math.ceil((new Date(r.garantia_fin)-hoy)/(1000*60*60*24)); if(d<0) gS.Expirada++; else if(d<=15) gS.Proxima++; else gS.Vigente++; } });
-    if($('chart-garantias-estado')) config($('chart-garantias-estado').getContext('2d'), Object.keys(gS), Object.values(gS), ['#10b981','#ef4444','#f59e0b']);
+    if($('chart-garantias-estado')) {
+        if(charts.garE) charts.garE.destroy();
+        charts.garE = config($('chart-garantias-estado').getContext('2d'), Object.keys(gS), Object.values(gS), ['#10b981','#ef4444','#f59e0b']);
+    }
 }
 
 function initRangeSelector() {
@@ -548,7 +755,7 @@ function filterTable() {
 // Modals & Forms
 function openModal(editData = null) {
     const modal = $('modal'), fields = $('form-fields'), idIn = $('form-id'), secIn = $('form-section');
-    let active = ['dashboard','reportes'].includes(currentSection) ? 'reparaciones' : currentSection;
+    let active = ['dashboard','reportes','configuracion'].includes(currentSection) ? 'reparaciones' : currentSection;
     idIn.value = editData ? editData.id : ''; secIn.value = active;
     $('modal-title').textContent = editData ? `Editar ${active}` : `Nueva ${active}`;
     
@@ -556,27 +763,30 @@ function openModal(editData = null) {
     if(active === 'reparaciones') {
         html = `
             <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Equipo</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">OT *</label><input type="text" name="ot" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.ot||''}"></div><div><label class="text-[10px] font-bold">Nº Serie</label><input type="text" name="serie" class="w-full border rounded-xl p-3 text-sm" value="${editData?.serie||''}"></div><div><label class="text-[10px] font-bold">Marca *</label><input type="text" name="marca" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.marca||''}"></div><div><label class="text-[10px] font-bold">Modelo *</label><input type="text" name="modelo" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.modelo||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Seguridad y Cliente</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">PIN / Password</label><input type="text" name="password" class="w-full border rounded-xl p-3 text-sm" value="${editData?.password||''}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Técnico</p><div class="grid grid-cols-3 gap-3"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='En Proceso'?'selected':''}>En Proceso</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="prioridad" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Seguridad y Cliente</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">PIN / Password</label><input type="text" name="password" class="w-full border rounded-xl p-3 text-sm" value="${editData?.password||''}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div><div><label class="text-[10px] font-bold">Teléfono</label><input type="text" name="telefono" class="w-full border rounded-xl p-3 text-sm" value="${editData?.telefono||''}"></div><div><label class="text-[10px] font-bold">Email</label><input type="email" name="email" class="w-full border rounded-xl p-3 text-sm" value="${editData?.email||''}"></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Técnico</p><div class="grid grid-cols-3 gap-3"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pendiente'?'selected':''}>Pendiente</option><option ${editData?.estado==='En Proceso'?'selected':''}>En Proceso</option><option ${editData?.estado==='Completado'?'selected':''}>Completado</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="prioridad" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.prioridad==='Normal'?'selected':''}>Normal</option><option ${editData?.prioridad==='Alta'?'selected':''}>Alta</option></select></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${technicians.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
             <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Garantía, Precio y Foto</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Meses Garantía</label><input type="number" name="garantia_meses" class="w-full border rounded-xl p-3 text-sm" value="${editData?.garantia_meses||0}"></div><div><label class="text-[10px] font-bold">Precio Reparación</label><input type="number" step="0.01" name="precio" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precio||''}"></div></div><div class="mt-3"><label class="text-[10px] font-bold">Foto (Cámara)</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div>
             <div><label class="text-[10px] font-bold">Observaciones / Notas Cliente</label><textarea name="observaciones" rows="3" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div>`;
     } else if(active === 'piezas') {
         html = `
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Información de Pieza</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.nombre||''}"></div><div><label class="text-[10px] font-bold">Referencia / SKU</label><input type="text" name="referencia" class="w-full border rounded-xl p-3 text-sm" value="${editData?.referencia||''}"></div><div><label class="text-[10px] font-bold">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded-xl p-3 text-sm" value="${editData?.proveedor||''}"></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${USUARIOS.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Información de Pieza</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Nombre Pieza *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.nombre||''}"></div><div><label class="text-[10px] font-bold">Referencia / SKU</label><input type="text" name="referencia" class="w-full border rounded-xl p-3 text-sm" value="${editData?.referencia||''}"></div><div><label class="text-[10px] font-bold">Proveedor</label><input type="text" name="proveedor" class="w-full border rounded-xl p-3 text-sm" value="${editData?.proveedor||''}"></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${technicians.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
             <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Precios</p><div class="grid grid-cols-3 gap-4"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Instalado'?'selected':''}>Instalado</option><option ${editData?.estado==='Vendido'?'selected':''}>Vendido</option></select></div><div><label class="text-[10px] font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div></div>
             <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Multimedia y Notas</p><div><label class="text-[10px] font-bold">Foto Pieza</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div><div class="mt-3"><label class="text-[10px] font-bold">Notas Internas</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div></div>`;
     } else if(active === 'pedidos') {
         html = `
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Datos del Pedido</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Producto *</label><input type="text" name="producto" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.producto||''}"></div><div><label class="text-[10px] font-bold">EAN / Referencia</label><input type="text" name="ean" class="w-full border rounded-xl p-3 text-sm" value="${editData?.ean||''}"></div><div><label class="text-[10px] font-bold">Cantidad</label><input type="number" name="cantidad" class="w-full border rounded-xl p-3 text-sm" value="${editData?.cantidad||1}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Gestión y Precios</p><div class="grid grid-cols-3 gap-4"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='En Espera'?'selected':''}>En Espera</option><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">P. Compra Unit.</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta Unit.</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Multimedia y Notas</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Teléfono Cliente</label><input type="tel" name="tlf" class="w-full border rounded-xl p-3 text-sm" value="${editData?.tlf||''}"></div><div><label class="text-[10px] font-bold">Foto Producto / Caja</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div><div class="mt-3"><label class="text-[10px] font-bold">Observaciones</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div></div>`;
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Datos del Pedido</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Producto *</label><input type="text" name="producto" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.producto||''}"></div><div><label class="text-[10px] font-bold">EAN / Referencia</label><input type="text" name="ean" class="w-full border rounded-xl p-3 text-sm" value="${editData?.ean||''}"></div><div><label class="text-[10px] font-bold">Cantidad</label><input type="number" name="cantidad" class="w-full border rounded-xl p-3 text-sm" value="${editData?.cantidad||1}"></div><div><label class="text-[10px] font-bold">Cliente *</label><input type="text" name="cliente" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.cliente||''}"></div><div><label class="text-[10px] font-bold">Teléfono</label><input type="text" name="tlf" class="w-full border rounded-xl p-3 text-sm" value="${editData?.tlf||''}"></div><div><label class="text-[10px] font-bold">Técnico</label><select name="usuario" class="w-full border rounded-xl p-3 text-sm">${technicians.map(u=>`<option ${editData?.usuario===u?'selected':''}>${u}</option>`).join('')}</select></div></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Estado y Costes</p><div class="grid grid-cols-3 gap-4"><div><label class="text-[10px] font-bold">Estado</label><select name="estado" class="w-full border rounded-xl p-3 text-sm"><option ${editData?.estado==='Pedido'?'selected':''}>Pedido</option><option ${editData?.estado==='En Camino'?'selected':''}>En Camino</option><option ${editData?.estado==='Recibido'?'selected':''}>Recibido</option><option ${editData?.estado==='Entregado'?'selected':''}>Entregado</option></select></div><div><label class="text-[10px] font-bold">P. Compra</label><input type="number" step="0.01" name="precioCompra" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioCompra||''}"></div><div><label class="text-[10px] font-bold">P. Venta</label><input type="number" step="0.01" name="precioVenta" class="w-full border rounded-xl p-3 text-sm" value="${editData?.precioVenta||''}"></div></div></div>
+            <div><label class="text-[10px] font-bold">Notas de Pedido</label><textarea name="observaciones" rows="2" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.observaciones||''}</textarea></div>`;
     } else if(active === 'recordatorios') {
         html = `
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Información del Cliente</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Nombre *</label><input type="text" name="nombre" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.nombre||''}"></div><div><label class="text-[10px] font-bold">Apellidos</label><input type="text" name="apellidos" class="w-full border rounded-xl p-3 text-sm" value="${editData?.apellidos||''}"></div><div><label class="text-[10px] font-bold">Teléfono</label><input type="tel" name="telefono" class="w-full border rounded-xl p-3 text-sm" value="${editData?.telefono||''}"></div><div><label class="text-[10px] font-bold">Email</label><input type="email" name="email" class="w-full border rounded-xl p-3 text-sm" value="${editData?.email||''}"></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Detalle y Referencia</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Título / Motivo *</label><input type="text" name="title" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.title||''}"></div><div><label class="text-[10px] font-bold">Referencia OT</label><input type="text" name="ref_ot" class="w-full border rounded-xl p-3 text-sm" placeholder="Ej: OT-1234" value="${editData?.ref_ot||''}"></div><div class="col-span-2"><label class="text-[10px] font-bold">Descripción / Notas</label><textarea name="desc" rows="2" class="w-full border rounded-xl p-3 text-sm">${editData?.desc||''}</textarea></div></div></div>
-            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Planificación y Multimedia</p><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] font-bold">Fecha Límite</label><input type="date" name="dueDate" class="w-full border rounded-xl p-3 text-sm" value="${editData?.dueDate||''}"></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="priority" class="w-full border rounded-xl p-3 text-sm"><option value="info" ${editData?.priority==='info'?'selected':''}>Normal</option><option value="warning" ${editData?.priority==='warning'?'selected':''}>Importante</option><option value="critical" ${editData?.priority==='critical'?'selected':''}>Urgente</option></select></div><div class="col-span-2"><label class="text-[10px] font-bold">Foto Adjunta</label><input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" class="w-full text-xs mt-1"><input type="hidden" name="imagen" id="form-imagen" value="${editData?.imagen||''}"></div></div></div>`;
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Asunto</p><div><label class="text-[10px] font-bold">Título / Nombre Cliente *</label><input type="text" name="title" required class="w-full border rounded-xl p-3 text-sm" value="${editData?.title||''}"></div></div>
+            <div class="form-section"><p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Detalles</p><div class="grid grid-cols-2 gap-4"><div><label class="text-[10px] font-bold">Fecha Límite</label><input type="date" name="dueDate" class="w-full border rounded-xl p-3 text-sm" value="${editData?.dueDate||''}"></div><div><label class="text-[10px] font-bold">Prioridad</label><select name="priority" class="w-full border rounded-xl p-3 text-sm"><option value="info" ${editData?.priority==='info'?'selected':''}>Baja</option><option value="warning" ${editData?.priority==='warning'?'selected':''}>Media</option><option value="critical" ${editData?.priority==='critical'?'selected':''}>Urgente</option></select></div></div></div>
+            <div><label class="text-[10px] font-bold">Descripción</label><textarea name="desc" rows="3" class="w-full border rounded-xl p-3 mt-1 text-sm">${editData?.desc||''}</textarea></div>`;
     }
-    fields.innerHTML = html; modal.classList.remove('hidden'); modal.classList.add('flex'); lucide.createIcons();
+    
+    fields.innerHTML = html;
+    modal.classList.remove('hidden'); modal.classList.add('flex');
+    lucide.createIcons();
 }
 
 function closeModal() { $('modal').classList.add('hidden'); }
@@ -626,11 +836,34 @@ function printItem(section, item) {
     } else if(section === 'pedidos') {
         doc = generateOrderDocument(item);
     } else {
-        doc = `<div class="print-header"><div><div class="print-title">${section.toUpperCase()}</div></div><div style="text-align:right;"><div style="font-size:14px; font-weight:bold; color:#2563eb;">#${item.id}</div></div></div><div class="print-section"><div class="print-section-title">DETALLES</div>${Object.entries(item).map(([k,v]) => {
-            if(['id','imagen','garantia_fin','fecha'].includes(k)) return '';
-            if(!v && v!==0) return '';
-            return `<div class="print-row"><div class="print-label">${k.replace('_',' ')}</div><div class="print-value">${escapeHtml(v)}</div></div>`;
-        }).join('')}</div>${item.imagen ? `<div class="print-section"><div class="print-section-title">FOTO ADJUNTA</div><img src="${item.imagen}" style="max-width:100%; border-radius:6px; border:1px solid #e2e8f0;"></div>` : ''}`;
+        doc = `
+            <div class="print-container">
+                <div class="print-header">
+                    <div>
+                        <div class="company-logo-container">
+                            ${companyConfig.logo ? `<img src="${companyConfig.logo}" class="company-logo-img">` : `<div class="company-logo-text">${companyConfig.name}</div>`}
+                        </div>
+                        <div class="company-info">${companyConfig.name}<br>${companyConfig.cif}<br>${companyConfig.address}<br>Tlf: ${companyConfig.phone} | ${companyConfig.email}</div>
+                    </div>
+                    <div class="doc-type">
+                        <div class="doc-type-title">${section.toUpperCase()}</div>
+                        <div class="doc-number">REF: #${item.id}</div>
+                    </div>
+                </div>
+                <div class="print-grid">
+                    <div>
+                        <div class="print-box-title">Detalles del Registro</div>
+                        <div class="print-box-content">
+                            ${Object.entries(item).map(([k,v]) => {
+                                if(['id','imagen','garantia_fin','fecha','observaciones'].includes(k)) return '';
+                                if(!v && v!==0) return '';
+                                return `<p><strong>${k.toUpperCase()}:</strong> ${escapeHtml(v)}</p>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+                ${item.observaciones ? `<div class="print-notes"><div class="print-box-title">Observaciones</div>${escapeHtml(item.observaciones)}</div>` : ''}
+            </div>`;
     }
     showDocumentPreview(doc);
 }
@@ -648,6 +881,7 @@ async function generateAISuggestions() {
     let ingresosPie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioVenta)||0), 0);
     let costePed = ped.reduce((s,p) => s + ((parseFloat(p.precioCompra)||0)*(parseInt(p.cantidad)||1)), 0);
     let costePie = pie.filter(p => p.estado==='Vendido'||p.estado==='Instalado').reduce((s,p) => s + (parseFloat(p.precioCompra)||0), 0);
+
     let ingresoTotal = ingresosRep + ingresosPed + ingresosPie;
     let costeTotal = costePed + costePie;
     let beneficio = ingresoTotal - costeTotal;
@@ -660,7 +894,7 @@ async function generateAISuggestions() {
     let garantiasProximas = reps.filter(r => r.garantia_fin && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) <= 15 && Math.ceil((new Date(r.garantia_fin) - now) / (1000*60*60*24)) >= 0).length;
     let garantiasExpiradas = reps.filter(r => r.garantia_fin && new Date(r.garantia_fin) < now).length;
     
-    let cargaTecnicos = USUARIOS.map(u => {
+    let cargaTecnicos = technicians.map(u => {
         let pendientes = reps.filter(r => r.usuario === u && r.estado === 'Pendiente').length;
         let enProceso = reps.filter(r => r.usuario === u && r.estado === 'En Proceso').length;
         let urgentes = reps.filter(r => r.usuario === u && r.prioridad === 'Alta' && r.estado !== 'Entregado').length;
@@ -745,7 +979,7 @@ async function generateAISuggestions() {
         
         content.innerHTML = html;
         
-        $('ai-mini-view').innerHTML = `
+        const miniViewHtml = `
             <div class="p-4 rounded-xl border border-slate-100 bg-slate-50">
                 <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i><p class="text-[10px] font-bold uppercase text-slate-500">Rentabilidad</p></div>
                 <p class="text-sm font-black text-emerald-600">${beneficio.toFixed(0)}€</p>
@@ -762,121 +996,195 @@ async function generateAISuggestions() {
                 <p class="text-[10px] text-slate-500 mt-1">Próximas a vencer</p>
             </div>
         `;
+        $('ai-mini-view').innerHTML = miniViewHtml;
         
-        $('ai-dashboard-summary').innerHTML = `Análisis completado: ${beneficio.toFixed(0)}€ de beneficio, ${piezasAntiguasPedido.length} piezas retrasadas, ${garantiasProximas} garantías próximas.`;
+        const summaryText = `Análisis completado: ${beneficio.toFixed(0)}€ de beneficio, ${piezasAntiguasPedido.length} piezas retrasadas, ${garantiasProximas} garantías próximas.`;
+        $('ai-dashboard-summary').innerHTML = summaryText;
+        
+        localStorage.setItem('sat_ai_report_v9_1', JSON.stringify({
+            full: html,
+            mini: miniViewHtml,
+            summary: summaryText,
+            timestamp: new Date().getTime()
+        }));
+        
         lucide.createIcons();
     }, 1200);
 }
 
-function closeAIModal() { $('ai-modal').classList.add('hidden'); }
-
-// Document Generation
-function generateRepairOrder(data) {
-    const doc = `
-        <div class="print-header">
-            <div>
-                <div class="print-title">ORDEN DE REPARACIÓN</div>
-                <div class="print-company">S.A.T. - Servicio Técnico</div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 16px; font-weight: bold; color: #2563eb;">OT-${data.ot}</div>
-                <div style="font-size: 12px; color: #666;">${new Date(data.fecha).toLocaleDateString('es-ES')}</div>
-            </div>
-        </div>
-        
-        <div class="print-section">
-            <div class="print-section-title">DATOS DEL CLIENTE</div>
-            <div class="print-row"><div class="print-label">Nombre:</div><div class="print-value">${data.cliente || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Teléfono:</div><div class="print-value">${data.telefono || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Email:</div><div class="print-value">${data.email || '-'}</div></div>
-        </div>
-        
-        <div class="print-section">
-            <div class="print-section-title">DATOS DEL EQUIPO</div>
-            <div class="print-row"><div class="print-label">Marca:</div><div class="print-value">${data.marca || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Modelo:</div><div class="print-value">${data.modelo || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Serie:</div><div class="print-value">${data.serie || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Contraseña:</div><div class="print-value">${data.password || '-'}</div></div>
-        </div>
-        
-        <div class="print-section">
-            <div class="print-section-title">DESCRIPCIÓN DEL PROBLEMA</div>
-            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; min-height: 60px; font-size: 13px;">${data.observaciones || 'Sin descripción'}</div>
-        </div>
-        
-        <div class="print-section">
-            <div class="print-section-title">INFORMACIÓN DE LA REPARACIÓN</div>
-            <div class="print-row"><div class="print-label">Estado:</div><div class="print-value">${data.estado || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Prioridad:</div><div class="print-value">${data.prioridad || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Técnico:</div><div class="print-value">${data.usuario || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Precio:</div><div class="print-value" style="font-weight: bold; color: #2563eb;">${data.precio || '0'}€</div></div>
-            <div class="print-row"><div class="print-label">Garantía hasta:</div><div class="print-value">${data.garantia_fin ? new Date(data.garantia_fin).toLocaleDateString('es-ES') : '-'}</div></div>
-        </div>
-        
-        <div class="signature-box">
-            <div class="signature-field">Firma del Cliente</div>
-            <div class="signature-field">Firma del Técnico</div>
-        </div>
-    `;
-    return doc;
+function restoreAIReport() {
+    const saved = localStorage.getItem('sat_ai_report_v9_1');
+    if(saved) {
+        const data = JSON.parse(saved);
+        if(new Date().getTime() - data.timestamp < 24*60*60*1000) {
+            $('ai-content').innerHTML = data.full;
+            $('ai-mini-view').innerHTML = data.mini;
+            $('ai-dashboard-summary').innerHTML = data.summary;
+        }
+    }
 }
 
-function generateOrderDocument(data) {
-    const doc = `
-        <div class="print-header">
-            <div>
-                <div class="print-title">ALBARÁN DE PEDIDO</div>
-                <div class="print-company">S.A.T. - Servicio Técnico</div>
+function closeAIModal() { $('ai-modal').classList.add('hidden'); }
+
+// Document Generation (PROFESIONAL DINÁMICO)
+function generateRepairOrder(data) {
+    return `
+        <div class="print-container">
+            <div class="print-header">
+                <div>
+                    <div class="company-logo-container">
+                        ${companyConfig.logo ? `<img src="${companyConfig.logo}" class="company-logo-img">` : `<div class="company-logo-text">${companyConfig.name}</div>`}
+                    </div>
+                    <div class="company-info">${companyConfig.name}<br>${companyConfig.cif}<br>${companyConfig.address}<br>Tlf: ${companyConfig.phone} | ${companyConfig.email}</div>
+                </div>
+                <div class="doc-type">
+                    <div class="doc-type-title">Orden de Reparación</div>
+                    <div class="doc-number">OT-${data.ot}</div>
+                    <div style="font-size:11px; color:#64748b; margin-top:5px;">Fecha: ${new Date(data.fecha).toLocaleDateString('es-ES')}</div>
+                </div>
             </div>
-            <div style="text-align: right;">
-                <div style="font-size: 16px; font-weight: bold; color: #2563eb;">PED-${data.id}</div>
-                <div style="font-size: 12px; color: #666;">${new Date(data.fecha).toLocaleDateString('es-ES')}</div>
+            
+            <div class="print-grid">
+                <div>
+                    <div class="print-box-title">Datos del Cliente</div>
+                    <div class="print-box-content">
+                        <p style="font-weight:700; font-size:14px; margin-bottom:4px;">${data.cliente || '-'}</p>
+                        <p>Teléfono: ${data.telefono || '-'}</p>
+                        <p>Email: ${data.email || '-'}</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="print-box-title">Información del Equipo</div>
+                    <div class="print-box-content">
+                        <p><strong>Marca/Modelo:</strong> ${data.marca || '-'} ${data.modelo || '-'}</p>
+                        <p><strong>Nº Serie:</strong> ${data.serie || '-'}</p>
+                        <p><strong>Seguridad:</strong> ${data.password || '-'}</p>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="print-section">
-            <div class="print-section-title">DATOS DEL CLIENTE</div>
-            <div class="print-row"><div class="print-label">Cliente:</div><div class="print-value">${data.cliente || '-'}</div></div>
-            <div class="print-row"><div class="print-label">Teléfono:</div><div class="print-value">${data.tlf || '-'}</div></div>
-        </div>
-        
-        <div class="print-section">
-            <div class="print-section-title">ARTÍCULOS PEDIDOS</div>
+            
+            <div class="print-box-title">Detalle del Servicio</div>
             <table class="print-table">
-                <thead><tr><th>Producto</th><th>EAN/Referencia</th><th>Cantidad</th><th>Precio Unit.</th><th>Total</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Concepto / Descripción</th>
+                        <th style="text-align:right;">Estado</th>
+                        <th style="text-align:right;">Garantía</th>
+                        <th style="text-align:right;">Importe</th>
+                    </tr>
+                </thead>
                 <tbody>
                     <tr>
-                        <td>${data.producto || '-'}</td>
-                        <td>${data.ean || '-'}</td>
-                        <td>${data.cantidad || '1'}</td>
-                        <td>${data.precioCompra || '0'}€</td>
-                        <td>${(data.precioVenta || 0) * (data.cantidad || 1)}€</td>
+                        <td>
+                            <strong>Servicio de Reparación Técnica</strong><br>
+                            <span style="font-size:10px; color:#64748b;">${data.observaciones || 'Sin descripción detallada'}</span>
+                        </td>
+                        <td style="text-align:right;">${data.estado}</td>
+                        <td style="text-align:right;">${data.garantia_meses || 0} Meses</td>
+                        <td style="text-align:right; font-weight:600;">${parseFloat(data.precio || 0).toFixed(2)}€</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align:right;">TOTAL A PAGAR:</td>
+                        <td style="text-align:right;">${parseFloat(data.precio || 0).toFixed(2)}€</td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-        
-        <div class="print-section">
-            <div class="print-row" style="justify-content: flex-end; font-weight: bold; font-size: 14px;">
-                <div style="width: 30%;">TOTAL:</div>
-                <div style="width: 20%; color: #2563eb;">${(data.precioVenta || 0) * (data.cantidad || 1)}€</div>
+            
+            <div class="print-notes">
+                <div style="font-weight:700; margin-bottom:5px;">Condiciones del Servicio:</div>
+                <p>${companyConfig.terms}</p>
             </div>
-        </div>
-        
-        <div class="print-section">
-            <div class="print-section-title">OBSERVACIONES</div>
-            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; min-height: 40px; font-size: 12px;">${data.observaciones || 'Sin observaciones'}</div>
-        </div>
-        
-        <div class="signature-box">
-            <div class="signature-field">Firma del Cliente</div>
-            <div class="signature-field">Firma del Responsable</div>
-        </div>
-    `;
-    return doc;
+            
+            <div class="print-footer">
+                <div class="signature-area">
+                    <div class="signature-space"></div>
+                    Firma Cliente
+                </div>
+                <div class="signature-area">
+                    <div class="signature-space"></div>
+                    Sello y Firma SAT (Técnico: ${data.usuario})
+                </div>
+            </div>
+        </div>`;
 }
 
-function showDocumentPreview(html, title) {
+function generateOrderDocument(data) {
+    const total = (parseFloat(data.precioVenta) || 0) * (parseInt(data.cantidad) || 1);
+    return `
+        <div class="print-container">
+            <div class="print-header">
+                <div>
+                    <div class="company-logo-container">
+                        ${companyConfig.logo ? `<img src="${companyConfig.logo}" class="company-logo-img">` : `<div class="company-logo-text">${companyConfig.name}</div>`}
+                    </div>
+                    <div class="company-info">${companyConfig.name}<br>${companyConfig.cif}<br>${companyConfig.address}<br>Tlf: ${companyConfig.phone} | ${companyConfig.email}</div>
+                </div>
+                <div class="doc-type">
+                    <div class="doc-type-title">Albarán de Pedido</div>
+                    <div class="doc-number">PED-${data.id}</div>
+                    <div style="font-size:11px; color:#64748b; margin-top:5px;">Fecha: ${new Date(data.fecha).toLocaleDateString('es-ES')}</div>
+                </div>
+            </div>
+            
+            <div class="print-grid">
+                <div>
+                    <div class="print-box-title">Facturar a</div>
+                    <div class="print-box-content">
+                        <p style="font-weight:700; font-size:14px; margin-bottom:4px;">${data.cliente || '-'}</p>
+                        <p>Teléfono: ${data.tlf || '-'}</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="print-box-title">Información Adicional</div>
+                    <div class="print-box-content">
+                        <p><strong>Estado:</strong> ${data.estado}</p>
+                        <p><strong>Vendedor:</strong> ${data.usuario}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="print-box-title">Artículos del Pedido</div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Referencia</th>
+                        <th style="text-align:center;">Cant.</th>
+                        <th style="text-align:right;">P. Unitario</th>
+                        <th style="text-align:right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>${data.producto}</strong></td>
+                        <td>${data.ean || '-'}</td>
+                        <td style="text-align:center;">${data.cantidad || 1}</td>
+                        <td style="text-align:right;">${parseFloat(data.precioVenta || 0).toFixed(2)}€</td>
+                        <td style="text-align:right; font-weight:600;">${total.toFixed(2)}€</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align:right;">TOTAL:</td>
+                        <td style="text-align:right;">${total.toFixed(2)}€</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            ${data.observaciones ? `<div class="print-notes"><div class="print-box-title">Notas del Pedido</div>${escapeHtml(data.observaciones)}</div>` : ''}
+            
+            <div class="print-footer" style="margin-top:60px;">
+                <div class="signature-area">
+                    <div class="signature-space"></div>
+                    Conformidad Cliente
+                </div>
+                <div class="signature-area">
+                    <div class="signature-space"></div>
+                    Firma Autorizada
+                </div>
+            </div>
+        </div>`;
+}
+
+function showDocumentPreview(html) {
     $('document-content').innerHTML = html;
     $('document-modal').classList.remove('hidden');
     lucide.createIcons();
@@ -889,47 +1197,63 @@ function closeDocumentModal() {
 function printDocument() {
     const content = $('document-content').innerHTML;
     const printWindow = window.open('', '', 'width=900,height=1200');
-    printWindow.document.write(`<html><head><style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: white; }
-        .print-container { width: 100%; max-width: 900px; margin: 0 auto; padding: 40px; background: white; color: #1f2937; line-height: 1.6; }
-        .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
-        .print-title { font-size: 24px; font-weight: bold; color: #2563eb; text-transform: uppercase; }
-        .print-company { font-size: 12px; color: #666; }
-        .print-section { margin-bottom: 25px; }
-        .print-section-title { font-size: 14px; font-weight: bold; background: #f1f5f9; padding: 10px; margin-bottom: 12px; border-left: 4px solid #2563eb; }
-        .print-row { display: flex; margin-bottom: 10px; }
-        .print-label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; width: 30%; }
-        .print-value { font-size: 13px; font-weight: 500; width: 70%; }
-        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .print-table th { background: #2563eb; color: white; padding: 10px; text-align: left; font-size: 12px; font-weight: bold; }
-        .print-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
-        .print-table tr:nth-child(even) { background: #f8fafc; }
-        .signature-box { margin-top: 50px; display: flex; justify-content: space-between; }
-        .signature-field { width: 200px; border-top: 2px solid #000; text-align: center; padding-top: 10px; font-size: 11px; }
+    printWindow.document.write(`<html><head><title>Imprimir Documento</title><style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', Arial, sans-serif; margin: 0; padding: 0; background: white; }
+        .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 30px; background: white; color: #1f2937; line-height: 1.4; }
+        .print-header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+        .company-logo-container { display: flex; align-items: center; gap: 15px; }
+        .company-logo-img { max-height: 60px; max-width: 150px; object-fit: contain; }
+        .company-logo-text { font-size: 28px; font-weight: 800; color: #2563eb; letter-spacing: -1px; }
+        .company-info { font-size: 11px; color: #64748b; line-height: 1.2; }
+        .doc-type { text-align: right; }
+        .doc-type-title { font-size: 20px; font-weight: 700; color: #1e293b; text-transform: uppercase; }
+        .doc-number { font-size: 14px; font-weight: 600; color: #2563eb; }
+        .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+        .print-box-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; }
+        .print-box-content { font-size: 12px; color: #1e293b; }
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .print-table th { background: #f8fafc; color: #64748b; padding: 12px 10px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        .print-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #334155; }
+        .print-table tr.total-row td { border-bottom: none; font-weight: 700; font-size: 14px; color: #1e293b; background: #f8fafc; }
+        .print-notes { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11px; color: #475569; }
+        .print-footer { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+        .signature-area { border-top: 1px solid #cbd5e1; padding-top: 10px; text-align: center; font-size: 10px; color: #64748b; font-weight: 600; }
+        .signature-space { height: 60px; }
+        @media print { .no-print { display: none; } }
     </style></head><body>${content}</body></html>`);
     printWindow.document.close();
-    printWindow.print();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
 }
 
 function downloadDocument() {
     const content = $('document-content').innerHTML;
     const html = `<html><head><meta charset="UTF-8"><style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: white; }
-        .print-container { width: 100%; max-width: 900px; margin: 0 auto; padding: 40px; background: white; color: #1f2937; line-height: 1.6; }
-        .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
-        .print-title { font-size: 24px; font-weight: bold; color: #2563eb; text-transform: uppercase; }
-        .print-company { font-size: 12px; color: #666; }
-        .print-section { margin-bottom: 25px; }
-        .print-section-title { font-size: 14px; font-weight: bold; background: #f1f5f9; padding: 10px; margin-bottom: 12px; border-left: 4px solid #2563eb; }
-        .print-row { display: flex; margin-bottom: 10px; }
-        .print-label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; width: 30%; }
-        .print-value { font-size: 13px; font-weight: 500; width: 70%; }
-        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .print-table th { background: #2563eb; color: white; padding: 10px; text-align: left; font-size: 12px; font-weight: bold; }
-        .print-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
-        .print-table tr:nth-child(even) { background: #f8fafc; }
-        .signature-box { margin-top: 50px; display: flex; justify-content: space-between; }
-        .signature-field { width: 200px; border-top: 2px solid #000; text-align: center; padding-top: 10px; font-size: 11px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', Arial, sans-serif; margin: 0; padding: 20px; background: #f1f5f9; }
+        .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 30px; background: white; color: #1f2937; line-height: 1.4; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .print-header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+        .company-logo-container { display: flex; align-items: center; gap: 15px; }
+        .company-logo-img { max-height: 60px; max-width: 150px; object-fit: contain; }
+        .company-logo-text { font-size: 28px; font-weight: 800; color: #2563eb; letter-spacing: -1px; }
+        .company-info { font-size: 11px; color: #64748b; line-height: 1.2; }
+        .doc-type { text-align: right; }
+        .doc-type-title { font-size: 20px; font-weight: 700; color: #1e293b; text-transform: uppercase; }
+        .doc-number { font-size: 14px; font-weight: 600; color: #2563eb; }
+        .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+        .print-box-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; }
+        .print-box-content { font-size: 12px; color: #1e293b; }
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .print-table th { background: #f8fafc; color: #64748b; padding: 12px 10px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        .print-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #334155; }
+        .print-table tr.total-row td { border-bottom: none; font-weight: 700; font-size: 14px; color: #1e293b; background: #f8fafc; }
+        .print-notes { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11px; color: #475569; }
+        .print-footer { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+        .signature-area { border-top: 1px solid #cbd5e1; padding-top: 10px; text-align: center; font-size: 10px; color: #64748b; font-weight: 600; }
+        .signature-space { height: 60px; }
     </style></head><body>${content}</body></html>`;
     const blob = new Blob([html], {type: 'text/html'});
     const url = URL.createObjectURL(blob);
@@ -941,17 +1265,24 @@ function downloadDocument() {
 
 // Data Management
 async function exportData() {
-    const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray() };
+    const d = { reparaciones: await db.reparaciones.toArray(), piezas: await db.piezas.toArray(), pedidos: await db.pedidos.toArray(), recordatorios: await db.recordatorios.toArray(), config: await db.config.toArray() };
     const b = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V8_9_${new Date().toISOString().split('T')[0]}.json`; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `SAT_Backup_V9_1_${new Date().toISOString().split('T')[0]}.json`; a.click();
 }
 async function importData(e) {
     const f = e.target.files[0]; if(!f) return;
     try {
         const d = JSON.parse(await f.text());
-        for(let s in d) { for(let i of d[s]) { delete i.id; await db[s].add(i); } }
-        showToast('Importado'); showSection(currentSection);
-    } catch(err) { showToast('Error', 'error'); }
+        for(let s in d) { 
+            if(s === 'config') {
+                for(let i of d[s]) await db.config.put(i);
+            } else {
+                for(let i of d[s]) { delete i.id; await db[s].add(i); }
+            }
+        }
+        showToast('Sistema Restaurado'); 
+        location.reload();
+    } catch(err) { showToast('Error al importar', 'error'); }
 }
 
 window.showSection = showSection; window.openModal = openModal; window.closeModal = closeModal;
@@ -960,6 +1291,7 @@ window.logout = logout; window.generateAISuggestions = generateAISuggestions;
 window.closeAIModal = closeAIModal; window.exportData = exportData; window.importData = importData; window.handleFile = handleFile; window.filterTable = filterTable;
 window.toggleReminder = toggleReminder; window.generateRepairOrder = generateRepairOrder; window.generateOrderDocument = generateOrderDocument;
 window.showDocumentPreview = showDocumentPreview; window.closeDocumentModal = closeDocumentModal; window.printDocument = printDocument; window.downloadDocument = downloadDocument;
+window.handleConfigLogo = handleConfigLogo; window.addTechnician = addTechnician; window.removeTechnician = removeTechnician; window.dangerZoneReset = dangerZoneReset;
 </script>
 </body>
 </html>
